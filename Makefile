@@ -15,7 +15,8 @@ build/original-1989-03-11.hex: build/original-1989-03-11.bin
 	         build/original-1989-03-11.bin -Binary
 
 build/bios.bin: src/*.asm src/*.inc
-	nasm -f bin -o build/bios.tmp -l build/bios.lst src/bios.asm && \
+	#nasm -f bin -o build/bios.tmp -l build/bios.lst src/bios.asm && \
+	./euroasm.exe src/bios.asm && \
 	srec_cat build/bios.tmp -Binary \
 	         -crop 0x8000 0x10000 -offset -0x8000 \
 	         -Output build/bios.bin -Binary

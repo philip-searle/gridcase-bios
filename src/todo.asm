@@ -1,27 +1,31 @@
 
-Reset_Actual	equ	080A6h
-NmiInt_Actual	equ	0C4F8h
-Int13Hd_Actual	equ	098D5h
-Int19_Actual	equ	09504h
-Int14_Actual	equ	09E87h
-Int16_Actual	equ	09FA2h
-Int9_Actual	equ	0A1B0h
-Int13Fd_Actual	equ	0A80Ah
-IntE_Actual	equ	0B1C9h
-Int17_Actual	equ	0B3ABh
-Int10_Actual	equ	0B45Bh
-Int12_Actual	equ	0BD3Ah
-Int11_Actual	equ	0BD43h
-Int15_Actual	equ	0BD4Ch
-IntE_Actual	equ	0B1C9h
-Int1A_Actual	equ	0C1C5h
-Int8_Actual	equ	0C21Ch
-EoiPic1		equ	0F53Ch
-DummyIsr	equ	0C66Dh
-Int18		equ	096A2h
-Int70		equ	0C351h
-Int71		equ	0C664h
-Int75		equ	0C655h
-EoiPic1and2	equ	0F543h
-PrntScrn_Actual	equ	0C789h
+TODO		%macro
+$		equ	%2
+%1		equ	$
+		%endmacro
+
+		TODO	Reset_Actual, 080A6h
+		TODO	NmiInt_Actual, 0C4F8h
+		TODO	Int13Hd_Actual, 098D5h
+		TODO	Int19_Actual, 09504h
+		TODO	Int14_Actual, 09E87h
+		TODO	Int16_Actual, 09FA2h
+		TODO	Int9_Actual, 0A1B0h
+		TODO	Int13Fd_Actual, 0A80Ah
+		TODO	IntE_Actual, 0B1C9h
+		TODO	Int17_Actual, 0B3ABh
+		TODO	Int10_Actual, 0B45Bh
+		TODO	Int12_Actual, 0BD3Ah
+		TODO	Int11_Actual, 0BD43h
+		TODO	Int15_Actual, 0BD4Ch
+		TODO	Int1A_Actual, 0C1C5h
+		TODO	Int8_Actual, 0C21Ch
+		TODO	EoiPic1, 0F53Ch
+		TODO	DummyIsr, 0C66Dh
+		TODO	Int18, 096A2h
+		TODO	Int70, 0C351h
+		TODO	Int71, 0C664h
+		TODO	Int75, 0C655h
+		TODO	EoiPic1and2, 0F543h
+		TODO	PrntScrn_Actual, 0C789h
 

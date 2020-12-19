@@ -19,9 +19,9 @@
 ;          The purpose of the 08ah and 0c3h are currently unknown (the AT BIOS
 ;          had spaces in those locations).
 Copyr_Compat	CompatAddress	0E000h
-		times	13 db 0FFh
+		d	13 * byte 0FFh
 		db	08Ah, 'IBM', 0C3h
-		times	4 db 0FFh
+		d	4 * byte 0FFh
 
 ; Phoenix seem to have rounded their copyright notice up to the next paragraph
 		FillRom	0E020h, 0FFh
@@ -30,7 +30,7 @@ Copyr_Phoenix	db	'Copyright (c) 1985,1986 Phoenix Technologies Ltd',0
 ; [Compat] Some programs hardcoded the destination of the power-on reset
 ;          vector (F000:E05B) so the AT BIOS keeps it as a compatibility thunk
 		FillRom	0E05Bh, 0FFh
-Reset_Compat	jmp	Reset_Actual
+Reset_Compat	jmpn	Reset_Actual
 
 ; Second part of Phoenix copyright notice is after the Reset_Compat jump.
 ; Maybe because this lines it up nicely with the first part in a hexdump?
@@ -40,30 +40,30 @@ Copyr_Phoenix2	db	0Dh,0Ah,'All Rights Reserved',0Dh,0Ah,0Ah,0
 
 ; [Compat] Non-maskable interrupt entrypoint must be the same as the XT BIOS.
 		FillRom	0E2C3h,00h
-NmiInt_Compat	jmp	NmiInt_Actual
+NmiInt_Compat	jmpn	NmiInt_Actual
 
 ; ---------------------------------------------------------------------------
 
 ; [Compat] Int13 fixed disk entrypoint must be the same as the XT BIOS.
 		FillRom 0xE3FE,0FFh
-Int13Hd_Compat	jmp	Int13Hd_Actual
+Int13Hd_Compat	jmpn	Int13Hd_Actual
 
 ; ---------------------------------------------------------------------------
 
-		struc	FIXED_DISK_PARAMS
-.cylinders	resw	1
-.heads		resb	1
-.unused1	resw	1
-.writePreComp	resw	1
-.unused2	resb	1
-.control	resb	1
-.unused3	resb	3
-.landingZone	resw	1
-.sectorsPerTrk	resb	1
-.reserved	resb	1
+FIXED_DISK_PARMS	struc
+.cylinders	dw	1
+.heads		db	1
+.unused1	dw	1
+.writePreComp	dw	1
+.unused2	db	1
+.control	db	1
+.unused3	db	3
+.landingZone	dw	1
+.sectorsPerTrk	db	1
+.reserved	db	1
 		endstruc
 
-%macro FIXED_DISK_PARAMS 6.nolist ; (cylinders, heads, writePreComp, control, landingZone, sectorsPerTrack)
+FDS_INSTANCE	%macro ; (cylinders, heads, writePreComp, control, landingZone, sectorsPerTrack)
 	dw	%1	; cylinders
 	db	%2	; heads 
 	dw	0	; unused1
@@ -80,60 +80,60 @@ Int13Hd_Compat	jmp	Int13Hd_Actual
 ; entrypoint.  The GRiD BIOS doesn't have it in the exact same address, but
 ; maybe it's important to keep it in the same sector?
 ;					  cyl  hd     wpc ctl  land  spt
-FixedDiskParams	FIXED_DISK_PARAMS	0132h,  4,    80h, 0h, 131h, 11h	; Type 01 10MB
-		FIXED_DISK_PARAMS	0267h,  4,   12Ch, 0h, 267h, 11h	; Type 02 20MB
-		FIXED_DISK_PARAMS	0267h,  6,   12Ch, 0h, 267h, 11h	; Type 03 31MB
-		FIXED_DISK_PARAMS	03ACh,  8,   200h, 0h, 3ACh, 11h	; Type 04 62MB
-		FIXED_DISK_PARAMS	03ACh,  6,   200h, 0h, 3ACh, 11h	; Type 05 47MB
-		FIXED_DISK_PARAMS	0267h,  4, 0FFFFh, 0h, 267h, 11h	; Type 06 20MB
-		FIXED_DISK_PARAMS	01CEh,  8,   100h, 0h, 1FFh, 11h	; Type 07 31MB
-		FIXED_DISK_PARAMS	02DDh,  5, 0FFFFh, 0h, 2DDh, 11h	; Type 08 30MB
-		FIXED_DISK_PARAMS	0384h, 15, 0FFFFh, 8h, 385h, 11h	; Type 09 112MB
-		FIXED_DISK_PARAMS	0334h,  3, 0FFFFh, 0h, 334h, 11h	; Type 10 20MB
-		FIXED_DISK_PARAMS	0357h,  5, 0FFFFh, 0h, 357h, 11h	; Type 11 35MB
-		FIXED_DISK_PARAMS	0357h,  7, 0FFFFh, 0h, 357h, 11h	; Type 12 50MB
-		FIXED_DISK_PARAMS	0132h,  8,    80h, 0h, 13Fh, 11h	; Type 13 20MB
-		FIXED_DISK_PARAMS	02DDh,  7, 0FFFFh, 0h, 2DDh, 11h	; Type 14 43MB
-		FIXED_DISK_PARAMS	0000h,  0,     0h, 0h,   0h,  0h	; Type 15 RESERVED
-		FIXED_DISK_PARAMS	0264h,  4,     0h, 0h, 297h, 11h	; Type 16 20MB GRiD supported [TechRef 6-18]
-		FIXED_DISK_PARAMS	03D1h,  5,   12Ch, 0h, 3D1h, 11h	; Type 17 41MB GRiD supported [TechRef 6-18]
-		FIXED_DISK_PARAMS	03D1h,  7, 0FFFFh, 0h, 3D1h, 11h	; Type 18 57MB GRiD supported [TechRef 6-18]
-		FIXED_DISK_PARAMS	0400h,  7,   200h, 0h, 3FFh, 11h	; Type 19 60MB GRiD supported [TechRef 6-18]
-		FIXED_DISK_PARAMS	02DDh,  5,   12Ch, 0h, 2DCh, 11h	; Type 20 30MB GRiD supported [TechRef 6-18]
-		FIXED_DISK_PARAMS	02DDh,  7,   12Ch, 0h, 2DCh, 11h	; Type 21 43MB GRiD supported [TechRef 6-18]
-		FIXED_DISK_PARAMS	02DDh,  5,   12Ch, 0h, 2DDh, 11h	; Type 22 30MB GRiD supported [TechRef 6-18]
-		FIXED_DISK_PARAMS	0132h,  4,     0h, 0h, 150h, 11h	; Type 23 10MB GRiD supported [TechRef 6-18]
-		FIXED_DISK_PARAMS	0000h,  0,     0h, 0h,   0h,  0h	; Type 24 UNUSED
-		FIXED_DISK_PARAMS	0267h,  4,     0h, 0h, 267h, 11h	; Type 25 20MB 
-		FIXED_DISK_PARAMS	0400h,  4, 0FFFFh, 0h, 3FFh, 11h	; Type 26 34MB  
-		FIXED_DISK_PARAMS	0400h,  5, 0FFFFh, 0h, 3FFh, 11h	; Type 27 43MB  
-		FIXED_DISK_PARAMS	0400h,  8, 0FFFFh, 0h, 3FFh, 11h	; Type 28 68MB  
-		FIXED_DISK_PARAMS	0200h,  8,   100h, 0h, 200h, 11h	; Type 29 34MB  
-		FIXED_DISK_PARAMS	0267h,  2,   267h, 0h, 267h, 11h	; Type 30 10MB  
-		FIXED_DISK_PARAMS	0000h,  0,     0h, 0h,   0h,  0h	; Type 31 UNUSED
-		FIXED_DISK_PARAMS	0000h,  0,     0h, 0h,   0h,  0h	; Type 32 UNUSED
-		FIXED_DISK_PARAMS	0000h,  0,     0h, 0h,   0h,  0h	; Type 33 UNUSED
-		FIXED_DISK_PARAMS	0000h,  0,     0h, 0h,   0h,  0h	; Type 34 UNUSED
-		FIXED_DISK_PARAMS	0400h,  9,   400h, 8h, 400h, 11h	; Type 35 77MB
-		FIXED_DISK_PARAMS	0400h,  5,   200h, 0h, 400h, 11h	; Type 36 43MB
-		FIXED_DISK_PARAMS	033Eh, 10, 0FFFFh, 8h, 33Eh, 11h	; Type 37 69MB
-		FIXED_DISK_PARAMS	0337h, 10,   100h, 8h, 338h, 11h	; Type 38 68MB
-		FIXED_DISK_PARAMS	0267h,  4,    80h, 0h, 298h, 11h	; Type 39 20MB
-		FIXED_DISK_PARAMS	0267h,  8,    80h, 0h, 298h, 11h	; Type 40 41MB
-		FIXED_DISK_PARAMS	0395h, 15, 0FFFFh, 8h, 396h, 11h	; Type 41 114MB
-		FIXED_DISK_PARAMS	03FFh, 15, 0FFFFh, 8h, 400h, 11h	; Type 42 127MB
-		FIXED_DISK_PARAMS	0337h, 10,   200h, 8h, 337h, 11h	; Type 43 102MB
-		FIXED_DISK_PARAMS	0334h,  6, 0FFFFh, 0h, 334h, 11h	; Type 44 41MB
-		FIXED_DISK_PARAMS	0400h,  8, 0FFFFh, 0h, 400h, 11h	; Type 45 68MB
-		FIXED_DISK_PARAMS	039Dh,  9, 0FFFFh, 8h, 39Dh, 11h	; Type 46 69MB
-		FIXED_DISK_PARAMS	02BBh,  7,   100h, 0h, 2BCh, 11h	; Type 47 41MB
+FixedDiskParams	FDS_INSTANCE	0132h,  4,    80h, 0h, 131h, 11h	; Type 01 10MB
+		FDS_INSTANCE	0267h,  4,   12Ch, 0h, 267h, 11h	; Type 02 20MB
+		FDS_INSTANCE	0267h,  6,   12Ch, 0h, 267h, 11h	; Type 03 31MB
+		FDS_INSTANCE	03ACh,  8,   200h, 0h, 3ACh, 11h	; Type 04 62MB
+		FDS_INSTANCE	03ACh,  6,   200h, 0h, 3ACh, 11h	; Type 05 47MB
+		FDS_INSTANCE	0267h,  4, 0FFFFh, 0h, 267h, 11h	; Type 06 20MB
+		FDS_INSTANCE	01CEh,  8,   100h, 0h, 1FFh, 11h	; Type 07 31MB
+		FDS_INSTANCE	02DDh,  5, 0FFFFh, 0h, 2DDh, 11h	; Type 08 30MB
+		FDS_INSTANCE	0384h, 15, 0FFFFh, 8h, 385h, 11h	; Type 09 112MB
+		FDS_INSTANCE	0334h,  3, 0FFFFh, 0h, 334h, 11h	; Type 10 20MB
+		FDS_INSTANCE	0357h,  5, 0FFFFh, 0h, 357h, 11h	; Type 11 35MB
+		FDS_INSTANCE	0357h,  7, 0FFFFh, 0h, 357h, 11h	; Type 12 50MB
+		FDS_INSTANCE	0132h,  8,    80h, 0h, 13Fh, 11h	; Type 13 20MB
+		FDS_INSTANCE	02DDh,  7, 0FFFFh, 0h, 2DDh, 11h	; Type 14 43MB
+		FDS_INSTANCE	0000h,  0,     0h, 0h,   0h,  0h	; Type 15 RESERVED
+		FDS_INSTANCE	0264h,  4,     0h, 0h, 297h, 11h	; Type 16 20MB GRiD supported [TechRef 6-18]
+		FDS_INSTANCE	03D1h,  5,   12Ch, 0h, 3D1h, 11h	; Type 17 41MB GRiD supported [TechRef 6-18]
+		FDS_INSTANCE	03D1h,  7, 0FFFFh, 0h, 3D1h, 11h	; Type 18 57MB GRiD supported [TechRef 6-18]
+		FDS_INSTANCE	0400h,  7,   200h, 0h, 3FFh, 11h	; Type 19 60MB GRiD supported [TechRef 6-18]
+		FDS_INSTANCE	02DDh,  5,   12Ch, 0h, 2DCh, 11h	; Type 20 30MB GRiD supported [TechRef 6-18]
+		FDS_INSTANCE	02DDh,  7,   12Ch, 0h, 2DCh, 11h	; Type 21 43MB GRiD supported [TechRef 6-18]
+		FDS_INSTANCE	02DDh,  5,   12Ch, 0h, 2DDh, 11h	; Type 22 30MB GRiD supported [TechRef 6-18]
+		FDS_INSTANCE	0132h,  4,     0h, 0h, 150h, 11h	; Type 23 10MB GRiD supported [TechRef 6-18]
+		FDS_INSTANCE	0000h,  0,     0h, 0h,   0h,  0h	; Type 24 UNUSED
+		FDS_INSTANCE	0267h,  4,     0h, 0h, 267h, 11h	; Type 25 20MB 
+		FDS_INSTANCE	0400h,  4, 0FFFFh, 0h, 3FFh, 11h	; Type 26 34MB  
+		FDS_INSTANCE	0400h,  5, 0FFFFh, 0h, 3FFh, 11h	; Type 27 43MB  
+		FDS_INSTANCE	0400h,  8, 0FFFFh, 0h, 3FFh, 11h	; Type 28 68MB  
+		FDS_INSTANCE	0200h,  8,   100h, 0h, 200h, 11h	; Type 29 34MB  
+		FDS_INSTANCE	0267h,  2,   267h, 0h, 267h, 11h	; Type 30 10MB  
+		FDS_INSTANCE	0000h,  0,     0h, 0h,   0h,  0h	; Type 31 UNUSED
+		FDS_INSTANCE	0000h,  0,     0h, 0h,   0h,  0h	; Type 32 UNUSED
+		FDS_INSTANCE	0000h,  0,     0h, 0h,   0h,  0h	; Type 33 UNUSED
+		FDS_INSTANCE	0000h,  0,     0h, 0h,   0h,  0h	; Type 34 UNUSED
+		FDS_INSTANCE	0400h,  9,   400h, 8h, 400h, 11h	; Type 35 77MB
+		FDS_INSTANCE	0400h,  5,   200h, 0h, 400h, 11h	; Type 36 43MB
+		FDS_INSTANCE	033Eh, 10, 0FFFFh, 8h, 33Eh, 11h	; Type 37 69MB
+		FDS_INSTANCE	0337h, 10,   100h, 8h, 338h, 11h	; Type 38 68MB
+		FDS_INSTANCE	0267h,  4,    80h, 0h, 298h, 11h	; Type 39 20MB
+		FDS_INSTANCE	0267h,  8,    80h, 0h, 298h, 11h	; Type 40 41MB
+		FDS_INSTANCE	0395h, 15, 0FFFFh, 8h, 396h, 11h	; Type 41 114MB
+		FDS_INSTANCE	03FFh, 15, 0FFFFh, 8h, 400h, 11h	; Type 42 127MB
+		FDS_INSTANCE	0337h, 10,   200h, 8h, 337h, 11h	; Type 43 102MB
+		FDS_INSTANCE	0334h,  6, 0FFFFh, 0h, 334h, 11h	; Type 44 41MB
+		FDS_INSTANCE	0400h,  8, 0FFFFh, 0h, 400h, 11h	; Type 45 68MB
+		FDS_INSTANCE	039Dh,  9, 0FFFFh, 8h, 39Dh, 11h	; Type 46 69MB
+		FDS_INSTANCE	02BBh,  7,   100h, 0h, 2BCh, 11h	; Type 47 41MB
 
 ; ---------------------------------------------------------------------------
 
 ; [Compat] Int19 vector must remain the same as in XT BIOS, some programs
 ;          will jump here to reload the operating system from disk.
 		FillRom	0E6F2h, 0FFh
-Int19_Compat	jmp	Int19_Actual
+Int19_Compat	jmpn	Int19_Actual
 
 ; GRiD BIOS has 18 bytes stored after Int19_Compat, purpose unknown.
 		db	8, 0, 0FCh, 1, 0, 70H, 0, 0, 0, 8, 0, 3, 6, 50h, 54h, 4Ch, 0, 0
@@ -155,31 +155,31 @@ BaudRateInit	dw	1047	; 100 Baud
 
 ; [Compat] Int14 (serial I/O) entrypoint must be the same place as the XT BIOS
 		FillRom	0E739h, 0FFh
-Int14_Compat	jmp	Int14_Actual
+Int14_Compat	jmpn	Int14_Actual
 
 ; ---------------------------------------------------------------------------
 
 ; [Compat] Int16 (keyboard) entrypoint must be the same place as the XT BIOS
 		FillRom	0E82Eh, 0FFh
-Int16_Compat	jmp	Int16_Actual
+Int16_Compat	jmpn	Int16_Actual
 
 ; ---------------------------------------------------------------------------
 
 ; [Compat] Int9 (keyboard input) entrypoint must be same as XT BIOS
 		FillRom	0E987h, 0FFh
-Int9_Compat	jmp	Int9_Actual
+Int9_Compat	jmpn	Int9_Actual
 
 ; ---------------------------------------------------------------------------
 
 ; [Compat] Int13 floppy disk entrypoint must be the same as the XT BIOS
 		FillRom	0EC59h,0FFh
-Int13Fd_Compat	jmp	Int13Fd_Actual
+Int13Fd_Compat	jmpn	Int13Fd_Actual
 
 ; ---------------------------------------------------------------------------
 
 ; [Compat] IntE (floppy interrupt) must be same location as the XT BIOS
 		FillRom	0EF57h, 0FFh
-IntE_Compat	jmp	IntE_Actual
+IntE_Compat	jmpn	IntE_Actual
 
 ; ---------------------------------------------------------------------------
 
@@ -201,13 +201,13 @@ DisketteParams	db	0DFh	; 1st specify byte
 
 ; [Compat] Int17 (printer services) must be same location as the XT BIOS
 		FillRom	0EFD2h, 0FFh
-Int17_Compat	jmp	Int17_Actual
+Int17_Compat	jmpn	Int17_Actual
 
 ; ---------------------------------------------------------------------------
 
 ; [Compat] Int10 (video services) must be same location as the XT BIOS
 		FillRom	0F065h, 0FFh
-Int10_Compat	jmp	Int10_Actual
+Int10_Compat	jmpn	Int10_Actual
 
 ; ---------------------------------------------------------------------------
 
@@ -242,12 +242,12 @@ VidUnknown1	db	5Bh,44h,5Eh,68h,7Dh,5Fh,7Ch,4Dh		; What are these for?
 ; ---------------------------------------------------------------------------
 ; [Compat] Int12 (memory size) must be at same location as the XT BIOS
 		FillRom	0F841h, 0FFh
-Int12_Compat	jmp	Int12_Actual
+Int12_Compat	jmpn	Int12_Actual
 
 ; ---------------------------------------------------------------------------
 ; [Compat] Int11 (equipment check) must be at same location as the XT BIOS
 		FillRom	0F84Dh, 0FFh
-Int11_Compat	jmp	Int11_Actual
+Int11_Compat	jmpn	Int11_Actual
 
 ; ---------------------------------------------------------------------------
 ; [Compat] Int15 (AT extended services) must be at the same location as the
@@ -255,23 +255,23 @@ Int11_Compat	jmp	Int11_Actual
 ;          and the AT repurposed it for PC/AT-specific BIOS calls.  GRiD
 ;          also extended with their own APIs.
 		FillRom	0F859h, 0FFh
-Int15_Compat	jmp	Int15_Actual
+Int15_Compat	jmpn	Int15_Actual
 
 ; ---------------------------------------------------------------------------
 ; [Compat] CGA graphics character set must be in same location as the XT BIOS
 		FillRom	0FA6Eh, 0FFh
 GraphicsChars:
-%include "src/graphics_charset.asm"
+INCLUDE		"src/graphics_charset.asm"
 
 ; ---------------------------------------------------------------------------
 ; [Compat] Int1A (timer) must be in the same location as the XT BIOS
 		FillRom	0FE6Eh, 0FFh
-Int1A_Compat	jmp	Int1A_Actual
+Int1A_Compat	jmpn	Int1A_Actual
 
 ; ---------------------------------------------------------------------------
 ; [Compat] Int8 (timer interrupt) must be in the same location as the XT BIOS
 		FillRom	0FEA5h, 0FFh
-Int8_Compat	jmp	Int8_Actual
+Int8_Compat	jmpn	Int8_Actual
 
 ; ---------------------------------------------------------------------------
 ; [Compat] Initial IVT contents must be in the same location as the XT BIOS
@@ -324,7 +324,7 @@ SoftwareIret	iret
 ; ---------------------------------------------------------------------------
 ; [Compat] Print screen handler is called by applications; don't move it
 		FillRom	0FF54h, 0FFh
-PrntScrn_Compat	jmp	PrntScrn_Actual
+PrntScrn_Compat	jmpn	PrntScrn_Actual
 
 
 ; ---------------------------------------------------------------------------

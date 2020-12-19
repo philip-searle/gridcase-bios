@@ -16,11 +16,11 @@
 ; 
 ; ===========================================================================
 
-%include	"src/macros.inc"
+		include	"src/macros.inc"
+		include	"src/ports.inc"
+		include	"src/todo.asm"
 
 BIOS_START	equ	08000h
-
-		cpu	8086
 
 ; ---------------------------------------------------------------------------
 ; 32K BIOS starts at F000:8000
@@ -28,11 +28,12 @@ BIOS_START	equ	08000h
 ; It's easier to generate a 64KB ROM with 32KB empty at the start, and then
 ; reduce it to 32KB later than it is to work out how an offset origin works.
 ; ---------------------------------------------------------------------------
-		org	0
-		times	BIOS_START db 0
+$		equ	BIOS_START
 
 		; Copyright notice at start, doubled so both the even and odd ROMs contain a complete copy
 		db	'CCooppyyrriigghhtt  11998855,,11998866  PPhhooeenniixx  TTeecchhnnoollooggiieess  LLttdd..'
+
+include		"src/post.asm"
 
 ; ---------------------------------------------------------------------------
 ; System identification section at F000:DFD0
@@ -56,7 +57,7 @@ GridSysId	CompatAddress 0DFFEh
 ; AT BIOS listing refers to this as ORGS.ASM
 ; ---------------------------------------------------------------------------
 		FillRom	0E000h, 0FFh
-%include	"src/at_compat.asm"
+		include	"src/at_compat.asm"
 
 ; ---------------------------------------------------------------------------
 ; Power-On Reset Vector at F000:FFF0
@@ -82,6 +83,4 @@ MachineId	CompatAddress 0FFFEh
 ; ===========================================================================
 ; END OF PROGRAM
 ; ===========================================================================
-
-%include	"src/todo.asm"
 

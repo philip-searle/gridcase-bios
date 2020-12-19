@@ -5,28 +5,34 @@
 ;
 ; ===========================================================================
 
-[map symbols]
-
-BIOS_START      equ     08000h
+EUROASM LISTINCLUDE=ON, LISTVAR=ON, LISTMACRO=ON, LISTREPEAT=ON, AUTOALIGN=OFF
 
 ; FillRom address, fill
 ; 
 ; Advances the current location to the specified address, filling any space
 ; with the byte provided.
-%macro FillRom 2.nolist
-		times   %1-($-$$) db %2
-%endmacro
+FillRom		%macro
+		d	(%1 - offset#$) * byte %2
+		%endmacro
 
 ; CompatAddress address
 ;
 ; Raises an error if the current assembly location is not equal to the address
 ; provided.  Meant to prevent items that have fixed addresses due to external
 ; compatibility constraints from shifting around by accident.
-%macro CompatAddress 1.nolist
-		%assign ACTUAL_ADDRESS ($-$$)
-		%assign COMPAT_ADDRESS %1
-		%if ACTUAL_ADDRESS != COMPAT_ADDRESS
-		%error Compatibility constraint failed: %00 must be at COMPAT_ADDRESS but was at ACTUAL_ADDRESS
+CompatAddress	%macro
+%here		%seta offset#$
+		%if %1 != %here
+		%error Compatibility constraint failed: %00 must be at %1 but was at %here
 		%endif
+		%endmacro
+
+; Delay count
+;
+; Inserts short jumps to delay execution by count*7 clocks.
+Delay		%macro
+i		%for	0..%1
+		jmpn	$+2
+		%endfor
 %endmacro
 
