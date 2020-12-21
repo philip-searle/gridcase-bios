@@ -1,0 +1,26 @@
+
+; ---------------------------------------------------------------------------
+; CMOS register indexes
+CMOS_STATUS_A		equ	0Ah
+CMOS_STATUS_B		equ	0Bh
+CMOS_STATUS_C		equ	0Ch
+CMOS_STATUS_D		equ	0Dh
+CMOS_SHUTDOWN_REASON	equ	0Fh
+
+; ---------------------------------------------------------------------------
+; Valid values for the CMOS_SHUTDOWN_REASON register
+SD_SOFT_RESET		equ	00h
+SD_AFTER_MEMSIZE	equ	01h
+SD_AFTER_MEMTEST	equ	02h
+SD_AFTER_MEMERROR	equ	03h
+SD_BOOTLOADER_REQ	equ	04h
+SD_JMP_WITH_INT		equ	05h
+SD_PM_TEST7_PASS	equ	06h
+SD_PM_TEST7_FAIL	equ	07h
+SD_PM_TEST1_FAIL	equ	08h
+SD_BLOCK_MOVE		equ	09h
+SD_JMP_WITHOUT_INT	equ	0Ah
+
+; Unknown shutdown reason, checked for in POST
+SD_UNKNOWN_FC		equ	0FCh
+

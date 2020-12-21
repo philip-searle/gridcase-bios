@@ -4,7 +4,7 @@ $		equ	%2
 %1		equ	$
 		%endmacro
 
-		TODO	Reset_Actual, 080A6h
+;		TODO	Reset_Actual, 080A6h
 		TODO	NmiInt_Actual, 0C4F8h
 		TODO	Int13Hd_Actual, 098D5h
 		TODO	Int19_Actual, 09504h
@@ -28,4 +28,10 @@ $		equ	%2
 		TODO	Int75, 0C655h
 		TODO	EoiPic1and2, 0F543h
 		TODO	PrntScrn_Actual, 0C789h
+		TODO	DisableA20, 0A7D9h
+		TODO	WaitKbEmpty, 08E5Dh
+		TODO	SDH_00, 08CB7h
+		TODO	SDH_03, 0BE87h
+		TODO	SDH_04, 0906Dh
+		TODO	ChecksumRom, 0C405h
 

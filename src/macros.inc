@@ -5,7 +5,7 @@
 ;
 ; ===========================================================================
 
-EUROASM LISTINCLUDE=ON, LISTVAR=ON, LISTMACRO=ON, LISTREPEAT=ON, AUTOALIGN=OFF
+EUROASM LISTINCLUDE=ON, LISTVAR=ON, LISTMACRO=OFF, LISTREPEAT=OFF, AUTOALIGN=OFF
 
 ; FillRom address, fill
 ; 
@@ -31,8 +31,8 @@ CompatAddress	%macro
 ;
 ; Inserts short jumps to delay execution by count*7 clocks.
 Delay		%macro
-i		%for	0..%1
-		jmpn	$+2
+i		%for	1..%1
+		jmps	$+2
 		%endfor
 %endmacro
 

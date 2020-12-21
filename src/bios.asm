@@ -18,9 +18,9 @@
 
 		include	"src/macros.inc"
 		include	"src/ports.inc"
+		include	"src/cmos.inc"
+		include	"src/segments.inc"
 		include	"src/todo.asm"
-
-BIOS_START	equ	08000h
 
 ; ---------------------------------------------------------------------------
 ; 32K BIOS starts at F000:8000
@@ -33,7 +33,7 @@ $		equ	BIOS_START
 		; Copyright notice at start, doubled so both the even and odd ROMs contain a complete copy
 		db	'CCooppyyrriigghhtt  11998855,,11998866  PPhhooeenniixx  TTeecchhnnoollooggiieess  LLttdd..'
 
-include		"src/post.asm"
+include		"src/reset.asm"
 
 ; ---------------------------------------------------------------------------
 ; System identification section at F000:DFD0
