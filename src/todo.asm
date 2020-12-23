@@ -41,4 +41,6 @@ $		equ	%2
 		TODO	SDH_POST.loc_F9369, 09369h
 		TODO	SDH_POST.loc_F93C6, 093C6h
 		TODO	kBdaSegment, 0C5E6h
+		TODO	SerDetectPort, 09F7Ah
+		TODO	ParDetectPort, 0C5CEh
 
