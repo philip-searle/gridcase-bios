@@ -34,4 +34,11 @@ $		equ	%2
 		TODO	SDH_03, 0BE87h
 		TODO	SDH_04, 0906Dh
 		TODO	ChecksumRom, 0C405h
+		TODO	MirrorRam512, 0F63Dh
+		TODO	SDH_POST.aOddEvenLogic, 0941Fh
+		TODO	SDH_POST.aAddressLine, 09445h
+		TODO	ToggleNmiChecks, 0C5B9h
+		TODO	SDH_POST.loc_F9369, 09369h
+		TODO	SDH_POST.loc_F93C6, 093C6h
+		TODO	kBdaSegment, 0C5E6h
 

@@ -19,4 +19,5 @@ AdapterRomSegment	d w
 
 $		equ	0072h
 SoftResetFlag		d w
+SOFT_RESET_FLAG	equ	1234h	; Set in SoftResetFlag to mark software-initiated reset via JMP to F000:FFF0
 

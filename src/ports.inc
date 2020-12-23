@@ -53,6 +53,8 @@ CHECKPOINT_TIMER	equ	04h
 CHECKPOINT_DMA		equ	05h
 CHECKPOINT_DMA_PR	equ	06h
 CHECKPOINT_RAM_REFRESH	equ	08h
+CHECKPOINT_RAM		equ	09h
+CHECKPOINT_RAM_PARITY	equ	0Dh
 
 ; Beep codes used for fatal errors before display is initialized
 ; See FatalBeeps for meaning of these values
@@ -62,6 +64,10 @@ BEEP_TIMER_FAIL		equ	04h
 BEEP_DMA_FAIL		equ	05h
 BEEP_DMA_PR_FAIL	equ	06h
 BEEP_RAM_REFRESH	equ	08h
+BEEP_RAM_MULTIPLE	equ	0Ah	; 1st 64K, multiple bits
+BEEP_RAM_OE		equ	0Bh	; 1st 64K, even/odd logic
+BEEP_RAM_ADDRESS_LINE	equ	0Ch	; 1st 64K, address line
+BEEP_RAM_PARITY		equ	0Dh	; 1st 64K, parity
 
 ; ---------------------------------------------------------------------------
 ; DMA controller ports [TechRef 4-1]
@@ -127,6 +133,23 @@ PORT_DMA_CHAN7_WC	equ	0CEh	; (RW) word count
 ; 80287 FPU/NPU control ports
 ; Ports 0E8h-0EFh and 0F8h-0FFh are reserved for 286/287 private ocmmunication.
 PORT_287RESET	equ	0F1h	; See FE3001A manual, section 2.9 "Coprocessor Interface"
+
+; ---------------------------------------------------------------------------
+; Parallel port subsystem [TechRef 11-3]
+PORT_PRINTER_DATA_R	equ	378h
+PORT_PRINTER_STATUSB	equ	379h
+PORT_PRINTER_STATUSC	equ	37Ah
+PORT_PRINTER_37B	equ	37Bh	; Documented as 'undefined'
+PORT_PRINTER_DATA_W	equ	37Ch
+PORT_PRINTER_37D	equ	37Dh	; Documented as 'no operation'
+PORT_PRINTER_CTRL	equ	37Eh
+PORT_PRINTER_37F	equ	37Fh	; Documented as 'undefined'
+PORT_PAR_PORTA_R	equ	0FF8h
+PORT_PAR_PORTB_R	equ	0FF9h
+PORT_PAR_PORTC_R	equ	0FFAh
+PORT_PAR_FFB		equ	0FFBh	; Documented as 'undefined'
+PORT_PAR_FFC		equ	0FFCh	; Documented as 'not used'
+PORT_PAR_PORTB_W	equ	0FFDh
 
 ; ---------------------------------------------------------------------------
 ; Monochrome display adapter ports

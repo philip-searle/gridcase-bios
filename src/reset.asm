@@ -350,10 +350,10 @@ SDH_POST	PROC
 		mov	cx, BIOS_START_PARA	; CX is checksum start address
 		mov	ax, cs
 		mov	ss, ax
-		mov	sp, .returnStack
+		mov	sp, .returnStack1
 		jmp	ChecksumRom
 
-.returnStack	dw	.checksumDone
+.returnStack1	dw	.checksumDone
 
 .checksumDone	jz	.checksumOk		; is our EPROM OK?
 		mov	al, BEEP_BIOS_CHECKSUM
@@ -593,13 +593,112 @@ SDH_POST	PROC
 		loop	.pollRamRefresh
 
 		; If we make it through 1000h polls without the RAM refresh toggle changing state
-		; twice then it's probalby broken - notify the user
-		mov	ah, BEEP_RAM_REFRESH
+		; twice then it's probably broken - notify the user
+		mov	al, BEEP_RAM_REFRESH
 		jmp	FatalBeeps
 
-.ramRefreshOk
+; ---------------------------------------------------------------------------
+; Verify RAM can be read/written
+; TODO: figure out how this works in more detail...
+.ramRefreshOk	mov	al, CHECKPOINT_RAM
+		out	PORT_DIAGNOSTICS, al
+
+		; Toggle parity check enables
+		mov	al, 0Ch			; KBC port B: disable IO and RAM parity checks
+		out	PORT_KBC_PORTB, al
+		mov	al, 0			; KBC port B: enable IO and RAM parity checks
+		out	PORT_KBC_PORTB, al
+
+		; Load soft reset flag.  If we encounter a parity error while
+		; doing this then assume the flag was zero (the parity error
+		; will be caught by the following tests, so no need to report
+		; it right now).
+		mov	ds, [cs:kBdaSegment]
+		mov	bx, [SoftResetFlag]
+		in	al, PORT_KBC_PORTB
+		test	al, 80h			; RAM parity error occurred?
+		jz	.l9			; continue if not
+		xor	bx, bx,CODE=LONG	; if so, don't count it as a soft reset
+		mov	al, 0Ch			; toggle IO and RAM parity checks
+		out	PORT_KBC_PORTB, al
+		mov	al, 0
+		out	PORT_KBC_PORTB, al
+
+.l9		mov	ax, cs			; load a fake return stack to handle
+		mov	ss, ax			; the checking the first 64KB of RAM
+		mov	sp, .returnStack2
+		jmpn	MirrorRam512
+
+.loc_F8387	jnb	.l10			; TODO: where does this come from?
+		mov	dx, PORT_PAR_PORTC_R
+		mov	al, 1
+		out	dx, al			; TODO: parallel port C isn't writable though?
+
+.l10		mov	ax, BDA_SEGMENT		; Set DS to BDA
+		mov	ds, ax
+		mov	ax, 0			; Set ES to first 64K
+		mov	es, ax
+		cmp	bx, SOFT_RESET_FLAG	; is it a soft reset?
+		jz	.memTestClear		; skip memory test if so
+
+		mov	ax, cs			; load a fake return stack to handle
+		mov	ss, ax			; (TODO: what?)
+		mov	sp, .returnStack3
+		mov	bp, 8000h		; TODO: is this a length?
+		jmp	.loc_F9369
+
+.loc_F83AC	jnb	.l13
+		mov	bx, ax,CODE=LONG
+		mov	al, BEEP_RAM_OE
+		cmp	dx, .aOddEvenLogic
+		jz	.memTestBeep
+		mov	al, BEEP_RAM_ADDRESS_LINE
+		cmp	dx, .aAddressLine
+		jz	.memTestBeep
+
+.memTestBeepDet	xor	bx, cx,CODE=LONG
+		mov	cx, 10h
+		mov	ax, 0FH
+.l11		rol	bx, 1
+		jnb	.l12
+		inc	ah
+		add	al, cl,CODE=LONG
+.l12		loop	.l11
+		dec	ah
+		jz	.memTestBeep
+		mov	al, BEEP_RAM_MULTIPLE
+.memTestBeep	jmp	FatalBeeps
+
+.l13		jmp	.loc_F93C6
+
+.returnStack3	dw	.loc_F83AC
+		dw	.loc_F83E4
+.returnStack2	dw	.loc_F8387
+
+.loc_F83E4	mov	bx, ax,CODE=LONG
+		jb	.memTestBeepDet
+
+.memTestClear	xor	ax, ax,CODE=LONG	; clear first 64K of RAM
+		mov	es, ax
+		xor	di, di,CODE=LONG
+		mov	cx, 8000h
+		rep stosw
+
+		mov	ax, 0
+		mov	ss, ax
+		mov	sp, 8000h
+		mov	ds, [cs:kBdaSegment]
+
+		mov	al, CHECKPOINT_RAM_PARITY
+		out	PORT_DIAGNOSTICS, al
+
+		call	ToggleNmiChecks
+		test	al, 80h			; RAM parity error occurred?
+		jz	.memTestFinished		; continue if not
+		mov	al, BEEP_RAM_PARITY	; report error if so
+		jmp	FatalBeeps
+.memTestFinished
+
 		ENDPROC	SDH_POST
 
-
-kBdaSegment	dw	BDA_SEGMENT		; constant for data segment
 
