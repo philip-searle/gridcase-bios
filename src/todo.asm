@@ -43,4 +43,6 @@ $		equ	%2
 		TODO	kBdaSegment, 0C5E6h
 		TODO	SerDetectPort, 09F7Ah
 		TODO	ParDetectPort, 0C5CEh
+		TODO	TestDmaRegisters, 08D9Ah
+		TODO	TestPicMaskReg, 08D7Bh
 

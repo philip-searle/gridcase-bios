@@ -709,6 +709,7 @@ SDH_POST	PROC
 .l14		mov	ax, kbBuffer
 		mov	[kbNextChar], ax
 		mov	[kbLastChar], ax
+		mov	[kbBufStart], ax
 		add	ax, KB_BUFFER_LENGTH
 		mov	[kbBufEnd], ax
 
@@ -742,6 +743,55 @@ SDH_POST	PROC
 		mov	dx, PORT_PAR_CANDIDATE3
 		call	ParDetectPort
 
+; ---------------------------------------------------------------------------
+; Test DMA controllers
+; Assumes that all channel registers for a controller are at regular offsets
+; from each other.  Does not test the first channel because it is either used
+; for RAM refresh (DMA1) or the cascade feature (DMA2).
+
+		; Test DMA1 registers
+		mov	al, CHECKPOINT_DMA1
+		out	PORT_DIAGNOSTICS, al
+		mov	dx, PORT_DMA_CHAN1_BASE
+		mov	cx, 6			; 2 registers x 3 channels
+		mov	si, PORT_DMA_CHAN2_BASE - PORT_DMA_CHAN1_WC
+		call	TestDmaRegisters
+		jnb	.testDma1Ok
+		mov	al, BEEP_DMA1_REG
+		jmp	FatalBeeps
+
+		; Test DMA2 registers
+.testDma1Ok	mov	al, CHECKPOINT_DMA2
+		out	PORT_DIAGNOSTICS, al
+		mov	dx, PORT_DMA_CHAN5_BASE
+		mov	cx, 6			; 2 registers x 3 channels
+		mov	si, PORT_DMA_CHAN6_BASE - PORT_DMA_CHAN5_WC
+		call	TestDmaRegisters
+		jnb	.testDma2Ok
+		mov	al, BEEP_DMA2_REG
+		jmp	FatalBeeps
+
+; ---------------------------------------------------------------------------
+; Test PIC mask registers
+
+		; Test PIC1 mask register
+.testDma2Ok	mov	al, CHECKPOINT_PIC1
+		out	PORT_DIAGNOSTICS, al
+		mov	dx, PORT_PIC1_MASK
+		call	TestPicMaskReg
+		jz	.testPic1Ok
+		mov	al, BEEP_PIC1_REG
+		jmp	FatalBeeps
+
+.testPic1Ok	mov	al, CHECKPOINT_PIC2
+		out	PORT_DIAGNOSTICS, al
+		mov	dx, PORT_PIC2_MASK
+		call	TestPicMaskReg
+		jz	.testPic2Ok
+		mov	al, BEEP_PIC2_REG
+		jmp	FatalBeeps
+
+.testPic2Ok
 		ENDPROC	SDH_POST
 
 

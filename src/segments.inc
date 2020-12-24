@@ -32,7 +32,7 @@ ebdaSegment		d w
 
 equipmentWord		d w
 
-interruptFlag		d w
+interruptFlag		d b
 
 memorySizeKb		d w
 

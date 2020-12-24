@@ -55,6 +55,10 @@ CHECKPOINT_DMA_PR	equ	06h
 CHECKPOINT_RAM_REFRESH	equ	08h
 CHECKPOINT_RAM		equ	09h
 CHECKPOINT_RAM_PARITY	equ	0Dh
+CHECKPOINT_DMA1		equ	20h
+CHECKPOINT_DMA2		equ	21h
+CHECKPOINT_PIC1		equ	22h
+CHECKPOINT_PIC2		equ	23h
 
 ; Beep codes used for fatal errors before display is initialized
 ; See FatalBeeps for meaning of these values
@@ -68,6 +72,10 @@ BEEP_RAM_MULTIPLE	equ	0Ah	; 1st 64K, multiple bits
 BEEP_RAM_OE		equ	0Bh	; 1st 64K, even/odd logic
 BEEP_RAM_ADDRESS_LINE	equ	0Ch	; 1st 64K, address line
 BEEP_RAM_PARITY		equ	0Dh	; 1st 64K, parity
+BEEP_DMA1_REG		equ	20h
+BEEP_DMA2_REG		equ	21h
+BEEP_PIC1_REG		equ	22h
+BEEP_PIC2_REG		equ	23h
 
 ; ---------------------------------------------------------------------------
 ; DMA controller ports [TechRef 4-1]
@@ -131,7 +139,7 @@ PORT_DMA_CHAN7_WC	equ	0CEh	; (RW) word count
 
 ; ---------------------------------------------------------------------------
 ; 80287 FPU/NPU control ports
-; Ports 0E8h-0EFh and 0F8h-0FFh are reserved for 286/287 private ocmmunication.
+; Ports 0E8h-0EFh and 0F8h-0FFh are reserved for 286/287 private communication.
 PORT_287RESET	equ	0F1h	; See FE3001A manual, section 2.9 "Coprocessor Interface"
 
 ; ---------------------------------------------------------------------------
@@ -190,7 +198,7 @@ PORT_SER2_ScRATCH	equ	2FFh	; (RW) scratchpad register
 ; Note that these do not exist on the GRiDCase 1500 hardware
 ; unless provided externally.
 PORT_SER3_LCR		equ	3EBH	; (RW) line control register
-PORT_SER4_LCR		equ	2FBh	; (RW) line control register
+PORT_SER4_LCR		equ	2EBh	; (RW) line control register
 
 ; ---------------------------------------------------------------------------
 ; Monochrome display adapter ports
