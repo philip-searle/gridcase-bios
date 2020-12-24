@@ -40,7 +40,7 @@ Copyr_Phoenix2	db	0Dh,0Ah,'All Rights Reserved',0Dh,0Ah,0Ah,0
 
 ; [Compat] Non-maskable interrupt entrypoint must be the same as the XT BIOS.
 		FillRom	0E2C3h,00h
-NmiInt_Compat	jmpn	NmiInt_Actual
+IntNmi_Compat	jmpn	IntNmi_Actual
 
 ; ---------------------------------------------------------------------------
 

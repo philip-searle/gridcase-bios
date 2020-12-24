@@ -5,7 +5,7 @@ $		equ	%2
 		%endmacro
 
 ;		TODO	Reset_Actual, 080A6h
-		TODO	NmiInt_Actual, 0C4F8h
+		TODO	IntNmi_Actual, 0C4F8h
 		TODO	Int13Hd_Actual, 098D5h
 		TODO	Int19_Actual, 09504h
 		TODO	Int14_Actual, 09E87h

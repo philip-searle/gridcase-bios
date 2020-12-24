@@ -52,13 +52,18 @@ CHECKPOINT_BIOS_CHECKSUM	equ	03h
 CHECKPOINT_TIMER	equ	04h
 CHECKPOINT_DMA		equ	05h
 CHECKPOINT_DMA_PR	equ	06h
+;				07h not used
 CHECKPOINT_RAM_REFRESH	equ	08h
 CHECKPOINT_RAM		equ	09h
+;				0Ah - 0Ch not used
 CHECKPOINT_RAM_PARITY	equ	0Dh
+;				0Eh - 1Fh not used
 CHECKPOINT_DMA1		equ	20h
 CHECKPOINT_DMA2		equ	21h
 CHECKPOINT_PIC1		equ	22h
 CHECKPOINT_PIC2		equ	23h
+;				24h not used
+CHECKPOINT_IVT		equ	25h
 
 ; Beep codes used for fatal errors before display is initialized
 ; See FatalBeeps for meaning of these values
