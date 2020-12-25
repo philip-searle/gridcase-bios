@@ -50,4 +50,7 @@ $		equ	%2
 		TODO	ReadCmos, 0C762h
 		TODO	WriteCmos, 0C773h
 		TODO	GridAutodetect, 0CFA3h
+		TODO	SetSoftResetFlag, 0C5F9h
+		TODO	TestVidMem, 08DFEh
+		TODO	WriteString_Inline, 0C4B3h
 

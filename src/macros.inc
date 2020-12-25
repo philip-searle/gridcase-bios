@@ -36,3 +36,15 @@ i		%for	1..%1
 		%endfor
 %endmacro
 
+Inline		%macro
+		%if "%1" == "WriteString"
+		call	WriteString_Inline
+i		%for 2..%#
+		db	%2
+		%shift
+		%endfor
+		%else
+		%error "Unknown Inline: %1"
+		%endif
+		%endmacro
+
