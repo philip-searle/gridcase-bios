@@ -5,7 +5,11 @@ CMOS_STATUS_A		equ	0Ah
 CMOS_STATUS_B		equ	0Bh
 CMOS_STATUS_C		equ	0Ch
 CMOS_STATUS_D		equ	0Dh
+CMOS_STATUS_DIAG	equ	0Eh
 CMOS_SHUTDOWN_REASON	equ	0Fh
+CMOS_FD_TYPE		equ	10h
+CMOS_EXPMEM2_LOBYTE	equ	30h
+CMOS_EXPMEM2_HIBYTE	equ	31h
 
 ; ---------------------------------------------------------------------------
 ; Valid values for the CMOS_SHUTDOWN_REASON register

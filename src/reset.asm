@@ -340,7 +340,7 @@ SDH_POST	PROC
 
 ; ---------------------------------------------------------------------------
 ; Checksum BIOS ROM content
-		mov	al, CHECKPOINT_BIOS_CHECKSUM
+		mov	al, CHECKPOINT_BIOS_CSUM
 		out	PORT_DIAGNOSTICS, al
 
 		; ChecksumRom routine expects a near call, so simulate one
@@ -859,6 +859,7 @@ SDH_POST	PROC
 		mov	[es:16h], cs
 
 		; Enable interrupts
+		mov	ds, [kBdaSegment]
 		mov	al, 0FAh		; PIC1: set interrupt mask:
 						;   IRQ0 - timer (disabled)
 						;   IRQ1 - keyboard
@@ -869,6 +870,114 @@ SDH_POST	PROC
 						;   IRQ6 - floppy drive
 						;   IRQ7 - parallel port
 		out	PORT_PIC1_MASK, al
+		sti
+
+; ---------------------------------------------------------------------------
+; Initialize keyboard controller
+		mov	al, CHECKPOINT_KEYBOARD
+		out	PORT_DIAGNOSTICS, al
+
+		mov	al, 0F0h		; why this value?
+		mov	[interruptFlag], al
+
+		; Reset keyboard controller
+		in	al, PORT_KBC_DATA	; clear data ready flag
+		call	KbWaitReady
+		mov	al, KBC_CMD_RESET
+		out	PORT_KBC_CMD, al	; reset keyboard controller
+
+		; Wait for keyboard controller to response
+		call	KbWaitReady
+		in	al, PORT_KBC_DATA	; clear data ready flag
+		mov	dx, KBC_RESET_TIMEOUT	; long delay while KBC resets itself
+		call	KbWaitResponse
+		jnz	.kbcReset
+
+.kbcInitFail	cli				; prevent FatalBeeps being interrupted
+		mov	al, BEEP_KBC
+		jmp	FatalBeeps
+
+		; Verify OK response from KBC
+.kbcReset	in	al, PORT_KBC_DATA	; read KBC reset response
+		cmp	al, KBC_RESET_OK	; keyboard controller reports success?
+		jnz	.kbcInitFail		; report error if not
+
+		; Setup KBC mode
+		mov	al, KBC_CMD_WRITE	; next write to data port is command
+		out	PORT_KBC_CMD, al
+		call	KbWaitReady
+		jnz	.kbcInitFail
+		mov	al, 5Ch			; KBC command:
+						;   convert set 2 scancodes to set 1 (PC compatibility mode)
+						;   disable keyboard
+						;   override inhibit keyswitch
+						;   system flag (mark as warm boot)
+						;   disable IRQ1 interrupt on KBC IBF
+		out	PORT_KBC_DATA, al
+
+		; Read KBC data port and store in BDA?
+		call	KbWaitReady
+		mov	al, KBC_CMD_READ	; read input port
+		out	PORT_KBC_CMD, al
+		mov	dx, KBC_SHORT_TIMEOUT	; wait for command to be processed
+		call	KbWaitResponse
+		jz	.kbcInitFail
+		in	al, PORT_KBC_DATA
+		and	al, 0F0h		; isolate upper nibble
+		mov	[interruptFlag], al
+
+; ---------------------------------------------------------------------------
+; Update CMOS diagnostic byte
+		mov	al, CHECKPOINT_CMOS_CSUM
+		out	PORT_DIAGNOSTICS, al
+
+		jmp	.checkCmosCsum
+.decAndReadCmos	dec	bl			; decrement CMOS register number
+		mov	al, bl,CODE=LONG
+		jmp	ReadCmos		; tail call
+
+		; Autodetect hardware changes where possible and then
+		; check the power fail bit in CMOS
+.checkCmosCsum	call	GridAutodetect
+		mov	al, CMOS_STATUS_D | NMI_DISABLE
+		call	ReadCmos
+		and	al, 80h			; ZF set == RTC has lost power
+		pushf				; save result
+		mov	al, CMOS_STATUS_DIAG | NMI_DISABLE
+		call	ReadCmos
+		and	al, 90h			; Preserve power bad and mem size bad flags
+		popf				; restore prev result
+		jnz	.rtcPwrChecked
+		or	al, 80h			; set power bad flag if power previously lost
+
+		; Some diagnostic bits can be cleared on soft reset
+.rtcPwrChecked	sti
+		mov	bx, [SoftResetFlag]
+		and	bl, 0FEh		; ignore lower bit (TODO: what is it used for?)
+		cmp	bx, SOFT_RESET_FLAG
+		jz	.rtcNotSoft		; soft reset?
+		and	al, 0EFh		; clear mem size OK flag on soft reset (we autodetected the new memsize)
+
+		; Read stored CMOS checksum
+.rtcNotSoft	mov	bh, al,CODE=LONG	; store diagnostic bte for later
+		mov	bl, CMOS_EXPMEM2_LOBYTE | NMI_DISABLE
+		call	.decAndReadCmos
+		mov	cl, al,CODE=LONG
+		call	.decAndReadCmos
+		mov	ch, al,CODE=LONG
+
+		; Calculate new checksum and compare to stored one
+		mov	ah, 0			; CMOS checksum is calulated one byte at a time
+.calcCmosCsum	call	.decAndReadCmos
+		sub	cx, ax,CODE=LONG
+		cmp	bl, CMOS_FD_TYPE | NMI_DISABLE
+		jnz	.calcCmosCsum
+		jcxz	.rtcCsumDone		; CMOS checksum matched?
+		or	bh, 40h			; record if it didn't
+
+.rtcCsumDone	mov	al, bh,CODE=LONG	; store new diagnostic byte
+		mov	ah, CMOS_STATUS_DIAG | NMI_DISABLE
+		call	WriteCmos
 		sti
 
 		ENDPROC	SDH_POST

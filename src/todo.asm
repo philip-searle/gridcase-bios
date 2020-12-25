@@ -45,4 +45,9 @@ $		equ	%2
 		TODO	ParDetectPort, 0C5CEh
 		TODO	TestDmaRegisters, 08D9Ah
 		TODO	TestPicMaskReg, 08D7Bh
+		TODO	KbWaitReady, 08E78h
+		TODO	KbWaitResponse, 08E69h
+		TODO	ReadCmos, 0C762h
+		TODO	WriteCmos, 0C773h
+		TODO	GridAutodetect, 0CFA3h
 

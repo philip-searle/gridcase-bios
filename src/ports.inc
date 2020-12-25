@@ -15,10 +15,11 @@ PORT_PIT_COUNTER2	equ	42h
 PORT_PIT_MODE		equ	43h
 
 ; ---------------------------------------------------------------------------
-; Keyboard controller, port B
-PORT_KBC_PORTB	equ	61h
-; Keyboard controller, status port
-PORT_KBC_STATUS	equ	64h
+; Keyboard controller
+PORT_KBC_DATA	equ	60h
+PORT_KBC_PORTB	equ	61h	; port B
+PORT_KBC_STATUS	equ	64h	; (R-) status port
+PORT_KBC_CMD	equ	64h	; (-W) command port
 
 ; Bitmasks for PORT_KBC_STATUS reads
 KBC_STATUS_PERR	equ	80h	; keyboard data parity error
@@ -29,6 +30,16 @@ KBC_STATUS_A2	equ	08h	; A2 address line for last port write
 KBC_STATUS_SYS	equ	04h	; Last reset type: 0=cold boot, 1=warm boot
 KBC_STATUS_IBF	equ	02h	; input buffer full
 KBC_STATUS_OBF	equ	01h	; output buffer full
+
+; Commands for PORT_KBC_CMD
+KBC_CMD_RESET	equ	0AAh	; reset and self-test
+KBC_CMD_WRITE	equ	060h	; next write to data port is a command
+KBC_CMD_READ	equ	0C0h	; read KBC input port and place on KBC_PORT_DATA
+
+; Misc KBC constants
+KBC_RESET_TIMEOUT	equ	1870h	; 18h x 70h loops waiting for reset response
+KBC_SHORT_TIMEOUT	equ	0179h	; 01h x 79h loops waiting for write command response
+KBC_RESET_OK		equ	55h	; success response from KBC self test
 
 ; ---------------------------------------------------------------------------
 ; CMOS address port (with NMI enable in bit 7)
@@ -48,7 +59,7 @@ PORT_DIAGNOSTICS equ	80h
 ; Checkpoint values written to diagnostic port during POST
 CHECKPOINT_CPU_REGS	equ	01h
 CHECKPOINT_CMOS_RW	equ	02h
-CHECKPOINT_BIOS_CHECKSUM	equ	03h
+CHECKPOINT_BIOS_CSUM	equ	03h
 CHECKPOINT_TIMER	equ	04h
 CHECKPOINT_DMA		equ	05h
 CHECKPOINT_DMA_PR	equ	06h
@@ -64,6 +75,9 @@ CHECKPOINT_PIC1		equ	22h
 CHECKPOINT_PIC2		equ	23h
 ;				24h not used
 CHECKPOINT_IVT		equ	25h
+;				26h not used
+CHECKPOINT_KEYBOARD	equ	27h
+CHECKPOINT_CMOS_CSUM	equ	28h
 
 ; Beep codes used for fatal errors before display is initialized
 ; See FatalBeeps for meaning of these values
@@ -81,6 +95,7 @@ BEEP_DMA1_REG		equ	20h
 BEEP_DMA2_REG		equ	21h
 BEEP_PIC1_REG		equ	22h
 BEEP_PIC2_REG		equ	23h
+BEEP_KBC		equ	27h
 
 ; ---------------------------------------------------------------------------
 ; DMA controller ports [TechRef 4-1]
