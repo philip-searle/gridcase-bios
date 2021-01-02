@@ -282,6 +282,7 @@ SDH_POST	PROC
 		include "src/post_12_kbc.asm"
 		include "src/post_13_cmosdiag.asm"
 		include "src/post_14_vidinit.asm"
+		include "src/post_15_hdroms.asm"
 
 		ENDPROC	SDH_POST
 

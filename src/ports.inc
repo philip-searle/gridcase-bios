@@ -80,6 +80,8 @@ CHECKPOINT_KEYBOARD	equ	27h
 CHECKPOINT_CMOS_CSUM	equ	28h
 CHECKPOINT_VIDEO	equ	29h
 CHECKPOINT_VIDEO_INIT	equ	2Ch
+;				2Dh not used
+CHECKPOINT_HD_ROM	equ	2Eh
 
 ; Beep codes used for fatal errors before display is initialized
 ; See FatalBeeps for meaning of these values

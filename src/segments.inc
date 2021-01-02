@@ -12,6 +12,10 @@ STACK_TOP	equ	0080h
 ; BIOS data area (0000:0400 - 0000:04FF)
 BDA_SEGMENT	equ	0040h
 
+; Upper and lower limits for hard disk option ROM search
+HD_ROM_SEG_LO	equ	0C000h
+HD_ROM_SEG_HI	equ	0C800h
+
 [BDA]
 
 ; Base I/O port for each detected serial port
