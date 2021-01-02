@@ -12,23 +12,23 @@ POST14_VidInit	PROC
 		; TODO: how is this set?
 		mov	[equipmentWord], 30h,DATA=BYTE	; 80x25 monochrome
 		test	[interruptFlag], 40h	; ???
-		jnz	.l15
+		jnz	.l1
 		mov	[equipmentWord], 20h,DATA=BYTE	; 80x25 colour
 
 		; Check for an option ROM present anywhere between C000:0000
 		; and C8000:0000, at 2KB boundaries.  If found, then assume it
 		; an EGA+ video adapter and update the default video mode.
-.l15		mov	si, 0C000h
+.l1		mov	si, 0C000h
 		mov	cx, 10h
 .findVidRom	mov	ds, si
 		add	si, 80h
 		cmp	[0], 0AA55h,DATA=WORD	; check for option ROM signature
 		loopne	.findVidRom
 		mov	ds, [cs:kBdaSegment]
-		jnz	.l16
+		jnz	.l2
 		and	[equipmentWord], 0CFh,DATA=BYTE	; set video equipment to EGA+
 
-.l16		mov	al, CMOS_STATUS_DIAG | NMI_DISABLE
+.l2		mov	al, CMOS_STATUS_DIAG | NMI_DISABLE
 		call	ReadCmos
 		mov	bl, al,CODE=LONG
 		test	al, 0C0h		; invalid config or CMOS checksum bad?

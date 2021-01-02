@@ -49,24 +49,24 @@ POST07_TestRam	PROC
 		mov	bx, [SoftResetFlag]
 		in	al, PORT_KBC_PORTB
 		test	al, 80h			; RAM parity error occurred?
-		jz	.l9			; continue if not
+		jz	.l1			; continue if not
 		xor	bx, bx,CODE=LONG	; if so, don't count it as a soft reset
 		mov	al, 0Ch			; toggle IO and RAM parity checks
 		out	PORT_KBC_PORTB, al
 		mov	al, 0
 		out	PORT_KBC_PORTB, al
 
-.l9		mov	ax, cs			; load a fake return stack to handle
+.l1		mov	ax, cs			; load a fake return stack to handle
 		mov	ss, ax			; the checking the first 64KB of RAM
-		mov	sp, .returnStack2
+		mov	sp, .returnStack1
 		jmpn	MirrorRam512
 
-.loc_F8387	jnb	.l10			; TODO: where does this come from?
+.loc_F8387	jnb	.l2			; TODO: where does this come from?
 		mov	dx, PORT_PAR_PORTC_R
 		mov	al, 1
 		out	dx, al			; TODO: parallel port C isn't writable though?
 
-.l10		mov	ax, BDA_SEGMENT		; Set DS to BDA
+.l2		mov	ax, BDA_SEGMENT		; Set DS to BDA
 		mov	ds, ax
 		mov	ax, 0			; Set ES to first 64K
 		mov	es, ax
@@ -75,11 +75,11 @@ POST07_TestRam	PROC
 
 		mov	ax, cs			; load a fake return stack to handle
 		mov	ss, ax			; (TODO: what?)
-		mov	sp, .returnStack3
+		mov	sp, .returnStack2
 		mov	bp, 8000h		; TODO: is this a length?
 		jmp	loc_F9369
 
-.loc_F83AC	jnb	.l13
+.loc_F83AC	jnb	.l5
 		mov	bx, ax,CODE=LONG
 		mov	al, BEEP_RAM_OE
 		cmp	dx, kOddEvenLogic
@@ -91,21 +91,21 @@ POST07_TestRam	PROC
 .memTestBeepDet	xor	bx, cx,CODE=LONG
 		mov	cx, 10h
 		mov	ax, 0FH
-.l11		rol	bx, 1
-		jnb	.l12
+.l3		rol	bx, 1
+		jnb	.l4
 		inc	ah
 		add	al, cl,CODE=LONG
-.l12		loop	.l11
+.l4		loop	.l3
 		dec	ah
 		jz	.memTestBeep
 		mov	al, BEEP_RAM_MULTIPLE
 .memTestBeep	jmp	FatalBeeps
 
-.l13		jmp	loc_F93C6
+.l5		jmp	loc_F93C6
 
-.returnStack3	dw	.loc_F83AC
+.returnStack2	dw	.loc_F83AC
 		dw	.loc_F83E4
-.returnStack2	dw	.loc_F8387
+.returnStack1	dw	.loc_F8387
 
 .loc_F83E4	mov	bx, ax,CODE=LONG
 		jb	.memTestBeepDet

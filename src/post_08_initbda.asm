@@ -6,11 +6,11 @@ POST08_InitBda	PROC
 ; Initialize BIOS data area
 ; Setup keyboard buffer, detect parallel and serial ports.
 .memTestFin	cmp	bx, SOFT_RESET_FLAG
-		jnz	.l14
+		jnz	.l1
 		mov	[SoftResetFlag], bx	; reset soft reset flag?x
 
 		; Initialize keyboard ring buffer
-.l14		mov	ax, kbBuffer
+.l1		mov	ax, kbBuffer
 		mov	[kbNextChar], ax
 		mov	[kbLastChar], ax
 		mov	[kbBufStart], ax

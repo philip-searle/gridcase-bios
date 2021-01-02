@@ -14,10 +14,10 @@ POST04_BiosCsum	PROC
 		mov	cx, BIOS_START_PARA	; CX is checksum start address
 		mov	ax, cs
 		mov	ss, ax
-		mov	sp, .returnStack1
+		mov	sp, .returnStack
 		jmp	ChecksumRom
 
-.returnStack1	dw	.checksumDone
+.returnStack	dw	.checksumDone
 
 .checksumDone	jz	.checksumOk		; is our EPROM OK?
 		mov	al, BEEP_BIOS_CHECKSUM

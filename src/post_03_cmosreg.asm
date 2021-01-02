@@ -25,11 +25,11 @@ POST03_CmosReg	PROC
 		in	al, PORT_CMOS_DATA
 
 		cmp	al, ah,CODE=LONG	; does it match?
-		jz	.l3			; keep going if so
+		jz	.bitOk			; keep going if so
 		mov	al, BEEP_CMOS_FAIL	; if not, probable stuck bits in CMOS RAM
 		jmp	FatalBeeps
 
-.l3		rol	ah, 1			; shift bit and try again
+.bitOk		rol	ah, 1			; shift bit and try again
 		jnb	.testCmosRam		; (until the bit falls out into the carry)
 
 		; Exit via fall-through to next POST procedure

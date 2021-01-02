@@ -27,10 +27,10 @@ POST06_InitDma	PROC
 						; (DMA channel 0 current address+base) normal and inverted
 
 .dmaZeroTest	test	cl, 1
-		jz	.l4			; odd iterations test the base address
+		jz	.l1			; odd iterations test the base address
 		inc	dx			; so increment port to PORT_DMA_CHAN0_BASE
 
-.l4		mov	al, bh,CODE=LONG
+.l1		mov	al, bh,CODE=LONG
 		out	dx, al			; output test pattern for register upper byte
 		xchg	ax, bx			; xchg to get test pattern lower byte into AL
 		Delay	2
@@ -46,15 +46,15 @@ POST06_InitDma	PROC
 		jnz	.dmaZeroFail		; if not, report failure
 
 		test	cl, 1			; odd iteration (DMA base register)?
-		jz	.l5
+		jz	.l2
 		dec	dx			; reset port for next iteration after testing base register
 		sar	bx, 1			; shift test pattern over by 1 bit
 
-.l5		cmp	cl, 21h			; are we halfway through the test cycle?
-		jnz	.l6
+.l2		cmp	cl, 21h			; are we halfway through the test cycle?
+		jnz	.l3
 		mov	bh, 7Fh			; if so, switch to inverted test pattern
 
-.l6		loop	.dmaZeroTest		; loop until all bits tested
+.l3		loop	.dmaZeroTest		; loop until all bits tested
 		jmp	.dmaZeroOk		; then continue successfully
 
 .dmaZeroFail	mov	al, BEEP_DMA_FAIL
@@ -86,7 +86,7 @@ POST06_InitDma	PROC
 		mov	al, CHECKPOINT_DMA_PR
 		out	PORT_DIAGNOSTICS, al
 
-		jmp	.l7			; jump over data array
+		jmp	.testPagePorts		; jump over data array
 .dmaPagePorts	db	PORT_DMA_PAGE0
 		db	PORT_DMA_PAGE1
 		db	PORT_DMA_PAGE2
@@ -97,7 +97,7 @@ POST06_InitDma	PROC
 		db	PORT_DMA_PAGE7
 
 		; Set all page registers, then verify they read back OK
-.l7		mov	dx, cs
+.testPagePorts	mov	dx, cs
 		mov	ds, dx
 		mov	bl, 0FFh		; set address registers to all-ones
 .pagePortsTest	mov	di, .setPageReg
@@ -111,15 +111,15 @@ POST06_InitDma	PROC
 
 .setPageReg	mov	al, bl,CODE=LONG
 		out	dx, al			; set DMA page register
-		jmp	.l8
+		jmp	.l4
 
 .checkPageReg	in	al, dx			; read DMA page register
 		cmp	al, bl,CODE=LONG			; matches what we wrote?
-		jz	.l8			; continue if so
+		jz	.l4			; continue if so
 		mov	al, BEEP_DMA_PR_FAIL	; report error if not
 		jmp	FatalBeeps
 
-.l8		loop	.nextPageReg		; loop over all page registers
+.l4		loop	.nextPageReg		; loop over all page registers
 
 		cmp	di, .checkPageReg	; are we on the verification pass?
 		jz	.dmaPageCheckOk		; continue with POST if so
