@@ -35,11 +35,11 @@ $		equ	%2
 		TODO	SDH_04, 0906Dh
 		TODO	ChecksumRom, 0C405h
 		TODO	MirrorRam512, 0F63Dh
-		TODO	SDH_POST.aOddEvenLogic, 0941Fh
-		TODO	SDH_POST.aAddressLine, 09445h
+		TODO	kOddEvenLogic, 0941Fh
+		TODO	kAddressLine, 09445h
 		TODO	ToggleNmiChecks, 0C5B9h
-		TODO	SDH_POST.loc_F9369, 09369h
-		TODO	SDH_POST.loc_F93C6, 093C6h
+		TODO	loc_F9369, 09369h
+		TODO	loc_F93C6, 093C6h
 		TODO	kBdaSegment, 0C5E6h
 		TODO	SerDetectPort, 09F7Ah
 		TODO	ParDetectPort, 0C5CEh
