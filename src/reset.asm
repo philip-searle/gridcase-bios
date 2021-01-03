@@ -240,8 +240,8 @@ SDH_POST	PROC
 		mov	dx, PORT_UNKNOWN_FFF
 		mov	al, 1			; set port FFF to 1
 		out	dx, al
-		mov	dx, PORT_UNKNOWN_6F8
-		mov	al, 0			; set port 6F8 to 0
+		mov	dx, PORT_ROM_SUBSYSTEM1
+		mov	al, 0			; ROM subsystem == 0?
 		out	dx, al
 		mov	dx, PORT_UNKNOWN_7FD
 		mov	al, 0			; set port 7FD to 0
