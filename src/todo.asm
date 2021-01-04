@@ -54,4 +54,6 @@ $		equ	%2
 		TODO	TestVidMem, 08DFEh
 		TODO	WriteString_Inline, 0C4B3h
 		TODO	InitOptionRoms, 08CFEh
+		TODO	VidInit, 0D541h
+		TODO	VidInitBacklite, 0D160h
 
