@@ -56,4 +56,5 @@ $		equ	%2
 		TODO	InitOptionRoms, 08CFEh
 		TODO	VidInit, 0D541h
 		TODO	VidInitBacklite, 0D160h
+		TODO	WriteBiosBanner, 0C458h
 

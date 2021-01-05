@@ -285,5 +285,8 @@ SDH_POST	PROC
 		include "src/post_15_hdroms.asm"
 		include "src/post_16_vidinit.asm"
 
+		; Enough hardware is initialized that we can safely ID ourselves
+		call	WriteBiosBanner
+
 		ENDPROC	SDH_POST
 
