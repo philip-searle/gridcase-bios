@@ -7,7 +7,7 @@ POST15_HdOptRom	PROC
 ; initialization entrypoints if their checksum is valid.  Assume that any
 ; ROMs in this range are hard disk controllers.
 		mov	ds, [cs:kBdaSegment]
-		test	[interruptFlag], 20h	; do we have video output?
+		test	[InterruptFlag], 20h	; do we have video output?
 		jz	.romInitDone		; skip ROM init if not, it requires video for error messages
 
 		mov	al, CHECKPOINT_HD_ROM

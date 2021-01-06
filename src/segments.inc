@@ -35,36 +35,41 @@ IvtInt70	equ	70h * 4
 
 ; Base I/O port for each detected serial port
 ; POST code assumes these are stored contiguously
-ser1BasePort		d w
-ser2BasePort		d w
-ser3BasePort		d w
-ser4BasePort		d w
+Ser1BasePort		d w
+Ser2BasePort		d w
+Ser3BasePort		d w
+Ser4BasePort		d w
 
 ; Base I/O port for each detected parallel port
 ; POST code assumes these are stored contiguously
-par1BasePort		d w
-par2BasePort		d w
-par3BasePort		d w
+Par1BasePort		d w
+Par2BasePort		d w
+Par3BasePort		d w
 
 ; Extended BIOS data area segment address
-ebdaSegment		d w
+EbdaSegment		d w
 
-equipmentWord		d w
+EquipmentWord		d w
 
-interruptFlag		d b
+; TODO: document what uses this
+InterruptFlag		d b
 
-memorySizeKb		d w
+MemorySizeKb		d w
 
-errorCodes		d w
+; TODO: document what this is
+ErrorCodes		d w
 
 KB_BUFFER_LENGTH	equ	20h
-kbShiftFlags1		d b
-kbShiftFlags2		d b
-altNumpad		d b
-kbNextChar		d w
-kbLastChar		d w
-kbBuffer		d KB_BUFFER_LENGTH * b
+KbShiftFlags1		d b
+KbShiftFlags2		d b
+AltNumpad		d b
+KbNextChar		d w
+KbLastChar		d w
+KbBuffer		d KB_BUFFER_LENGTH * b
 
+; Various places document this as 'adapter ROM offset/segment' with no
+; further details.  It's actually just a scratch area for storing a far
+; code pointer temporarily.
 $		equ	0067h
 AdapterRomOffset	d w
 AdapterRomSegment	d w
@@ -75,17 +80,16 @@ SOFT_RESET_FLAG	equ	1234h	; Set in SoftResetFlag to mark software-initiated rese
 
 $		equ	78h
 DEFAULT_PARALLEL_TIMEOUT	equ	14h
-parPort1Timeout		d b
-parPort2Timeout		d b
-parPort3Timeout		d b
+ParPort1Timeout		d b
+ParPort2Timeout		d b
+ParPort3Timeout		d b
 
 $		equ	7CH
 DEFAULT_SERIAL_TIMEOUT		equ	01h
-serPort1Timeout		d b
-serPort2Timeout		d b
-serPort3Timeout		d b
-serPort4Timeout		d b
+SerPort1Timeout		d b
+SerPort2Timeout		d b
+SerPort3Timeout		d b
+SerPort4Timeout		d b
 
-kbBufStart		d w
-kbBufEnd		d w
-
+KbBufStart		d w
+KbBufEnd		d w

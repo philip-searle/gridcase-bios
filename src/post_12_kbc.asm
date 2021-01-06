@@ -8,7 +8,7 @@ POST12_InitKbc	PROC
 		out	PORT_DIAGNOSTICS, al
 
 		mov	al, 0F0h		; why this value?
-		mov	[interruptFlag], al
+		mov	[InterruptFlag], al
 
 		; Reset keyboard controller
 		in	al, PORT_KBC_DATA	; clear data ready flag
@@ -54,7 +54,7 @@ POST12_InitKbc	PROC
 		jz	.kbcInitFail
 		in	al, PORT_KBC_DATA
 		and	al, 0F0h		; isolate upper nibble
-		mov	[interruptFlag], al
+		mov	[InterruptFlag], al
 
 		; Exit via fall-through to next POST procedure
 		ENDPROC POST12_InitKbc

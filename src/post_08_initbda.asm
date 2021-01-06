@@ -7,29 +7,29 @@ POST08_InitBda	PROC
 ; Setup keyboard buffer, detect parallel and serial ports.
 .memTestFin	cmp	bx, SOFT_RESET_FLAG
 		jnz	.l1
-		mov	[SoftResetFlag], bx	; reset soft reset flag?x
+		mov	[SoftResetFlag], bx	; reset soft reset flag
 
 		; Initialize keyboard ring buffer
-.l1		mov	ax, kbBuffer
-		mov	[kbNextChar], ax
-		mov	[kbLastChar], ax
-		mov	[kbBufStart], ax
+.l1		mov	ax, KbBuffer
+		mov	[KbNextChar], ax
+		mov	[KbLastChar], ax
+		mov	[KbBufStart], ax
 		add	ax, KB_BUFFER_LENGTH
-		mov	[kbBufEnd], ax
+		mov	[KbBufEnd], ax
 
-		mov	[errorCodes], 100h	; what does this value mean?
+		mov	[ErrorCodes], 100h	; what does this value mean?
 
 		; Initialize comms port timeouts, two at a time
 		mov	ax, (DEFAULT_PARALLEL_TIMEOUT << 8) | DEFAULT_PARALLEL_TIMEOUT
-		mov	[parPort1Timeout], ax
-		mov	[parPort3Timeout], ax
+		mov	[ParPort1Timeout], ax
+		mov	[ParPort3Timeout], ax
 		mov	ax, (DEFAULT_SERIAL_TIMEOUT << 8) | DEFAULT_SERIAL_TIMEOUT
-		mov	[serPort1Timeout], ax
-		mov	[serPort3Timeout], ax
+		mov	[SerPort1Timeout], ax
+		mov	[SerPort3Timeout], ax
 
 		; Detect serial and parallel ports and record the base I/O
 		; ports of any that are found in the BIOS data area.
-		mov	si, ser1BasePort
+		mov	si, Ser1BasePort
 		mov	dx, PORT_SER1_LCR
 		call	SerDetectPort
 		mov	dx, PORT_SER2_LCR
@@ -39,7 +39,7 @@ POST08_InitBda	PROC
 		mov	dx, PORT_SER4_LCR
 		call	SerDetectPort
 
-		mov	bx, par1BasePort
+		mov	bx, Par1BasePort
 		mov	dx, PORT_PAR_CANDIDATE1
 		call	ParDetectPort
 		mov	dx, PORT_PAR_CANDIDATE2
@@ -49,4 +49,3 @@ POST08_InitBda	PROC
 
 		; Exit via fall-through to next POST procedure
 		ENDPROC POST08_InitBda
-

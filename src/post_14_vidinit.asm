@@ -8,12 +8,12 @@ POST14_VidInit	PROC
 		mov	al, CHECKPOINT_VIDEO
 		out	PORT_DIAGNOSTICS, al
 
-		; Assume default mode based on interruptFlag?
+		; Assume default mode based on InterruptFlag?
 		; TODO: how is this set?
-		mov	[equipmentWord], 30h,DATA=BYTE	; 80x25 monochrome
-		test	[interruptFlag], 40h	; ???
+		mov	[EquipmentWord], 30h,DATA=BYTE	; 80x25 monochrome
+		test	[InterruptFlag], 40h	; ???
 		jnz	.l1
-		mov	[equipmentWord], 20h,DATA=BYTE	; 80x25 colour
+		mov	[EquipmentWord], 20h,DATA=BYTE	; 80x25 colour
 
 		; Check for an option ROM present anywhere between C000:0000
 		; and C8000:0000, at 2KB boundaries.  If found, then assume it
@@ -26,7 +26,7 @@ POST14_VidInit	PROC
 		loopne	.findVidRom
 		mov	ds, [cs:kBdaSegment]
 		jnz	.l2
-		and	[equipmentWord], 0CFh,DATA=BYTE	; set video equipment to EGA+
+		and	[EquipmentWord], 0CFh,DATA=BYTE	; set video equipment to EGA+
 
 .l2		mov	al, CMOS_STATUS_DIAG | NMI_DISABLE
 		call	ReadCmos
@@ -39,14 +39,14 @@ POST14_VidInit	PROC
 		call	ReadCmos
 		mov	bh, al,CODE=LONG
 		and	al, 30h			; isolate CMOS equipment video bits
-		cmp	[equipmentWord], al
+		cmp	[EquipmentWord], al
 		jz	.loc_F8653
 		cmp	al, 10h
 		jnz	.loc_F865B
-		cmp	[equipmentWord], 20h,DATA=BYTE
+		cmp	[EquipmentWord], 20h,DATA=BYTE
 		jnz	.loc_F865B
-		and	[equipmentWord], 0CFh,DATA=BYTE
-		or	[equipmentWord], al
+		and	[EquipmentWord], 0CFh,DATA=BYTE
+		or	[EquipmentWord], al
 .loc_F8653	test	bh, 1
 		jnz	.loc_F8664
 		jmp	.loc_F8669
@@ -58,10 +58,10 @@ POST14_VidInit	PROC
 		mov	ah, CMOS_STATUS_DIAG | NMI_DISABLE
 		call	WriteCmos
 
-.loc_F8664	or	[equipmentWord], 1,DATA=BYTE
+.loc_F8664	or	[EquipmentWord], 1,DATA=BYTE
 
 .loc_F8669	sti
-		test	[interruptFlag], 20h
+		test	[InterruptFlag], 20h
 		jnz	.loc_F8674
 		jmp	.vidInitFail
 
@@ -72,24 +72,24 @@ POST14_VidInit	PROC
 		out	PORT_DIAGNOSTICS, al
 
 		; TODO: why is equipmentWord modified here?
-		push	[equipmentWord]		; save original equipment word
-		mov	[equipmentWord], 30h,DATA=BYTE	; set just reserved bits in equipment word
+		push	[EquipmentWord]		; save original equipment word
+		mov	[EquipmentWord], 30h,DATA=BYTE	; set just reserved bits in equipment word
 		xor	ax, ax,CODE=LONG	; mode 0: 40x25 CGA text
 		int	10h			; set video mode
-		mov	[equipmentWord], 10h,DATA=BYTE	; set just one reserved bit in equipment word
+		mov	[EquipmentWord], 10h,DATA=BYTE	; set just one reserved bit in equipment word
 		mov	ax, 3			; mode 3: 80x25 CGA text
 		int	10h			; set video mode
 		pop	ax
-		mov	[equipmentWord], ax
+		mov	[EquipmentWord], ax
 		test	al, 30h			; check int10/00 return
 		jz	.vidInitFail
 
 		call	TestVidMem
 		jnb	.vidInitDone
-		mov	al, [equipmentWord]
+		mov	al, [EquipmentWord]
 		and	al, 10h			; reserved bit?
 		add	al, 10h			; reserved bits?
-		xor	[equipmentWord], al
+		xor	[EquipmentWord], al
 		call	TestVidMem
 		jb	.vidInitFail
 
