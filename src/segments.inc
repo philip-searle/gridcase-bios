@@ -12,9 +12,24 @@ STACK_TOP	equ	0080h
 ; BIOS data area (0000:0400 - 0000:04FF)
 BDA_SEGMENT	equ	0040h
 
+; Interrupt vector table (0000:0000 - 0000:0400)
+IVT_SEGMENT	equ	0000h
+
 ; Upper and lower limits for hard disk option ROM search
 HD_ROM_SEG_LO	equ	0C000h
 HD_ROM_SEG_HI	equ	0C800h
+
+[IVT]
+
+IvtInt00	equ	00h * 4
+IvtInt02	equ	02h * 4
+IvtInt05	equ	05h * 4
+IvtInt08	equ	08h * 4
+IvtInt14	equ	14h * 4
+IvtInt1F	equ	1Fh * 4
+IvtInt60	equ	60h * 4
+IvtInt67	equ	67h * 4
+IvtInt70	equ	70h * 4
 
 [BDA]
 
