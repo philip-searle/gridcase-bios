@@ -41,6 +41,7 @@ $		equ	%2
 		TODO	loc_F9369, 09369h
 		TODO	loc_F93C6, 093C6h
 		TODO	kBdaSegment, 0C5E6h
+		TODO	kIvtSegment, 0C5E9h
 		TODO	SerDetectPort, 09F7Ah
 		TODO	ParDetectPort, 0C5CEh
 		TODO	TestDmaRegisters, 08D9Ah
@@ -57,4 +58,5 @@ $		equ	%2
 		TODO	VidInit, 0D541h
 		TODO	VidInitBacklite, 0D160h
 		TODO	WriteBiosBanner, 0C458h
+		TODO	loc_F885D, 0885Dh
 

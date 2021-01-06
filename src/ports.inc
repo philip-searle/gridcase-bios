@@ -85,6 +85,9 @@ CHECKPOINT_VIDEO	equ	29h
 CHECKPOINT_VIDEO_INIT	equ	2Ch
 ;				2Dh not used
 CHECKPOINT_HD_ROM	equ	2Eh
+;				2Fh - 33h not used
+CHECKPOINT_TIMER_INT	equ	34h
+CHECKPOINT_SHUTDOWN	equ	35h
 
 ; Beep codes used for fatal errors before display is initialized
 ; See FatalBeeps for meaning of these values
@@ -103,6 +106,9 @@ BEEP_DMA2_REG		equ	21h
 BEEP_PIC1_REG		equ	22h
 BEEP_PIC2_REG		equ	23h
 BEEP_KBC		equ	27h
+;				28h - 33h not used
+BEEP_TIMER_INT		equ	34h
+BEEP_SHUTDOWN		equ	35h
 
 ; ---------------------------------------------------------------------------
 ; DMA controller ports [TechRef 4-1]
