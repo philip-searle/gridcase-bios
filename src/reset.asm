@@ -184,7 +184,7 @@ Reset_Actual	PROC
 ; ===========================================================================
 SDH_01		PROC
 		call	WaitKbEmpty
-		mov	al, 20h			; Issue non-specific EOI to both PICs
+		mov	al, NONSPECIFIC_EOI	; Issue non-specific EOI to both PICs
 		out	PORT_PIC2_CTRL, al
 		out	PORT_PIC1_CTRL, al
 		; FALLTHROUGH into sdh02
