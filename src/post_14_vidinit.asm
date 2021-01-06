@@ -100,6 +100,7 @@ POST14_VidInit	PROC
 .vidInitFail	xor	ax, ax,CODE=LONG
 		mov	ds, ax
 		mov	[40h], SoftwareIret,DATA=WORD
+
 .vidInitDone	; Exit via fall-through to next POST procedure
 		ENDPROC POST14_VidInit
 

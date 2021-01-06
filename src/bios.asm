@@ -70,7 +70,7 @@ Reset		CompatAddress 0FFF0h
 		jmp	0F000h:Reset_Compat
 
 		; [Public] IBM BIOS stores ROM date at F000:FFF5 (AT BIOS calls this 'RELEASE MARKER')
-ReleaseMarker	CompatAddress 0fff5h
+ReleaseMarker	CompatAddress 0FFF5h
 		db	'03/11/89'
 
 		db	0FFh		; Unused byte
