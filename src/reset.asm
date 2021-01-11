@@ -288,7 +288,7 @@ SDH_POST	PROC
 		; Enough hardware is initialized that we can safely ID ourselves
 		call	WriteBiosBanner
 
-		include "src/post_17_timerint.asm"
+		include "src/post_17_protmode.asm"
 		include "src/post_18_timer2.asm"
 		ENDPROC	SDH_POST
 
