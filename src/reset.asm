@@ -290,5 +290,6 @@ SDH_POST	PROC
 
 		include "src/post_17_protmode.asm"
 		include "src/post_18_timer2.asm"
+		include "src/post_19_keyboard.asm"
 		ENDPROC	SDH_POST
 
