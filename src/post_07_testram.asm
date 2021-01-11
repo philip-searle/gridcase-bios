@@ -59,14 +59,14 @@ POST07_TestRam	PROC
 .l1		mov	ax, cs			; load a fake return stack to handle
 		mov	ss, ax			; the checking the first 64KB of RAM
 		mov	sp, .returnStack1
-		jmpn	MirrorRam512
+		jmpn	DetectMemController
 
-.loc_F8387	jnb	.l2			; TODO: where does this come from?
-		mov	dx, PORT_PAR_PORTC_R
+.loc_F8387	jnb	.memc1M			; TODO: where does this come from?
+.memc256K	mov	dx, PORT_PAR_PORTC_R
 		mov	al, 1
 		out	dx, al			; TODO: parallel port C isn't writable though?
 
-.l2		mov	ax, BDA_SEGMENT		; Set DS to BDA
+.memc1M		mov	ax, BDA_SEGMENT		; Set DS to BDA
 		mov	ds, ax
 		mov	ax, 0			; Set ES to first 64K
 		mov	es, ax

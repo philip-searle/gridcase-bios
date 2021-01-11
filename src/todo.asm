@@ -34,7 +34,7 @@ $		equ	%2
 		TODO	SDH_03, 0BE87h
 		TODO	SDH_04, 0906Dh
 		TODO	ChecksumRom, 0C405h
-		TODO	MirrorRam512, 0F63Dh
+		TODO	DetectMemController, 0F63Dh
 		TODO	kOddEvenLogic, 0941Fh
 		TODO	kAddressLine, 09445h
 		TODO	ToggleNmiChecks, 0C5B9h
@@ -58,5 +58,6 @@ $		equ	%2
 		TODO	VidInit, 0D541h
 		TODO	VidInitBacklite, 0D160h
 		TODO	WriteBiosBanner, 0C458h
-		TODO	loc_F885D, 0885Dh
+		;TODO	loc_F885D, 0885Dh
+		TODO	DetectMemSize, 090D1h
 

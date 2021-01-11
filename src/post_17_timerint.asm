@@ -1,5 +1,12 @@
 
-POST17_TimerInt	PROC
+; ---------------------------------------------------------------------------
+; Tests that use protected mode, plus their prerequisites:
+;  - Test timer interrupt works.
+;  - Test KBC reset works (using timer to detect failure).
+;  - Switch to protected mode (testing the A20 gate on the way).
+;  - Detect expanded memory size.
+;  - Return to real mode.
+POST17_ProtMode	PROC
 		; Enter via fall-through from previous POST code
 
 ; ---------------------------------------------------------------------------
@@ -70,11 +77,94 @@ POST17_TimerInt	PROC
 .haveDisplay2	Inline	WriteString,'Shutdown failure',0Dh,0Ah,0
 		mov	[SoftResetFlag], 1235h	; ???
 		mov	[es:IvtInt08], Int8_Compat,DATA=WORD
-		jmp	loc_F885D	; why jump so far ahead?
+		; If the KBC can't reset the CPU then we must skip all
+		; tests that use protected mode since we won't be able
+		; to exit from real-mode without the KBC's help.
+		; In practice this means expanded memory size checks
+		; and, since they share the same helper code, the base
+		; memory size checks as well.
+		jmp	.pastPmodeTests
 
 .skipShutdown	; A non-fatal failure in timer tick test ends up here.
-.shutdownOk	; So does a successful shutdown/reset rest.
+		; (Why?  Maybe we can still reset via the KBC and give
+		; the user some additional useful diagnostics perhaps).
+.shutdownOk	; A successful shutdown/reset also ends up here.
+		; Reset the timer interrupt handler to the normal one.
+		mov	[es:IvtInt08], Int8_Compat,DATA=WORD
 
-		; Exit via fall-through to next POST procedure
-		ENDPROC POST17_TimerInt
+		; TODO: check whether the shutdown handler modifies
+		; InterruptFlag to indicate a successful reset...
+		test	[InterruptFlag], 20h
+		jnz	.detectMemSize
+
+		; Flag not set; mark minimum amount of memory?
+		; Note that DetectMemSize below will also set MemorySizeKb
+		test	[InterruptFlag], 10h
+		mov	bx, 200h	; 512KB
+		jnz	.l1
+		mov	bx, 100h	; 256KB
+.l1		mov	[MemorySizeKb], bx
+		jmp	.pastPmodeTests
+
+; ---------------------------------------------------------------------------
+; Detect the amount of extended memory the computer has fitted
+.detectMemSize	mov	dx, PORT_PAR_PORTB_W
+		mov	al, 1		; ??? enable all address lines
+		out	dx, al
+		Delay	2
+		inc	dx		; ??? increment to 0FFEh
+		out	dx, al
+		call	DetectMemSize
+
+		; CMOS mem size bytes have been updated, so use the
+		; new values to configure the memory controller
+		mov	al, CMOS_EXPMEM_HIBYTE | NMI_DISABLE
+		call	ReadCmos
+		mov	ah, al,CODE=LONG
+		mov	al, CMOS_EXPMEM_LOBYTE | NMI_DISABLE
+		call	ReadCmos
+		mov	bx, ax,CODE=LONG	; got expansion memory size
+		mov	al, CMOS_BASEMEM_HIBYTE | NMI_DISABLE
+		call	ReadCmos
+		mov	ah, al,CODE=LONG
+		mov	al, CMOS_BASEMEM_LOBYTE | NMI_DISABLE
+		call	ReadCmos
+		add	bx, ax,CODE=LONG	; add on base memory size
+
+; ---------------------------------------------------------------------------
+; Configure the memory controller based on the detected memory size
+		call	DetectMemController
+		mov	al, 0
+		jnb	.ramc1M		; 1MB or 256KB memory controller?
+
+.ramc256K	cmp	bx, 200h	; <= 512KB?
+		jbe	.configureRamc
+		inc	al
+		cmp	bx, 400h	; <= 1MB?
+		jbe	.configureRamc
+		inc	al
+		cmp	bx, 600h	; <= 1.5MB?
+		jbe	.configureRamc
+		inc	al		; must be 2MB then
+		jmp	.configureRamc
+
+.ramc1M		cmp	bx, 800h	; <= 2MB?
+		jbe	.configureRamc
+		inc	al
+		cmp	bx, 1000h	; <= 4MB?
+		jbe	.configureRamc
+		inc	al
+		cmp	bx, 1800h	; <= 6MB?
+		jbe	.configureRamc
+		inc	al		; must be 8MB then
+
+.configureRamc	mov	dx, PORT_PAR_PORTB_W
+		out	dx, al		; ??? 0-3 number of populated RAM banks
+		Delay	2
+		inc	dx		; ??? increment to 0FFEh
+		shr	al, 1
+		out	dx, al		; ??? 0-1 
+
+.pastPmodeTests	; Exit via fall-through to next POST procedure
+		ENDPROC POST17_ProtMode
 
