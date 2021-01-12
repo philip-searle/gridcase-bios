@@ -17,8 +17,17 @@
 ; ===========================================================================
 
 		include	"src/macros.inc"
-		include	"src/ports.inc"
+		include	"src/pic.inc"
+		include	"src/pit.inc"
+		include	"src/keyboard.inc"
 		include	"src/cmos.inc"
+		include	"src/diagnostics.inc"
+		include	"src/dma.inc"
+		include	"src/npu.inc"
+		include	"src/parallel.inc"
+		include	"src/serial.inc"
+		include	"src/video.inc"
+		include	"src/grid.inc"
 		include	"src/segments.inc"
 		include	"src/todo.asm"
 

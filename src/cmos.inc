@@ -1,5 +1,16 @@
 
 ; ---------------------------------------------------------------------------
+; CMOS address port (with NMI enable in bit 7)
+; Needs setting after each data port access
+PORT_CMOS_ADDRESS      equ     70h
+; CMOS data port
+PORT_CMOS_DATA         equ     71h
+
+; OR with register index to form value for CMOS_ADDRESS_PORT
+NMI_ENABLE             equ     00h
+NMI_DISABLE            equ     80h
+
+; ---------------------------------------------------------------------------
 ; CMOS register indexes
 CMOS_STATUS_A		equ	0Ah
 CMOS_STATUS_B		equ	0Bh
