@@ -183,9 +183,9 @@ Reset_Actual	PROC
 ; Shutdown handler for SD_JMP_WITH_INT
 ; ===========================================================================
 SDH_01		PROC
-		call	WaitKbEmpty
+		call	KbWaitEmpty
 		mov	al, NONSPECIFIC_EOI	; Issue non-specific EOI to both PICs
-		out	PORT_PIC2_CTRL, al
+		out	PORT_PIC2_CTRL, al	; to clear timer interrupt
 		out	PORT_PIC1_CTRL, al
 		; FALLTHROUGH into sdh02
 		ENDPROC	SDH_01
@@ -291,5 +291,46 @@ SDH_POST	PROC
 		include "src/post_17_protmode.asm"
 		include "src/post_18_timer2.asm"
 		include "src/post_19_keyboard.asm"
+
+		; Comprehensive memory test only on cold boots
+		mov	ax, [SoftResetFlag]
+		and	ax, 0FFFEh
+		cmp	ax, SOFT_RESET_FLAG
+		jz	.warmBoot
+		call	HdcTestDriveReady
+		mov	al, CHECKPOINT_RAM_ALL
+		out	PORT_DIAGNOSTICS, al
+		call	TestAllMem
+.warmBoot	call	IdeAutodetect_70	; ???
+		call	KbWaitEmpty		; consume any keypresses that skipped the memtest
+
+; ---------------------------------------------------------------------------
+; We're ready for the timer and keyboard to be processed normally via interrupts
+		mov	al, 0F8h		; unmask IRQ0/1/2 (timer, keyboard, cascade)
+		out	PORT_PIC1_MASK, al
+		sti
+
+		; 0A0h == 'reading 2-byte KB ID in progress', 'force numlock on'
+		mov	[KbStatusFlags3], 0A0h
+		call	KbWaitReady
+		jnz	.l3			; don't request KB ID if KBC isn't ready in time
+		mov	al, KB_CMD_READ_KB_ID
+		out	PORT_KBC_DATA, al
+
+; ---------------------------------------------------------------------------
+; POST tests that require keyboard and timer interrupts can now be run
+.l3
+		include	"src/post_20_rtc.asm"
+
+; ---------------------------------------------------------------------------
+; If we don't have video at this point (and no earlier failures were fatal)
+; then go into a reset loop (TODO: is this right?)
+		mov	ds, [cs:kBdaSegment]
+		test	[InterruptFlag], 20h
+		jnz	.haveVideo
+		jmp	Reset_Actual
+
+.haveVideo
+
 		ENDPROC	SDH_POST
 

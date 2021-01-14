@@ -32,8 +32,11 @@ CHECKPOINT_HD_ROM	equ	2Eh
 ;				2Fh - 33h not used
 CHECKPOINT_TIMER_INT	equ	34h
 CHECKPOINT_SHUTDOWN	equ	35h
-;				36h - 39h not used
+;				36h - 37h not used
+CHECKPOINT_RAM_ALL	equ	38h
+;				39h not used
 CHECKPOINT_TIMER2	equ	3Ah
+CHECKPOINT_RTC		equ	3Bh
 
 ; Beep codes used for fatal errors before display is initialized
 ; See FatalBeeps for meaning of these values
@@ -57,4 +60,5 @@ BEEP_TIMER_INT		equ	34h
 BEEP_SHUTDOWN		equ	35h
 ;				36h - 39h not used
 BEEP_TIMER2_FAIL	equ	3Ah
+BEEP_RTC		equ	3Bh
 

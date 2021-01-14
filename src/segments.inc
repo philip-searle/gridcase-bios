@@ -84,7 +84,7 @@ ParPort1Timeout		d b
 ParPort2Timeout		d b
 ParPort3Timeout		d b
 
-$		equ	7CH
+$		equ	7Ch
 DEFAULT_SERIAL_TIMEOUT		equ	01h
 SerPort1Timeout		d b
 SerPort2Timeout		d b
@@ -93,3 +93,7 @@ SerPort4Timeout		d b
 
 KbBufStart		d w
 KbBufEnd		d w
+
+$		equ	96h
+KbStatusFlags3		d b
+

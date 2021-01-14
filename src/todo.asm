@@ -29,7 +29,7 @@ $		equ	%2
 		TODO	EoiPic1and2, 0F543h
 		TODO	PrntScrn_Actual, 0C789h
 		TODO	DisableA20, 0A7D9h
-		TODO	WaitKbEmpty, 08E5Dh
+		TODO	KbWaitEmpty, 08E5Dh
 		TODO	SDH_00, 08CB7h
 		TODO	SDH_03, 0BE87h
 		TODO	SDH_04, 0906Dh
@@ -59,6 +59,9 @@ $		equ	%2
 		TODO	VidInit, 0D541h
 		TODO	VidInitBacklite, 0D160h
 		TODO	WriteBiosBanner, 0C458h
-		;TODO	loc_F885D, 0885Dh
 		TODO	DetectMemSize, 090D1h
+		TODO	HdcTestDriveReady, 0CEBBh
+		TODO	TestAllMem, 0917Dh
+		TODO	IdeAutodetect_70, 0D09Ch
+		TODO	Beep, 0C3D3h
 

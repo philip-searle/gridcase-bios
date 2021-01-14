@@ -34,6 +34,7 @@ KBC_RESET_OK		equ	55h	; success response from KBC self test
 ; ---------------------------------------------------------------------------
 ; Keyboard (not controller) commands and responses
 KB_CMD_RESET		equ	0FFh	; reset keyboard and run basic assurance test
+KB_CMD_READ_KB_ID	equ	0F2h	; read 2-byte keyboard ID
 
 KB_REPLY_BAT_OK		equ	0AAh	; reset complete and BAT tests OK
 KB_REPLY_RESEND		equ	0FEh	; host should resend last command
