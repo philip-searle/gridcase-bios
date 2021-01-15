@@ -64,4 +64,5 @@ $		equ	%2
 		TODO	TestAllMem, 0917Dh
 		TODO	IdeAutodetect_70, 0D09Ch
 		TODO	Beep, 0C3D3h
+		TODO	WriteCharHex2, 0C4CBh
 

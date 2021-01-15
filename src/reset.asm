@@ -331,6 +331,7 @@ SDH_POST	PROC
 		jmp	Reset_Actual
 
 .haveVideo
+		include	"src/post_21_validconfig.asm"
 
 		ENDPROC	SDH_POST
 
