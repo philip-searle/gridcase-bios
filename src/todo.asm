@@ -30,7 +30,6 @@ $		equ	%2
 		TODO	PrntScrn_Actual, 0C789h
 		TODO	DisableA20, 0A7D9h
 		TODO	KbWaitEmpty, 08E5Dh
-		TODO	SDH_00, 08CB7h
 		TODO	SDH_03, 0BE87h
 		TODO	SDH_04, 0906Dh
 		TODO	ChecksumRom, 0C405h
@@ -65,4 +64,23 @@ $		equ	%2
 		TODO	IdeAutodetect_70, 0D09Ch
 		TODO	Beep, 0C3D3h
 		TODO	WriteCharHex2, 0C4CBh
+		TODO	MemSetXmsEms, 0D13Ch
+		TODO	CheckFdConfigValid, 0B27Fh
+		TODO	HdcHookIvt, 0C822h
+		TODO	InitInt1ACounter, 08E8Bh
+		TODO	PromptF1Cont, 096C6h
+		TODO	PmClearTraces, 08FA5h
+		TODO	ChecksumOptionRom, 0C409h
+		TODO	WriteCharHex4, 0C4C4h
+		TODO	kRomBadCksum, 08CEAh
+		TODO	WriteChecksumFailMsg, 0C4A4h
+		TODO	PwEnabled, 0F180h
+		TODO	PwStartInput, 0F1F2h
+		TODO	PwPrompt, 0F422h
+		TODO	PwProcessInput, 0F37Bh
+		TODO	PwEndInput, 0F1D2h
+		TODO	PwCompareStored, 0F23Ah
+		TODO	PwBackdoor2, 0F291h
+		TODO	PwIncorrect, 0F2D8h
+		TODO	PwClearBuffer, 0F27Ah
 

@@ -330,8 +330,201 @@ SDH_POST	PROC
 		jnz	.haveVideo
 		jmp	Reset_Actual
 
+; ---------------------------------------------------------------------------
+; Check CMOS config matches detected hardware
 .haveVideo
 		include	"src/post_21_validconfig.asm"
 
+; ---------------------------------------------------------------------------
+; Reconfigure memory controller for EMS if required
+		call	MemSetXmsEms
+
+; ---------------------------------------------------------------------------
+; Update equipment byte based on detected floppy drives
+		call	CheckFdConfigValid
+		cmp	[Fd1MediaState], 0
+		jz	.updatedFdCount
+		or	[EquipmentWord], 40h,DATA=BYTE	; why not add?
+		cmp	[Fd2MediaState], 00h,DATA=BYTE
+		jz	.updatedFdCount
+		add	[EquipmentWord], 40h,DATA=BYTE
+
+; ---------------------------------------------------------------------------
+; Get hard drive controller hooked into the IVT
+.updatedFdCount	call	HdcHookIvt
+
+; ---------------------------------------------------------------------------
+; Detect and init option ROMs outside the the hard disk controller range
+		mov	si, OPT_ROM_SEG_LO
+		mov	cx, OPT_ROM_SEG_HI
+		mov	dl, 0			; ???
+		call	InitOptionRoms
+
+; ---------------------------------------------------------------------------
+; Init Int1A time-of-day counter if the RTC is running
+		mov	ds, [cs:kBdaSegment]
+		mov	al, CMOS_STATUS_DIAG | NMI_DISABLE
+		call	ReadCmos
+		test	al, 80h			; power good?
+		jnz	.pastTodInit		; skip time-of-day init if not
+		call	InitInt1ACounter
+		jb	.pastTodInit
+		Inline	WriteString,'Time-of-day not set - please set current time',0Dh,0Ah,0
+		call	SetSoftResetFlag
+
+.pastTodInit	sti				; re-enable interrupts after ReadCmos
+
+
+; ---------------------------------------------------------------------------
+; Alert user if keyboard is locked (GRiD 1500 series do not support the
+; keyboard lock feature, so this should never trigger).
+		and	[KbStatusFlags3], 1Fh	; unset kb ID state bits and
+						; numlock forced on bit
+		in	al, PORT_KBC_STATUS
+		test	al, 10h			; KB inhibit bit == 1?
+		jnz	.pastKbLock		; if so, skip warning
+		Inline	WriteString,'Keyboard is locked - please unlock',0Dh,0Ah,0
+		call	SetSoftResetFlag
+
+; ---------------------------------------------------------------------------
+; If POST checks resulted in a critically important message, prompt the user
+; to 
+.pastKbLock	test	[SoftResetFlag], 1,DATA=BYTE	; lowest bit set (important message)?
+		jz	.pastF1Prompt
+		call	PromptF1Cont		; make sure user has read POST messages
+		jmp	.pastF1Prompt		; ??? useless jmp
+
+; ---------------------------------------------------------------------------
+; Clear the soft reset flag.  Code past this point cannot change behaviour
+; based on whether the reset was considered to be keyboard-intiated or not.
+.pastF1Prompt	mov	bx, 0
+		mov	[SoftResetFlag], bx	; POST is over, no more soft resetting
+
+; ---------------------------------------------------------------------------
+; Clear the area used by protected-mode descriptor tables, IVT, etc.
+		call	PmClearTraces
+
+; ---------------------------------------------------------------------------
+; Reset the stack and initialize the NPU (if present)
+		mov	ax, STACK_SEGMENT
+		mov	ss, ax
+		mov	sp, STACK_TOP2
+		mov	ax, 0
+		mov	es, ax
+		cli
+		in	al, PORT_PIC2_MASK	; save PIC2 mask in AL
+		fninit				; init NPU
+		push	ax			; reserve a word on the stack
+						; we don't care about the exact value
+						; because we overwrite it immediately
+
+		; Issue FNSTCW, wait a bit, and see if it wrote the expected value.
+		; We can't use the no-wait version because if an NPU is not
+		; present then we will lockup waiting for it to response.
+		mov	bp, sp,CODE=LONG	; point BP to word we just reserved
+		fnstcw	[bp+0]			; store NPU control word
+		Delay	4
+		and	[bp+0], 01F3Fh,DATA=WORD	; mask off reserved bits to 0
+		cmp	[bp+0], 0033Fh,DATA=WORD	; equal to default NPU control word
+							; as loaded by FNINIT?
+		jnz	.afterNpuInit			; if not, assume no NPU
+
+		; Store NPU status word
+		fnstsw	[bp+0]
+		Delay	4
+		; Mask off condition codes - they are undefined after FINIT.
+		; The rest of the status word should be equal to zero after FINIT.
+		; BUG: mask should be 0B8BFH, the value actually used excludes
+		;      bit 13 (highest bit of the top-of-stack pointer field)
+		;      and includes bit 6 ('stack fault' on 80387 but 'reserved'
+		;      on the 80287.
+		;      In practice, bit 6 is likely always zero on an 80287.
+		;      Bit 7 won't be checked, but it should be zero anyway.
+		and	[bp+0], 098FFh,DATA=WORD
+		cmp	[bp+0], 0,DATA=WORD	; equal to default NPU status word
+						; as loaded by FINIT?
+		jnz	.afterNpuInit		; if not, assume no NPU
+
+		; If we make it here, the NPU appears to be present and functioning
+		; as expected.  Mark it as available for user code.
+		or	[EquipmentWord], 2,DATA=BYTE	; set 'NPU present bit
+		and	al, 0DFh		; unmask coprocessor interrupt
+
+.afterNpuInit	; Unreserve word from stack. Note that this doesn't pop to
+		; the same register we pushed from because we need to preserve
+		; the PIC2 mask value in AL.
+		pop	bx
+		and	al, 0FDh		; unmask redirect cascade IRQ
+		out	PORT_PIC2_MASK, al
+		sti
+
+; ---------------------------------------------------------------------------
+; Locate and init system expansion ROM.
+; Not very well documented, but the IBM AT BIOS supports a 64KB ROM mapped at
+; E000:0000 that is initialized after all others, right before the Int19 IPL.
+; It must have the AA55h signature and the checksum must cover the entire
+; 64KB range.  Purpose unclear; possibly for BIOS expansion in later models.
+		mov	si, SYS_ROM_SEG
+		mov	ds, si
+		cmp	[0], 0AA55h,DATA=WORD	; check for option ROM signature
+		jnz	.afterSysRom
+		xor	cx, cx,CODE=LONG	; sys rom always 64KB in size
+		call	ChecksumOptionRom
+		jnz	.sysRomBad
+		mov	es, [cs:kBdaSegment]
+		mov	[es:AdapterRomOffset], 3
+		mov	[es:AdapterRomSegment], ds
+		mov	al, 0 | NMI_ENABLE	; disable NMI during sys opt ROM init
+		out	PORT_CMOS_ADDRESS, al
+		callf	[es:AdapterRomOffset]
+		jmp	.afterSysRom
+
+.sysRomBad	call	WriteCharHex4
+		Inline	WriteString,'0h Optional ',0
+		mov	si, kRomBadCksum
+		call	WriteChecksumFailMsg
+
+.afterSysRom	mov	ds, [cs:kBdaSegment]	; reset DS -> BDA after sys opt ROM init
+
+; ---------------------------------------------------------------------------
+; Enable all parity checks
+		mov	al, 0			; KBC port B: speaker off, RAM
+						; and I/O parity checking on,
+						; keyboard enabled
+		out	PORT_KBC_PORTB, al
+		mov	al, 0 | NMI_ENABLE
+		out	PORT_CMOS_ADDRESS, al
+
+		; Fall-through into SDH_00
 		ENDPROC	SDH_POST
+
+; ===========================================================================
+; Shutdown handler called to request bootloader
+; Also fallthrough from SDH_POST for cold boot.
+; ===========================================================================
+SDH_00		PROC
+		; GRiD extensions to password-lock BIOS bootloader
+		call	PwEnabled
+		jnb	.ipl
+		call	PwStartInput
+		call	PwPrompt
+		call	PwProcessInput
+		call	PwEndInput
+		call	PwCompareStored
+		jnb	.passwordOk
+		call	PwBackdoor2
+		jnb	.passwordOk
+
+		; Password didn't match, notify user and restart
+		call	PwIncorrect
+		mov	ds, [cs:kBdaSegment]
+		mov	[SoftResetFlag], SOFT_RESET_FLAG
+		jmp	Reset_Actual
+
+.passwordOk	call	PwClearBuffer
+
+.ipl		int	19h			; load system from disk
+		jmp	SDH_00			; retry if bootloader failed
+
+		ENDPROC	SDH_00
 

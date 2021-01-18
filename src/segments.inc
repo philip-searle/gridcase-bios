@@ -8,6 +8,7 @@ BIOS_START_PARA	equ	(BIOS_SEGMENT + BIOS_START >> 4)
 ; BIOS stack (0000:0300 - 0000:0380)
 STACK_SEGMENT	equ	0030h
 STACK_TOP	equ	0080h
+STACK_TOP2	equ	0100h
 
 ; BIOS data area (0000:0400 - 0000:04FF)
 BDA_SEGMENT	equ	0040h
@@ -18,6 +19,13 @@ IVT_SEGMENT	equ	0000h
 ; Upper and lower limits for hard disk option ROM search
 HD_ROM_SEG_LO	equ	0C000h
 HD_ROM_SEG_HI	equ	0C800h
+
+; Upper and lower limits for regular option ROM search
+OPT_ROM_SEG_LO	equ	0C800h
+OPT_ROM_SEG_HI	equ	0E000h
+
+; Location system option ROM search
+SYS_ROM_SEG	equ	0E000h
 
 [IVT]
 
@@ -84,6 +92,16 @@ ParPort1Timeout		d b
 ParPort2Timeout		d b
 ParPort3Timeout		d b
 
+; [TechRef 9-9] documents BDA offset 7Bh as the external floppy drive state
+;               machine byte and notes that "The IBM AT uses absolute address
+;               40:7Bh to store the timeout value for a third line printer
+;               port (LPT3).  The LPT3 port is not used by GriDCase 1500
+;               Series computers."
+;               The IBM AT actually uses BDA offset 7Bh for LPT4.  After
+;               substituting the correct LPT number, this note is accurate.
+ParPort4Timeout		d b
+Fd2MediaState	equ	ParPort4Timeout
+
 $		equ	7Ch
 DEFAULT_SERIAL_TIMEOUT		equ	01h
 SerPort1Timeout		d b
@@ -93,6 +111,11 @@ SerPort4Timeout		d b
 
 KbBufStart		d w
 KbBufEnd		d w
+
+$		equ	90h
+Fd0MediaState		d b
+Fd1MediaState		d b
+; Fd2MediaState stored elsewhere (external drive)
 
 $		equ	96h
 KbStatusFlags3		d b

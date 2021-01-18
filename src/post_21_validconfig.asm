@@ -73,13 +73,13 @@ POST21_ConfigOk	PROC
 
 		Inline	WriteString,'Invalid configuration information; code ',0
 		mov	al, cl,CODE=LONG
-		xor	ah, ah
+		xor	ah, ah,CODE=LONG
 		call	WriteCharHex2
 		Inline	WriteString,0Dh,0Ah,0
 		call	SetSoftResetFlag
 		; fall-through into .configOk path
 
-.configOk	sti
+.configOk	sti			; make sure all paths that get here re-enable interrupts
 
 		; Exit via fall-through to next POST procedure
 		ENDPROC POST21_ConfigOk
