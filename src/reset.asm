@@ -268,29 +268,29 @@ SDH_POST	PROC
 ; by 'falling through' from the previous file.  It is expected to continue to
 ; the next part of the POST code in the same way: by 'falling off' the end of
 ; the PROC.
-		include	"src/post_01_cpu.asm"
-		include "src/post_02_vidoff.asm"
-		include "src/post_03_cmosreg.asm"
-		include "src/post_04_bioscsum.asm"
-		include "src/post_05_initpit.asm"
-		include "src/post_06_initdma.asm"
-		include "src/post_07_testram.asm"
-		include "src/post_08_initbda.asm"
-		include "src/post_09_dmareg.asm"
-		include "src/post_10_picreg.asm"
-		include "src/post_11_ivt.asm"
-		include "src/post_12_kbc.asm"
-		include "src/post_13_cmosdiag.asm"
-		include "src/post_14_vidinit.asm"
-		include "src/post_15_hdroms.asm"
-		include "src/post_16_vidinit.asm"
+		include	"src/post/01_cpu.asm"
+		include "src/post/02_vidoff.asm"
+		include "src/post/03_cmosreg.asm"
+		include "src/post/04_bioscsum.asm"
+		include "src/post/05_pitinit.asm"
+		include "src/post/06_dmainit.asm"
+		include "src/post/07_testram.asm"
+		include "src/post/08_bdainit.asm"
+		include "src/post/09_dmareg.asm"
+		include "src/post/10_picreg.asm"
+		include "src/post/11_ivt.asm"
+		include "src/post/12_kbc.asm"
+		include "src/post/13_cmosdiag.asm"
+		include "src/post/14_vidinit.asm"
+		include "src/post/15_hdroms.asm"
+		include "src/post/16_vidinit.asm"
 
 		; Enough hardware is initialized that we can safely ID ourselves
 		call	WriteBiosBanner
 
-		include "src/post_17_protmode.asm"
-		include "src/post_18_timer2.asm"
-		include "src/post_19_keyboard.asm"
+		include "src/post/17_protmode.asm"
+		include "src/post/18_timer2.asm"
+		include "src/post/19_keyboard.asm"
 
 		; Comprehensive memory test only on cold boots
 		mov	ax, [SoftResetFlag]
@@ -320,7 +320,7 @@ SDH_POST	PROC
 ; ---------------------------------------------------------------------------
 ; POST tests that require keyboard and timer interrupts can now be run
 .l3
-		include	"src/post_20_rtc.asm"
+		include	"src/post/20_rtc.asm"
 
 ; ---------------------------------------------------------------------------
 ; If we don't have video at this point (and no earlier failures were fatal)
@@ -333,7 +333,7 @@ SDH_POST	PROC
 ; ---------------------------------------------------------------------------
 ; Check CMOS config matches detected hardware
 .haveVideo
-		include	"src/post_21_validconfig.asm"
+		include	"src/post/21_validconfig.asm"
 
 ; ---------------------------------------------------------------------------
 ; Reconfigure memory controller for EMS if required

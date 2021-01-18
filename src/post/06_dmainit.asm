@@ -1,5 +1,5 @@
 
-POST06_InitDma	PROC
+POST06_DmaInit	PROC
 		; Enter via fall-through from previous POST code
 
 ; ---------------------------------------------------------------------------
@@ -130,5 +130,5 @@ POST06_InitDma	PROC
 		jz	.pagePortsTest		; rerun tests with all-zero pattern before continuing
 
 		; Exit via fall-through to next POST procedure
-		ENDPROC POST06_InitDma
+		ENDPROC POST06_DmaInit
 

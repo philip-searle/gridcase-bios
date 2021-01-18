@@ -1,5 +1,5 @@
 
-POST05_InitPit	PROC
+POST05_PitInit	PROC
 		; Enter via fall-through from previous POST code
 
 ; ---------------------------------------------------------------------------
@@ -87,5 +87,5 @@ POST05_InitPit	PROC
 		out	dx, al			; counter 2 divisor == 533h
 
 		; Exit via fall-through to next POST procedure
-		ENDPROC POST05_InitPit
+		ENDPROC POST05_PitInit
 

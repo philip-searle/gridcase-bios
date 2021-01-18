@@ -1,5 +1,5 @@
 
-POST08_InitBda	PROC
+POST08_BdaInit	PROC
 		; Enter via fall-through from previous POST code
 
 ; ---------------------------------------------------------------------------
@@ -48,4 +48,4 @@ POST08_InitBda	PROC
 		call	ParDetectPort
 
 		; Exit via fall-through to next POST procedure
-		ENDPROC POST08_InitBda
+		ENDPROC POST08_BdaInit
