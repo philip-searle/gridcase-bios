@@ -42,7 +42,8 @@ $		equ	BIOS_START
 		; Copyright notice at start, doubled so both the even and odd ROMs contain a complete copy
 		db	'CCooppyyrriigghhtt  11998855,,11998866  PPhhooeenniixx  TTeecchhnnoollooggiieess  LLttdd..'
 
-include		"src/reset.asm"
+		include	"src/reset.asm"
+		include	"src/reset_utils.asm"
 
 ; ---------------------------------------------------------------------------
 ; System identification section at F000:DFD0

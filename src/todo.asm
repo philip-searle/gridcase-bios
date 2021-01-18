@@ -54,7 +54,6 @@ $		equ	%2
 		TODO	TestVidMem, 08DFEh
 		TODO	WriteString_Inline, 0C4B3h
 		TODO	WriteString, 0BD34h
-		TODO	InitOptionRoms, 08CFEh
 		TODO	VidInit, 0D541h
 		TODO	VidInitBacklite, 0D160h
 		TODO	WriteBiosBanner, 0C458h
@@ -70,7 +69,7 @@ $		equ	%2
 		TODO	InitInt1ACounter, 08E8Bh
 		TODO	PromptF1Cont, 096C6h
 		TODO	PmClearTraces, 08FA5h
-		TODO	ChecksumOptionRom, 0C409h
+		TODO	ChecksumOptRom, 0C409h
 		TODO	WriteCharHex4, 0C4C4h
 		TODO	kRomBadCksum, 08CEAh
 		TODO	WriteChecksumFailMsg, 0C4A4h
@@ -83,4 +82,6 @@ $		equ	%2
 		TODO	PwBackdoor2, 0F291h
 		TODO	PwIncorrect, 0F2D8h
 		TODO	PwClearBuffer, 0F27Ah
+		TODO	WriteBadCsumMsg, 0C4A4h
+		TODO	WriteCrLf, 0BD31h
 

@@ -469,7 +469,7 @@ SDH_POST	PROC
 		cmp	[0], 0AA55h,DATA=WORD	; check for option ROM signature
 		jnz	.afterSysRom
 		xor	cx, cx,CODE=LONG	; sys rom always 64KB in size
-		call	ChecksumOptionRom
+		call	ChecksumOptRom
 		jnz	.sysRomBad
 		mov	es, [cs:kBdaSegment]
 		mov	[es:AdapterRomOffset], 3
@@ -487,7 +487,7 @@ SDH_POST	PROC
 .afterSysRom	mov	ds, [cs:kBdaSegment]	; reset DS -> BDA after sys opt ROM init
 
 ; ---------------------------------------------------------------------------
-; Enable all parity checks
+; Reset parity checks (ROM search may have read from open bus)
 		mov	al, 0			; KBC port B: speaker off, RAM
 						; and I/O parity checking on,
 						; keyboard enabled
