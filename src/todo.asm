@@ -29,14 +29,13 @@ $		equ	%2
 		TODO	EoiPic1and2, 0F543h
 		TODO	PrntScrn_Actual, 0C789h
 		TODO	DisableA20, 0A7D9h
-		TODO	KbWaitEmpty, 08E5Dh
 		TODO	SDH_03, 0BE87h
 		TODO	SDH_04, 0906Dh
 		TODO	ChecksumRom, 0C405h
 		TODO	DetectMemController, 0F63Dh
 		TODO	kOddEvenLogic, 0941Fh
 		TODO	kAddressLine, 09445h
-		TODO	ToggleNmiChecks, 0C5B9h
+		TODO	ResetNmiChecks, 0C5B9h
 		TODO	loc_F9369, 09369h
 		TODO	loc_F93C6, 093C6h
 		TODO	kBdaSegment, 0C5E6h
@@ -44,9 +43,6 @@ $		equ	%2
 		TODO	SerDetectPort, 09F7Ah
 		TODO	ParDetectPort, 0C5CEh
 		TODO	TestDmaRegisters, 08D9Ah
-		TODO	TestPicMaskReg, 08D7Bh
-		TODO	KbWaitReady, 08E78h
-		TODO	KbWaitResponse, 08E69h
 		TODO	ReadCmos, 0C762h
 		TODO	WriteCmos, 0C773h
 		TODO	GridAutodetect, 0CFA3h
@@ -84,4 +80,6 @@ $		equ	%2
 		TODO	PwClearBuffer, 0F27Ah
 		TODO	WriteBadCsumMsg, 0C4A4h
 		TODO	WriteCrLf, 0BD31h
+		TODO	MemTestData, 09369h
+		TODO	MemTestAddress, 093C6h
 

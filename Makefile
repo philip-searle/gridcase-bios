@@ -14,7 +14,7 @@ build/original-1989-03-11.hex: build/original-1989-03-11.bin
 	srec_cat -Output build/original-1989-03-11.hex \
 	         build/original-1989-03-11.bin -Binary
 
-build/bios.bin: src/*.asm src/*.inc
+build/bios.bin: src/*.asm src/*.inc src/post/*.asm
 	#nasm -f bin -o build/bios.tmp -l build/bios.lst src/bios.asm && \
 	./euroasm.exe src/bios.asm && \
 	srec_cat build/bios.tmp -Binary \

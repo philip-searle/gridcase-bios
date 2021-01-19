@@ -124,7 +124,7 @@ POST07_TestRam	PROC
 		mov	al, CHECKPOINT_RAM_PARITY
 		out	PORT_DIAGNOSTICS, al
 
-		call	ToggleNmiChecks
+		call	ResetNmiChecks
 		test	al, 80h			; RAM parity error occurred?
 		jz	.memTestFin		; continue if not
 		mov	al, BEEP_RAM_PARITY	; report error if so

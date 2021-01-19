@@ -75,6 +75,9 @@ KbNextChar		d w
 KbLastChar		d w
 KbBuffer		d KB_BUFFER_LENGTH * b
 
+$		equ	63h
+VidBasePort		d w
+
 ; Various places document this as 'adapter ROM offset/segment' with no
 ; further details.  It's actually just a scratch area for storing a far
 ; code pointer temporarily.

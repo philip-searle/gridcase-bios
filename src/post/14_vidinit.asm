@@ -84,13 +84,13 @@ POST14_VidInit	PROC
 		test	al, 30h			; check int10/00 return
 		jz	.vidInitFail
 
-		call	TestVidMem
+		call	VidTestMem
 		jnb	.vidInitDone
 		mov	al, [EquipmentWord]
-		and	al, 10h			; reserved bit?
-		add	al, 10h			; reserved bits?
-		xor	[EquipmentWord], al
-		call	TestVidMem
+		and	al, 10h			; create xor mask from CGA/MDA to MDA/CGA
+		add	al, 10h
+		xor	[EquipmentWord], al	; invert default video mode
+		call	VidTestMem
 		jb	.vidInitFail
 
 		Inline	WriteString,'Display adapter failed; using alternate',0Dh,0Ah,0
