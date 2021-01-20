@@ -1,6 +1,6 @@
 
 ; =====================================================================
-; Procedures in this file are called during POST to while testing the
+; Procedures in this file are called during POST while testing the
 ; keyboard controller.  They cannot use any timers, or IVT entries as
 ; those system functions have not yet been initialized.
 ; =====================================================================

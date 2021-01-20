@@ -46,6 +46,7 @@ $		equ	BIOS_START
 		include	"src/reset_utils.asm"
 		include	"src/post/vidtest.asm"
 		include	"src/post/kbc.asm"
+		include	"src/post/timer.asm"
 
 ; ---------------------------------------------------------------------------
 ; System identification section at F000:DFD0
