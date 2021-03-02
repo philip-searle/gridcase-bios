@@ -29,6 +29,7 @@
 		include	"src/video.inc"
 		include	"src/grid.inc"
 		include	"src/segments.inc"
+		include	"src/descriptors.inc"
 		include	"src/todo.asm"
 
 ; ---------------------------------------------------------------------------
@@ -47,6 +48,7 @@ $		equ	BIOS_START
 		include	"src/post/vidtest.asm"
 		include	"src/post/kbc.asm"
 		include	"src/post/timer.asm"
+		include	"src/post/protmode.asm"
 
 ; ---------------------------------------------------------------------------
 ; System identification section at F000:DFD0

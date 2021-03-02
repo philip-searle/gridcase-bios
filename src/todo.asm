@@ -30,11 +30,8 @@ $		equ	%2
 		TODO	PrntScrn_Actual, 0C789h
 		TODO	DisableA20, 0A7D9h
 		TODO	SDH_03, 0BE87h
-		TODO	SDH_04, 0906Dh
 		TODO	ChecksumRom, 0C405h
 		TODO	DetectMemController, 0F63Dh
-		TODO	kOddEvenLogic, 0941Fh
-		TODO	kAddressLine, 09445h
 		TODO	ResetNmiChecks, 0C5B9h
 		TODO	loc_F9369, 09369h
 		TODO	loc_F93C6, 093C6h
@@ -53,9 +50,7 @@ $		equ	%2
 		TODO	VidInit, 0D541h
 		TODO	VidInitBacklite, 0D160h
 		TODO	WriteBiosBanner, 0C458h
-		TODO	DetectMemSize, 090D1h
 		TODO	HdcTestDriveReady, 0CEBBh
-		TODO	TestAllMem, 0917Dh
 		TODO	IdeAutodetect_70, 0D09Ch
 		TODO	Beep, 0C3D3h
 		TODO	WriteCharHex2, 0C4CBh
@@ -64,7 +59,6 @@ $		equ	%2
 		TODO	HdcHookIvt, 0C822h
 		TODO	InitInt1ACounter, 08E8Bh
 		TODO	PromptF1Cont, 096C6h
-		TODO	PmClearTraces, 08FA5h
 		TODO	ChecksumOptRom, 0C409h
 		TODO	WriteCharHex4, 0C4C4h
 		TODO	kRomBadCksum, 08CEAh
@@ -82,4 +76,8 @@ $		equ	%2
 		TODO	WriteCrLf, 0BD31h
 		TODO	MemTestData, 09369h
 		TODO	MemTestAddress, 093C6h
+		TODO	A20Enable, 0A7D4h
+		TODO	A20Disable, 0A7D9h
+		TODO	ResetCpu, 0A7FDh
+		TODO	WriteChar, 0BD28h
 

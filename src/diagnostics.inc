@@ -43,6 +43,8 @@ CHECKPOINT_RAM_ALL	equ	38h
 ;				39h not used
 CHECKPOINT_TIMER2	equ	3Ah
 CHECKPOINT_RTC		equ	3Bh
+;				3Ch - 9Fh not used
+CHECKPOINT_PM_IRET	equ	90h
 
 ; Beep codes used for fatal errors before display is initialized
 ; See FatalBeeps for meaning of these values
@@ -64,7 +66,11 @@ BEEP_KBC		equ	27h
 ;				28h - 33h not used
 BEEP_TIMER_INT		equ	34h
 BEEP_SHUTDOWN		equ	35h
-;				36h - 39h not used
+BEEP_A20_FAIL		equ	36h
+BEEP_PM_IRET		equ	37h
+;				36h - 37h not used
+BEEP_RAM_ALL		equ	38h
+;				39h not used
 BEEP_TIMER2_FAIL	equ	3Ah
 BEEP_RTC		equ	3Bh
 

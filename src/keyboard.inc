@@ -44,3 +44,7 @@ KB_RESET_TIMEOUT	equ	3908h
 KB_RESET_REPLY_DELAY	equ	0C8h	; this x 100h x 2 io_delay = delay between
 					; keyboard reset and any expected response
 
+; ---------------------------------------------------------------------------
+; Keyboard scan code 1
+SC1_ESC			equ	01h
+
