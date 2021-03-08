@@ -161,7 +161,7 @@ PmEnter		PROC
 		; in the stack descriptor's base field
 		mov	ax, ss
 		shl	ax, 4
-		; Need SEGES prefix here, euroasm doesn't like the prefix in the memref
+		; [ReadMe] explicit segment override
 		SEGES:mov	[kPmGdt+dtiStack+DESCRIPTOR.BaseLo], ax
 		mov	ax, ss
 		shr	ah, 4
@@ -302,6 +302,7 @@ DetectMemSize	PROC
 		mul	bl
 		mov	bx, dtiBda
 		mov	es, bx
+		; [ReadMe] explicit segment override
 		SEGES:mov	[MemorySizeKb], ax
 
 		; Set "top 128K base memory installed" flag
@@ -812,6 +813,7 @@ TestMemFailCx	PROC
 ;   CF set
 ; =====================================================================
 TestMemFail	PROC
+		; [ReadMe] explicit segment override
 		SEGES:mov	[0], ax
 		stc
 		retn

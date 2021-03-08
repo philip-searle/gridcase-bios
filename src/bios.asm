@@ -14,6 +14,7 @@
 ; remain fixed for compatibility with software that relies on undocumented or
 ; semi-documented functionality.
 ; 
+; Comments marked with [ReadMe] refer to the file README.txt in this project.
 ; ===========================================================================
 
 		include	"src/macros.inc"
