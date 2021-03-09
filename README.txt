@@ -1,4 +1,30 @@
 
+CODE=LONG instruction modifier
+==============================
+
+The x86 instruction set includes several different ways of encoding certain
+instructions, usually those that encode a reg+reg/mem operand with a direction
+flag.  For example:
+
+	xchg	cx, dx
+
+can be encoded as either 87CA or as 87D1.  Most assemblers arbitrarily choose
+one variant (usually the numerically lowest as a side effect of how they are
+coded).
+
+While it is not known which assembler was used to create the GRiDCase 1520
+BIOS, it seems to have consistently picked the numerically higher variant for
+instructions that reference two register operands.
+
+Unfortunately very few assemblers document how they assemble instructions with
+multiple encodings, and those that do invariably choose the opposite way to
+that needed to reproduce the GRiD BIOS.  EuroAssembler allows the programmer
+to choose which encoding they want using the CODE modifier.  For this reason,
+this project is written for EuroAssembler.  The syntax and behaviour of the
+CODE instruction is documented at:
+
+	<https://euroassembler.eu/eadoc/index.htm#CODEeq>
+
 Explicit segment override
 =========================
 
