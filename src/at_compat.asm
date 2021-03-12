@@ -78,8 +78,8 @@ FDS_INSTANCE	%macro ; (cylinders, heads, writePreComp, control, landingZone, sec
 
 ; IBM AT BIOS stored the fixed disk parameter table somewhere after the NMI
 ; entrypoint.  The GRiD BIOS doesn't have it in the exact same address, but
-; maybe it's important to keep it in the same sector?
-;					  cyl  hd     wpc ctl  land  spt
+; maybe it's important to keep it in the same segment?
+; 				  cyl  hd     wpc ctl  land  spt
 FixedDiskParams	FDS_INSTANCE	0132h,  4,    80h, 0h, 131h, 11h	; Type 01 10MB
 		FDS_INSTANCE	0267h,  4,   12Ch, 0h, 267h, 11h	; Type 02 20MB
 		FDS_INSTANCE	0267h,  6,   12Ch, 0h, 267h, 11h	; Type 03 31MB

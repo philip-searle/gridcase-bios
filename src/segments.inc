@@ -29,15 +29,16 @@ SYS_ROM_SEG	equ	0E000h
 
 [IVT]
 
-IvtInt00	equ	00h * 4
-IvtInt02	equ	02h * 4
-IvtInt05	equ	05h * 4
-IvtInt08	equ	08h * 4
-IvtInt14	equ	14h * 4
-IvtInt1F	equ	1Fh * 4
-IvtInt60	equ	60h * 4
-IvtInt67	equ	67h * 4
-IvtInt70	equ	70h * 4
+IvtInt00		equ	00h * 4
+IvtInt02		equ	02h * 4
+IvtInt05		equ	05h * 4
+IvtInt08		equ	08h * 4
+IvtInt14		equ	14h * 4
+IvtDisketteTable	equ	1Eh * 4	; Int1E is a far pointer, not a real ISR
+IvtInt1F		equ	1Fh * 4
+IvtInt60		equ	60h * 4
+IvtInt67		equ	67h * 4
+IvtInt70		equ	70h * 4
 
 [BDA]
 

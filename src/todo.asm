@@ -7,7 +7,6 @@ $		equ	%2
 ;		TODO	Reset_Actual, 080A6h
 		TODO	IntNmi_Actual, 0C4F8h
 		TODO	Int13Hd_Actual, 098D5h
-		TODO	Int19_Actual, 09504h
 		TODO	Int14_Actual, 09E87h
 		TODO	Int16_Actual, 09FA2h
 		TODO	Int9_Actual, 0A1B0h
@@ -36,6 +35,7 @@ $		equ	%2
 		TODO	loc_F9369, 09369h
 		TODO	loc_F93C6, 093C6h
 		TODO	kBdaSegment, 0C5E6h
+		TODO	kBootSegOffset, 0C5E7h
 		TODO	kIvtSegment, 0C5E9h
 		TODO	SerDetectPort, 09F7Ah
 		TODO	ParDetectPort, 0C5CEh
@@ -80,4 +80,6 @@ $		equ	%2
 		TODO	A20Disable, 0A7D9h
 		TODO	ResetCpu, 0A7FDh
 		TODO	WriteChar, 0BD28h
+		TODO	GridBootRom, 0D88Ah
+		TODO	ShortDelay, 0B20Dh
 

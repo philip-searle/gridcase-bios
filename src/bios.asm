@@ -50,6 +50,7 @@ $		equ	BIOS_START
 		include	"src/post/kbc.asm"
 		include	"src/post/timer.asm"
 		include	"src/post/protmode.asm"
+		include "src/int19.asm"
 
 ; ---------------------------------------------------------------------------
 ; System identification section at F000:DFD0
