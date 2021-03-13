@@ -21,7 +21,6 @@ $		equ	%2
 		TODO	Int8_Actual, 0C21Ch
 		TODO	EoiPic1, 0F53Ch
 		TODO	DummyIsr, 0C66Dh
-		TODO	Int18, 096A2h
 		TODO	Int70, 0C351h
 		TODO	Int71, 0C664h
 		TODO	Int75, 0C655h
@@ -58,7 +57,6 @@ $		equ	%2
 		TODO	CheckFdConfigValid, 0B27Fh
 		TODO	HdcHookIvt, 0C822h
 		TODO	InitInt1ACounter, 08E8Bh
-		TODO	PromptF1Cont, 096C6h
 		TODO	ChecksumOptRom, 0C409h
 		TODO	WriteCharHex4, 0C4C4h
 		TODO	kRomBadCksum, 08CEAh
@@ -82,4 +80,5 @@ $		equ	%2
 		TODO	WriteChar, 0BD28h
 		TODO	GridBootRom, 0D88Ah
 		TODO	ShortDelay, 0B20Dh
+		TODO	WaitKey, 0C4E7h
 

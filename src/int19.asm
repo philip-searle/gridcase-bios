@@ -4,7 +4,7 @@
 ; Bootloader, called after POST (and in theory by any application software
 ; that wants to reload the operating system, although under DOS deficiancies
 ; in many TSRs and system software mean that it is not usable once DOS has
-; loaded -- see "DOS Internals" by Geoff Chappel for an in-depth discussion
+; loaded -- see "DOS Internals" by Geoff Chappell for an in-depth discussion
 ; on this problem).
 ; ===========================================================================
 Int19_Actual	PROC

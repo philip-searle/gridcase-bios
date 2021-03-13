@@ -47,4 +47,5 @@ KB_RESET_REPLY_DELAY	equ	0C8h	; this x 100h x 2 io_delay = delay between
 ; ---------------------------------------------------------------------------
 ; Keyboard scan code 1
 SC1_ESC			equ	01h
+SC1_F1			equ	3Bh
 
