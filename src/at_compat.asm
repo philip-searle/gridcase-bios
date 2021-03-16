@@ -50,32 +50,6 @@ Int13Hd_Compat	jmpn	Int13Hd_Actual
 
 ; ---------------------------------------------------------------------------
 
-FIXED_DISK_PARMS	struc
-.cylinders	dw	1
-.heads		db	1
-.unused1	dw	1
-.writePreComp	dw	1
-.unused2	db	1
-.control	db	1
-.unused3	db	3
-.landingZone	dw	1
-.sectorsPerTrk	db	1
-.reserved	db	1
-		endstruc
-
-FDS_INSTANCE	%macro ; (cylinders, heads, writePreComp, control, landingZone, sectorsPerTrack)
-	dw	%1	; cylinders
-	db	%2	; heads 
-	dw	0	; unused1
-	dw	%3	; writePreComp,
-	db	0	; unused2
-	db	%4	; control
-	db	0,0,0	; unused3
-	dw	%5	; landingZone
-	db	%6	; sectorsPerTrack
-	db	0	; reserved
-%endmacro
-
 ; IBM AT BIOS stored the fixed disk parameter table somewhere after the NMI
 ; entrypoint.  The GRiD BIOS doesn't have it in the exact same address, but
 ; maybe it's important to keep it in the same segment?

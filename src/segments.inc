@@ -33,12 +33,17 @@ IvtInt00		equ	00h * 4
 IvtInt02		equ	02h * 4
 IvtInt05		equ	05h * 4
 IvtInt08		equ	08h * 4
+IvtInt13		equ	13h * 4
 IvtInt14		equ	14h * 4
 IvtDisketteTable	equ	1Eh * 4	; Int1E is a far pointer, not a real ISR
 IvtInt1F		equ	1Fh * 4
+IvtInt40		equ	40h * 4
+IvtHd0Parms		equ	41h * 4	; Int41 is a far pointer, not a real ISR
+IvtHd1Parms		equ	46h * 4	; Int46 is a far pointer, not a real ISR
 IvtInt60		equ	60h * 4
 IvtInt67		equ	67h * 4
 IvtInt70		equ	70h * 4
+IvtInt76		equ	76h * 4
 
 [BDA]
 
@@ -93,7 +98,13 @@ $		equ	0072h
 SoftResetFlag		d w
 SOFT_RESET_FLAG	equ	1234h	; Set in SoftResetFlag to mark software-initiated reset via JMP to F000:FFF0
 
-$		equ	78h
+CompatAddress	74h
+LastHdOpStatus		d b
+HdCount			d b
+HdControl		d b
+HdIoOffset		d b
+
+CompatAddress	78h
 DEFAULT_PARALLEL_TIMEOUT	equ	14h
 ParPort1Timeout		d b
 ParPort2Timeout		d b
@@ -109,15 +120,21 @@ ParPort3Timeout		d b
 ParPort4Timeout		d b
 Fd2MediaState	equ	ParPort4Timeout
 
-$		equ	7Ch
+CompatAddress	7Ch
 DEFAULT_SERIAL_TIMEOUT		equ	01h
 SerPort1Timeout		d b
 SerPort2Timeout		d b
 SerPort3Timeout		d b
 SerPort4Timeout		d b
 
+CompatAddress	80h
 KbBufStart		d w
 KbBufEnd		d w
+
+$		equ	8Ch
+HdStatus		d b
+HdError			d b
+HdcTaskComplete		d b
 
 $		equ	90h
 Fd0MediaState		d b
