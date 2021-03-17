@@ -81,6 +81,9 @@ KbNextChar		d w
 KbLastChar		d w
 KbBuffer		d KB_BUFFER_LENGTH * b
 
+$		equ	41h
+HdRegPacket		ds	HDC_REG_PACKET
+
 $		equ	63h
 VidBasePort		d w
 
@@ -99,7 +102,7 @@ SoftResetFlag		d w
 SOFT_RESET_FLAG	equ	1234h	; Set in SoftResetFlag to mark software-initiated reset via JMP to F000:FFF0
 
 CompatAddress	74h
-LastHdOpStatus		d b
+HdLastOpStatus		d b
 HdCount			d b
 HdControl		d b
 HdIoOffset		d b
@@ -134,7 +137,7 @@ KbBufEnd		d w
 $		equ	8Ch
 HdStatus		d b
 HdError			d b
-HdcTaskComplete		d b
+HdTaskComplete		d b
 
 $		equ	90h
 Fd0MediaState		d b

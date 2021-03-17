@@ -28,10 +28,11 @@
 		include	"src/parallel.inc"
 		include	"src/serial.inc"
 		include	"src/video.inc"
+		include	"src/hdc_at.inc"
 		include	"src/grid.inc"
+		include "src/int13.inc"
 		include	"src/segments.inc"
 		include	"src/descriptors.inc"
-		include "src/int13.inc"
 		include	"src/todo.asm"
 
 ; ---------------------------------------------------------------------------
