@@ -4,9 +4,7 @@ $		equ	%2
 %1		equ	$
 		%endmacro
 
-;		TODO	Reset_Actual, 080A6h
 		TODO	IntNmi_Actual, 0C4F8h
-		TODO	Int13Hd_Actual, 098D5h
 		TODO	Int14_Actual, 09E87h
 		TODO	Int16_Actual, 09FA2h
 		TODO	Int9_Actual, 0A1B0h
@@ -31,19 +29,15 @@ $		equ	%2
 		TODO	ChecksumRom, 0C405h
 		TODO	DetectMemController, 0F63Dh
 		TODO	ResetNmiChecks, 0C5B9h
-		TODO	loc_F9369, 09369h
-		TODO	loc_F93C6, 093C6h
 		TODO	kBdaSegment, 0C5E6h
 		TODO	kBootSegOffset, 0C5E7h
 		TODO	kIvtSegment, 0C5E9h
 		TODO	SerDetectPort, 09F7Ah
 		TODO	ParDetectPort, 0C5CEh
-		TODO	TestDmaRegisters, 08D9Ah
 		TODO	ReadCmos, 0C762h
 		TODO	WriteCmos, 0C773h
 		TODO	GridAutodetect, 0CFA3h
 		TODO	SetSoftResetFlag, 0C5F9h
-		TODO	TestVidMem, 08DFEh
 		TODO	WriteString_Inline, 0C4B3h
 		TODO	WriteString, 0BD34h
 		TODO	VidInit, 0D541h
@@ -56,10 +50,8 @@ $		equ	%2
 		TODO	MemSetXmsEms, 0D13Ch
 		TODO	CheckFdConfigValid, 0B27Fh
 		TODO	HdcHookIvt, 0C822h
-		TODO	InitInt1ACounter, 08E8Bh
 		TODO	ChecksumOptRom, 0C409h
 		TODO	WriteCharHex4, 0C4C4h
-		TODO	kRomBadCksum, 08CEAh
 		TODO	WriteChecksumFailMsg, 0C4A4h
 		TODO	PwEnabled, 0F180h
 		TODO	PwStartInput, 0F1F2h
@@ -72,8 +64,6 @@ $		equ	%2
 		TODO	PwClearBuffer, 0F27Ah
 		TODO	WriteBadCsumMsg, 0C4A4h
 		TODO	WriteCrLf, 0BD31h
-		TODO	MemTestData, 09369h
-		TODO	MemTestAddress, 093C6h
 		TODO	A20Enable, 0A7D4h
 		TODO	A20Disable, 0A7D9h
 		TODO	ResetCpu, 0A7FDh

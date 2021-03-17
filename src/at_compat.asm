@@ -46,7 +46,7 @@ IntNmi_Compat	jmpn	IntNmi_Actual
 
 ; [Compat] Int13 fixed disk entrypoint must be the same as the XT BIOS.
 		FillRom 0xE3FE,0FFh
-Int13Hd_Compat	jmpn	Int13Hd_Actual
+Int13Hd_Compat	jmpn	HdcAtInt13
 
 ; ---------------------------------------------------------------------------
 

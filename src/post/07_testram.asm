@@ -77,7 +77,7 @@ POST07_TestRam	PROC
 		mov	ss, ax			; (TODO: what?)
 		mov	sp, .returnStack2
 		mov	bp, 8000h		; TODO: is this a length?
-		jmp	loc_F9369
+		jmp	TestMemData
 
 .loc_F83AC	jnb	.l5
 		mov_	bx, ax
@@ -101,7 +101,7 @@ POST07_TestRam	PROC
 		mov	al, BEEP_RAM_MULTIPLE
 .memTestBeep	jmp	FatalBeeps
 
-.l5		jmp	loc_F93C6
+.l5		jmp	TestMemLoAddr
 
 .returnStack2	dw	.loc_F83AC
 		dw	.loc_F83E4

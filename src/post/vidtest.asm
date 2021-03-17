@@ -99,9 +99,9 @@ VidTestMem	PROC
 
 .adapterKnown	mov	al, 1		; MDA/CGA mode control: disable video
 		out	dx, al
-		call	MemTestData
+		call	TestMemData
 		jb	VidTestFail
-		call	MemTestAddress
+		call	TestMemLoAddr
 		jb	VidTestFail
 		call	ResetNmiChecks
 		jnz	VidTestFail

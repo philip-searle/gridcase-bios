@@ -367,7 +367,7 @@ SDH_POST	PROC
 		call	ReadCmos
 		test	al, 80h			; power good?
 		jnz	.pastTodInit		; skip time-of-day init if not
-		call	InitInt1ACounter
+		call	InitTimerTicks
 		jb	.pastTodInit
 		Inline	WriteString,'Time-of-day not set - please set current time',0Dh,0Ah,0
 		call	SetSoftResetFlag
@@ -481,7 +481,7 @@ SDH_POST	PROC
 
 .sysRomBad	call	WriteCharHex4
 		Inline	WriteString,'0h Optional ',0
-		mov	si, kRomBadCksum
+		mov	si, kRomBadChecksum
 		call	WriteChecksumFailMsg
 
 .afterSysRom	mov	ds, [cs:kBdaSegment]	; reset DS -> BDA after sys opt ROM init
