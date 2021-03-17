@@ -275,7 +275,7 @@ PmDescToSegment	PROC
 		mov	bl, [si+DESCRIPTOR.BaseHi]
 		shr	ax, 4
 		shl	bl, 4
-		or	ah, bl,CODE=LONG
+		or_	ah, bl
 		retn
 		ENDPROC	PmDescToSegment
 
@@ -326,13 +326,13 @@ DetectMemSize	PROC
 		shl	bx, SEG_SIZE_SHIFT
 
 		mov	ah, CMOS_EXPMEM2_LOBYTE | NMI_DISABLE
-		mov	al, bl,CODE=LONG
+		mov_	al, bl
 		call	WriteCmos
 		mov	ah, CMOS_EXPMEM_LOBYTE | NMI_DISABLE
 		call	WriteCmos
 
 		mov	ah, CMOS_EXPMEM2_HIBYTE | NMI_DISABLE
-		mov	al, bh,CODE=LONG
+		mov_	al, bh
 		call	WriteCmos
 		mov	ah, CMOS_EXPMEM_HIBYTE | NMI_DISABLE
 		call	WriteCmos
@@ -377,11 +377,11 @@ PmDetectMem	PROC
 		jnz	.leaveProc
 
 		; Memory present, clear it all to zero
-		mov	ax, di,CODE=LONG
+		mov_	ax, di
 		mov	cx, 8000h	; clear 64K by words
 		rep	stosw
 		inc	bl		; advance segment
-		cmp	bl, bh,CODE=LONG	; reached last one?
+		cmp_	bl, bh		; reached last one?
 		jnz	.check64K
 
 .leaveProc	retn
@@ -415,7 +415,7 @@ TestAllMem	PROC
 		mov	ah, 3
 		mov	bh, 0
 		int	10h
-		mov	di, dx,CODE=LONG
+		mov_	di, dx
 
 		; Display initial message.  We know the first 64K is good
 		; because the POST calls FatalBeep if it isn't.
@@ -457,7 +457,7 @@ TestAllMem	PROC
 		xchg	dx, di
 		jnb	.lowMemChecked
 
-		cmp	bl, bh,CODE=LONG; reached end?
+		cmp_	bl, bh		; reached end?
 		jz	.reachedEnd
 
 		; Memory fault found, report it and limit mme size to checked amount
@@ -481,22 +481,22 @@ TestAllMem	PROC
 		; Read extended/expanded memory size
 		mov	al, CMOS_EXPMEM2_LOBYTE | NMI_DISABLE
 		call	ReadCmos
-		mov	bl, al,CODE=LONG
+		mov_	bl, al
 		mov	al, CMOS_EXPMEM2_HIBYTE | NMI_DISABLE
 		call	ReadCmos
 		sti
 
 		; Check extended/expanded memory
-		mov	bh, al,CODE=LONG
+		mov_	bh, al
 		shl	bx, 2		; convert count of KB in BX to count of 64KB in BH
 		mov	bl, 10h		; start mem test at 1MB
-		add	bh, bl,CODE=LONG
+		add_	bh, bl
 		and	si, 8000h	; reset memtest offset
 		call	TestMemSegments
 		jnb	.nextTestPass	; continue if all segments OK
 
 		; Check for user terminating memory test
-		cmp	bl, bh,CODE=LONG; reached the end but not OK?
+		cmp_	bl, bh		; reached the end but not OK?
 .reachedEnd	jz	.userTerminated	; must be user keypress then
 
 		; If we reach here the memory is bad and we know where.
@@ -509,12 +509,12 @@ TestAllMem	PROC
 
 		mov	bh, 0
 		shl	bx, SEG_SIZE_SHIFT
-		mov	al, bl,CODE=LONG
+		mov_	al, bl
 		mov	ah, CMOS_EXPMEM2_LOBYTE | NMI_DISABLE
 		call	WriteCmos
 		mov	ah, CMOS_EXPMEM_LOBYTE | NMI_DISABLE
 		call	WriteCmos
-		mov	al, bh,CODE=LONG
+		mov_	al, bh
 		mov	ah, CMOS_EXPMEM2_HIBYTE | NMI_DISABLE
 		call	WriteCmos
 		mov	ah, CMOS_EXPMEM_HIBYTE | NMI_DISABLE
@@ -537,7 +537,7 @@ TestAllMem	PROC
 		int	10h		; read cursor position
 		push	dx		; save it
 
-		mov	dx, di,CODE=LONG; overwrite memtest progress with cancelled message
+		mov_	dx, di		; overwrite memtest progress with cancelled message
 		mov	ah, 2
 		mov	bh, 0
 		int	10h
@@ -577,7 +577,7 @@ TestMemSegments	PROC
 
 		; Check whether we've reached the end of the segment
 		; range and dispatch accordingly
-.nextSegment	cmp	bl, bh,CODE=LONG
+.nextSegment	cmp_	bl, bh
 		jb	.checkSegment
 		jmp	.leaveProc
 		nop			; assembler-inserted NOP?
@@ -632,7 +632,7 @@ TestMemSegments	PROC
 		int	10h		; when we entered the proc
 
 		inc	si		; increment visible counter
-		mov	ax, si,CODE=LONG
+		mov_	ax, si
 		shl	ax, SEG_SIZE_SHIFT
 		call	WriteMemSize
 
@@ -651,7 +651,7 @@ TestMemSegments	PROC
 		jnz	.advanceSegment		; continue if not
 
 		; User pressed ESC if we reached here
-		mov	bl, bh,CODE=LONG; move to the end of the segments immediately
+		mov_	bl, bh		; move to the end of the segments immediately
 		jmp	.leaveFailure
 
 .advanceSegment	inc	bl		; move to next segment
@@ -681,7 +681,7 @@ TestMemSegments	PROC
 ;   CF set on failure
 ; =====================================================================
 TestMem		PROC
-		or	si, si,CODE=LONG; dispatch tail call to appropriate address handler
+		or_	si, si		; dispatch tail call to appropriate address handler
 		jns	TestMemHiAddr
 		jmp	TestMemLoAddr
 		nop			; assembler-inserted nop?
@@ -702,13 +702,13 @@ TestMemHiAddr	PROC
 		mov	dx, kHiAddressLine
 		push	ax		; store AX on stack
 		not	ax
-		mov	di, sp,CODE=LONG; store inverted AX via ES to same offset
+		mov_	di, sp		; store inverted AX via ES to same offset
 		mov	[es:di], ax
 		pop	cx		; attempt to poo AX into CX
 					; this may read the inverted value just moved via ES
 					; if the upper address bits are broken
 		not	ax
-		cmp	ax, cx,CODE=LONG; value written to different segment?
+		cmp_	ax, cx		; value written to different segment?
 		jz	TestMemData	; yes, tail call to next test
 		jmp	TestMemFail	; no, report failure
 		nop			; assembler-inserted nop?
@@ -730,31 +730,31 @@ TestMemData	PROC
 
 .testDataLine	mov	[es:di], ax	; store test value
 		mov	cx, [es:di]	; read it back
-		cmp	cx, ax,CODE=LONG; did it match?
+		cmp_	cx, ax		; did it match?
 		jnz	TestMemFail
 		shl	ax, 1		; shift test bit left
 		jnb	.testDataLine	; continue until all bits tested
 
 		; Test every word in the segment writes/reads OK
 		mov	dx, kWriteRead
-		mov	al, bl,CODE=LONG
-		mov	ah, al,CODE=LONG
+		mov_	al, bl
+		mov_	ah, al
 		xor	ax, 0EFh
 
 .testWriteRead	; Fill all words in segment with test value
 		mov	di, 0
-		mov	cx, bp,CODE=LONG
+		mov_	cx, bp
 		rep	stosw
 
 		; Check all words in segment read back OK
 		mov	di, 0
-		mov	cx, bp,CODE=LONG
+		mov_	cx, bp
 		repe	scasw
 		jnz	TestMemFailCx
 
 		; Run write/read test twice?  If not, swap AH/AL and go again
 		xchg	ah, al
-		cmp	ah, bl,CODE=LONG
+		cmp_	ah, bl
 		jnz	.testWriteRead
 
 		; Test first 10 words in segment read correctly when
@@ -770,7 +770,7 @@ TestMemData	PROC
 		; bits known to be set from previous successful tests)
 		xor	ax, 0FF10h
 		mov	di, 0
-		mov	cx, bp,CODE=LONG
+		mov_	cx, bp
 		rep	stosw
 
 		; All done!
@@ -833,12 +833,12 @@ TestMemLoAddr	PROC
 		; sure the segment to be tested doesn't contain it (we expect it
 		; to be cleared to zero so this is a sanity check against RAM
 		; being bad before we start checking).
-		mov	al, bl,CODE=LONG	; use segment index as test value
-		mov	ah, bl,CODE=LONG
+		mov_	al, bl			; use segment index as test value
+		mov_	ah, bl
 		not	ax			; invert it to make sure we've got at least one set bit
 						; (AX == FFFF -> 0000 would mean we're checking ROM, which won't happen)
 		mov	di, 0			; check from start of segment
-		mov	cx, bp,CODE=LONG
+		mov_	cx, bp
 		repe	scasw			; check all words
 		jnz	TestMemFailCx		; if found, assume we've got bad RAM
 
@@ -851,7 +851,7 @@ TestMemLoAddr	PROC
 .writeSentinals	mov	[es:di], ax
 		shl	di, 1
 		jb	.wroteSentinals		; done if we've passed 64KB?
-		cmp	di, bp,CODE=LONG	; passed end of area under test?
+		cmp_	di, bp			; passed end of area under test?
 		jbe	.writeSentinals		; if not, keep going
 
 		; Scan through the segment until we find a value that is not
@@ -861,11 +861,11 @@ TestMemLoAddr	PROC
 .wroteSentinals	not	ax			; restore original test value
 		mov	dx, 2			; DX holds the next expected mismatch address
 		mov	di, 0			; start scanning at start of segment
-		mov	cx, bp,CODE=LONG
+		mov_	cx, bp
 .scanSentinals	repe	scasw			; find next mismatch
 		jz	.clearSentinals		; reached end of are under test?
 		add	dx, 2
-		cmp	di, dx,CODE=LONG	; mismatch at expected address?
+		cmp_	di, dx			; mismatch at expected address?
 		jnz	TestMemFailAddr		; if not, report bad RAM
 		sub	dx, 2
 		shl	dx, 1			; advance expected mismatch address
@@ -873,8 +873,8 @@ TestMemLoAddr	PROC
 
 		; Once testing is complete, clear the segment back to zero
 .clearSentinals	mov	di, 0
-		mov	ax, di,CODE=LONG
-		mov	cx, bp,CODE=LONG
+		mov_	ax, di
+		mov_	cx, bp
 		rep	stosw
 		retn
 		ENDPROC	TestMemLoAddr
@@ -907,7 +907,7 @@ kWriteRead	db	'write/read',0
 ReportMemError	PROC
 		push	si
 		Inline	WriteString,'Memory ',0
-		mov	si, dx,CODE=LONG
+		mov_	si, dx
 		call	WriteString
 		Inline	WriteString,' failure at ',0
 		cmp	dx, kAddressLine
@@ -915,12 +915,12 @@ ReportMemError	PROC
 
 		; Report failing address and expected/actual values
 		push	ax
-		mov	al, bl,CODE=LONG
+		mov_	al, bl
 		call	WriteCharHex2		; output segment
-		mov	ax, di,CODE=LONG
+		mov_	ax, di
 		call	WriteCharHex4		; output offset
 		Inline	WriteString,', read ',0
-		mov	ax, cx,CODE=LONG
+		mov_	ax, cx
 		call	WriteCharHex4		; output actual value
 		Inline	WriteString,' expecting ',0
 		pop	ax
@@ -930,10 +930,10 @@ ReportMemError	PROC
 		retn				; early return
 
 		; Report failing segment only
-.segmentOnly	mov	al, bl,CODE=LONG
+.segmentOnly	mov_	al, bl
 		call	WriteCharHex2		; output segment start
 		Inline	WriteString,'0000-',0
-		mov	al, bl,CODE=LONG
+		mov_	al, bl
 		call	WriteCharHex2		; output segment end
 		Inline	WriteString,'FFFF',0Dh,0Ah,0
 		pop	si
@@ -955,12 +955,12 @@ WriteMemSize	PROC
 		jnb	.printDigit
 		sub	si, 4			; decrease to 3 digits if not
 
-.printDigit	xor	dx, dx,CODE=LONG
+.printDigit	xor_	dx, dx
 		; ??? operand is offset backwards by 2, error by original programmer?
 		div	[cs:.divisors-2+si]	; extract digit
 		add	al, '0'
 		call	WriteChar
-		mov	ax, dx,CODE=LONG	; retrieve remainder
+		mov_	ax, dx			; retrieve remainder
 		dec	si
 		dec	si
 		jnz	.printDigit

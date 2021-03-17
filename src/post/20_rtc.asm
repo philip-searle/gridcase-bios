@@ -18,7 +18,7 @@ POST20_RTC	PROC
 		jnz	.rtcTested	; Don't bother testing whether it's ticking if so
 					; (power fail would have already been reported)
 
-		mov	bh, al,CODE=LONG	; save diagnostic byte
+		mov_	bh, al		; save diagnostic byte
 
 		mov	cx, 910		; why 910 loops?
 		mov	al, CHECKPOINT_RTC
@@ -46,7 +46,7 @@ POST20_RTC	PROC
 .l1		Inline	WriteString,'Time-of-day clock stopped - please set current time',0Dh,0Ah,0
 		call	SetSoftResetFlag
 		mov	ah, CMOS_STATUS_DIAG | NMI_DISABLE
-		mov	al, bh,CODE=LONG	; restore original diagnostic byte
+		mov_	al, bh		; restore original diagnostic byte
 		call	WriteCmos	; (why? it's not been modified)
 
 ; ---------------------------------------------------------------------------

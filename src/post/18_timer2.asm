@@ -20,7 +20,7 @@ POST18_Timer2	PROC
 		out	dx, al
 
 		mov	bx, 00FFh	; initial test pattern
-		xor	cx, cx,CODE=LONG	; max loops while timer is tested
+		xor_	cx, cx		; max loops while timer is tested
 .testCounter	mov	dx, PORT_PIT_MODE
 		mov	al, 80h		; PIT: select timer 2, latch counter value
 		out	dx, al
@@ -28,13 +28,13 @@ POST18_Timer2	PROC
 
 		Delay	2
 		in	al, dx		; read counter lobyte
-		or	bh, al,CODE=LONG	; set/reset bits in test pattern
-		and	bl, al,CODE=LONG
+		or_	bh, al		; set/reset bits in test pattern
+		and_	bl, al
 
 		Delay	2
 		in	al, dx		; read counter hibyte
-		or	bh, al,CODE=LONG	; set/reset bits in test pattrn
-		and	bl, al,CODE=LONG
+		or_	bh, al		; set/reset bits in test pattrn
+		and_	bl, al
 
 		cmp	bx, 0FF00h	; all bits changed state?
 		jz	.timer2Checked	; continue if so

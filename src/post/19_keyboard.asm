@@ -79,7 +79,7 @@ POST19_Keyboard	PROC
 		jz	.kbResetOk
 		cmp	bl, KB_REPLY_ACK	; already had an ack? fail if so
 		jz	.reportFailure
-		mov	bl, al,CODE=LONG	; store ack for next loop
+		mov_	bl, al			; store ack for next loop
 
 .retryKbReset	jmp	.waitKbReset
 

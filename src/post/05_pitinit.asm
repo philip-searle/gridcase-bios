@@ -39,7 +39,7 @@ POST05_PitInit	PROC
 		out	dx, al			; write lobyte of divisor
 
 		xchg	bh, bl			; possible bug? meant to exchange AL,AH instead but still works because AX is 0?
-		xor	cx, cx,CODE=LONG	; setup maximum loop count for timer test below
+		xor_	cx, cx			; setup maximum loop count for timer test below
 		Delay	1			; only one jmp needed because of xchg/xor above?
 		out	dx, al
 
@@ -62,11 +62,11 @@ POST05_PitInit	PROC
 		dec	dx
 		Delay	1			; prev 3 'dec' is clocks equivalent to one 'jmp short' so we only need one delay here
 		in	al, dx			; read timer counter 0 latched value (lobyte)
-		or	bh, al,CODE=LONG	; set bits 
-		and	bl, al,CODE=LONG	; clear bit
+		or_	bh, al			; set bits 
+		and_	bl, al			; clear bit
 		in	al, dx			; read timer counter 0 latched value (hibyte)
-		or	bh, al,CODE=LONG	; set bits
-		and	bl, al,CODE=LONG	; clear bits
+		or_	bh, al			; set bits
+		and_	bl, al			; clear bits
 
 		loop	.timerTest		; keep looping until target bit pattern reached
 		mov	al, BEEP_TIMER_FAIL	; if loop exits here we call it a failure

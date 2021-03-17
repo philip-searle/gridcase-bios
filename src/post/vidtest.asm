@@ -37,12 +37,12 @@ VidTestRefresh	PROC
 		; Read status port and isolate refresh bit
 		in	al, dx
 		and	al, 1
-		mov	ah, al,CODE=LONG; store for comparison
+		mov_	ah, al		; store for comparison
 
-		xor	cx, cx,CODE=LONG; loop as long as possible
+		xor_	cx, cx		; loop as long as possible
 .waitRefresh	in	al, dx
 		and	al, 1
-		xor	al, ah,CODE=LONG; compare to initial read
+		xor_	al, ah		; compare to initial read
 		loope	.waitRefresh
 		jz	VidTestFail	; tail call on failure
 

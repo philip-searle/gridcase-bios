@@ -13,15 +13,15 @@ POST01_Cpu	PROC
 		mov	ax, 55AAh		; load alternating bit pattern to test registers
 .testRegisters	mov	ss, ax			; cycle the test pattern through all registers
 		mov	si, ss
-		mov	bx, si,CODE=LONG
+		mov_	bx, si
 		mov	ds, bx
 		mov	di, ds
-		mov	cx, di,CODE=LONG
+		mov_	cx, di
 		mov	es, cx
 		mov	bp, es
-		mov	dx, bp,CODE=LONG
-		mov	sp, dx,CODE=LONG
-		cmp	ax, sp,CODE=LONG	; did the test pattern survive all register transfers?
+		mov_	dx, bp
+		mov_	sp, dx
+		cmp_	ax, sp			; did the test pattern survive all register transfers?
 		jz	.registersOk		; if so, continue with POST
 		hlt				; if not, we can't continue.
 						; since interrupts are disabled the system is soft-locked

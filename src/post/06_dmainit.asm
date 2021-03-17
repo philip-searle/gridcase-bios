@@ -30,7 +30,7 @@ POST06_DmaInit	PROC
 		jz	.l1			; odd iterations test the base address
 		inc	dx			; so increment port to PORT_DMA_CHAN0_BASE
 
-.l1		mov	al, bh,CODE=LONG
+.l1		mov_	al, bh
 		out	dx, al			; output test pattern for register upper byte
 		xchg	ax, bx			; xchg to get test pattern lower byte into AL
 		Delay	2
@@ -42,7 +42,7 @@ POST06_DmaInit	PROC
 		xchg	ah, al			; shift into AH
 		Delay	2
 		in	al, dx			; read back register value lobyte
-		cmp	bx, ax,CODE=LONG	; value read back matches test pattern?
+		cmp_	bx, ax			; value read back matches test pattern?
 		jnz	.dmaZeroFail		; if not, report failure
 
 		test	cl, 1			; odd iteration (DMA base register)?
@@ -106,15 +106,15 @@ POST06_DmaInit	PROC
 		mov	cx, 7			; seven page registers to set
 		mov	dh, 0			; clear upper half of port number
 .nextPageReg	lodsb				; load page register port
-		mov	dl, al,CODE=LONG	; merge into DX
+		mov_	dl, al			; merge into DX
 		jmp	di			; jump to test handler
 
-.setPageReg	mov	al, bl,CODE=LONG
+.setPageReg	mov_	al, bl
 		out	dx, al			; set DMA page register
 		jmp	.l4
 
 .checkPageReg	in	al, dx			; read DMA page register
-		cmp	al, bl,CODE=LONG			; matches what we wrote?
+		cmp_	al, bl			; matches what we wrote?
 		jz	.l4			; continue if so
 		mov	al, BEEP_DMA_PR_FAIL	; report error if not
 		jmp	FatalBeeps

@@ -23,14 +23,14 @@ Int19_Actual	PROC
 		sti
 
 		; Int13 requires valid diskette parameter table
-		xor	ax, ax,CODE=LONG
+		xor_	ax, ax
 		mov	ds, ax
 		mov	[IvtDisketteTable], DisketteParams,DATA=WORD
 		mov	[IvtDisketteTable+2], cs
 
 		; Reset disk system
-		xor	ah, ah,CODE=LONG
-		mov	dl, ah,CODE=LONG
+		xor_	ah, ah
+		mov_	dl, ah
 		int	13h
 
 		; Setup registers for bootloader loop:
@@ -74,13 +74,13 @@ Int19_Actual	PROC
 
 		; Check for floppy disk boot request
 		mov	si, Int19_kFloppy
-		mov	dl, bh,CODE=LONG
+		mov_	dl, bh
 		cmp	al, .BOOT_KEY_FLOPPY
 		jz	.manualBoot
 
 		; Check for external floppy boot request
 		mov	si, Int19_kExtraFloppy
-		mov	dl, bl,CODE=LONG
+		mov_	dl, bl
 		cmp	al, .BOOT_KEY_EXTRA_FLOPPY
 		jz	.manualBoot
 
@@ -124,7 +124,7 @@ Int19_Actual	PROC
 		jnz	.restartLoop
 
 		; Attempt boot from internal floppy
-		mov	dl, bh,CODE=LONG
+		mov_	dl, bh
 		call	LoadBootSector
 		mov	ah, 1
 		int	16h		; Check keypress present
@@ -136,7 +136,7 @@ Int19_Actual	PROC
 .extFloppyDelay	call	ShortDelay
 		loop	.extFloppyDelay
 		pop	cx
-		mov	dl, bl,CODE=LONG
+		mov_	dl, bl
 		call	LoadBootSector
 		mov	ah, 1
 		int	16h		; Check keypress present
@@ -176,11 +176,11 @@ LoadBootSector	PROC
 .loadSector	push	bx
 		push	cx
 		sti
-		xor	ah, ah,CODE=LONG
+		xor_	ah, ah
 		int	13h		; reset disk system
 
 		les	bx, [cs:kBootSegOffset]
-		xor	dh, dh,CODE=LONG; head 0
+		xor_	dh, dh		; head 0
 		mov	cx, 0001h	; track 0, sector 1
 		mov	ax, 0201h	; read 1 sector
 		int	13h		; read to es:bx
@@ -285,7 +285,7 @@ GridWaitKey	PROC
 		stc			; CF set if no keys pressed
 		retn
 
-.drainKbBuf	xor	ah, ah,CODE=LONG
+.drainKbBuf	xor_	ah, ah
 		int	16h		; read keyboard
 		push	ax		; store scancode
 		mov	ah, 1

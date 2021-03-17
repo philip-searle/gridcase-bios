@@ -120,16 +120,16 @@ POST17_ProtMode	PROC
 		; new values to configure the memory controller
 		mov	al, CMOS_EXPMEM_HIBYTE | NMI_DISABLE
 		call	ReadCmos
-		mov	ah, al,CODE=LONG
+		mov_	ah, al
 		mov	al, CMOS_EXPMEM_LOBYTE | NMI_DISABLE
 		call	ReadCmos
-		mov	bx, ax,CODE=LONG	; got expansion memory size
+		mov_	bx, ax			; got expansion memory size
 		mov	al, CMOS_BASEMEM_HIBYTE | NMI_DISABLE
 		call	ReadCmos
-		mov	ah, al,CODE=LONG
+		mov_	ah, al
 		mov	al, CMOS_BASEMEM_LOBYTE | NMI_DISABLE
 		call	ReadCmos
-		add	bx, ax,CODE=LONG	; add on base memory size
+		add_	bx, ax			; add on base memory size
 
 ; ---------------------------------------------------------------------------
 ; Configure the memory controller based on the detected memory size

@@ -17,7 +17,7 @@ kOptionRomSig	equ	0AA55h
 ; 	   == 1 if no video output is available
 ; =====================================================================
 InitOptionRoms	PROC
-		xor	bp, bp,CODE=LONG
+		xor_	bp, bp
 
 .findRom	mov	ds, si		; adjust DS to next candidate segment
 		push	cx
@@ -31,8 +31,8 @@ InitOptionRoms	PROC
 		; half cleared that is equivalent to being divided by two
 		; (now a count of 256 byte pages).
 		mov	ch, [2]
-		xor	cl, cl,CODE=LONG
-		mov	si, cx,CODE=LONG
+		xor_	cl, cl
+		mov_	si, cx
 		shr	si, 3		; divide by 8 (equivalent to divide
 					; by 16, making a segment address)
 		push	si		; save segment address of next potential ROM
@@ -67,9 +67,9 @@ InitOptionRoms	PROC
 .afterRomFound	pop	si		; pop current ROM candiate location
 
 .advanceSearch	pop	cx		; pop search end segment
-		add	si, cx,CODE=LONG	; advance to next potential ROM location
+		add_	si, cx		; advance to next potential ROM location
 		pop	cx		; pop original end segment
-		cmp	si, cx,CODE=LONG	; reached the end yet?
+		cmp_	si, cx		; reached the end yet?
 		jb	.findRom	; continue if not
 
 		; Completed ROM search, print a CRLF if we found any ROMs
@@ -79,7 +79,7 @@ InitOptionRoms	PROC
 		test	dl, 2		; found a ROM?
 		jz	.leaveProc
 		call	WriteCrLf
-		or	bp, bp,CODE=LONG
+		or_	bp, bp
 		jz	.leaveProc
 		call	SetSoftResetFlag
 
@@ -101,12 +101,12 @@ TestPicMaskReg	PROC
 		mov	cx, 10h		; 8 registers, each tested twice
 		mov	bh, 7Fh		; initial test pattern, write zero
 
-.testRegister	mov	al, bh,CODE=LONG	; write PIC mask register
+.testRegister	mov_	al, bh		; write PIC mask register
 		out	dx, al
 		Delay	2
 
-		in	al, dx			; read back value writtem
-		cmp	bh, al,CODE=LONG	; same?
+		in	al, dx		; read back value writtem
+		cmp_	bh, al		; same?
 		jnz	.leaveProc		; if not, return with ZF clear
 
 		sar	bh, 1		; shift test pattern over one bit
@@ -116,7 +116,7 @@ TestPicMaskReg	PROC
 .l1		loop	.testRegister
 
 		; Successful test if we make it here
-		xor	al, al,CODE=LONG
+		xor_	al, al
 
 .leaveProc	retn
 		ENDPROC	TestPicMaskReg
@@ -139,7 +139,7 @@ TestDmaRegs	PROC
 		push	cx		; preserve register count
 		mov	cx, 32		; load count of bits per register
 
-.testBit	mov	al, bh,CODE=LONG	; write register hibyte
+.testBit	mov_	al, bh		; write register hibyte
 		out	dx, al
 		Delay	2
 		xchg	ax, bx		; write register lobyte
@@ -152,7 +152,7 @@ TestDmaRegs	PROC
 		Delay	2
 		xchg	ah, al
 		in	al, dx		; read lobyte
-		cmp	bx, ax,CODE=LONG
+		cmp_	bx, ax
 		jnz	.failure
 
 		sar	bx, 1		; shift test pattern over one bit
@@ -162,7 +162,7 @@ TestDmaRegs	PROC
 .l1		loop	.testBit
 
 		; Successful test of register if we make it here.
-		add	dx, si,CODE=LONG	; advance to next register
+		add_	dx, si		; advance to next register
 		pop	cx		; restore register count
 		loop	TestDmaRegs	; go again if we need to
 		retn

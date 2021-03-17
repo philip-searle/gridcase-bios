@@ -34,7 +34,7 @@ InitTimerTicks	PROC
 
 ; ---------------------------------------------------------------------
 ; Convert BCD values to binary
-		mov	al, ch,CODE=LONG
+		mov_	al, ch
 		call	BcdToBinary
 		mul	[cs:kMinSecRadix],DATA=BYTE
 		; AX = hours * 60
@@ -42,18 +42,18 @@ InitTimerTicks	PROC
 		xchg	ax, cx
 		call	BcdToBinary
 		mov	ah, 0
-		add	ax, cx,CODE=LONG
+		add_	ax, cx
 		; AX = (hours * 60) + minutes
 
-		mov	bl, dh,CODE=LONG; preserve seconds
+		mov_	bl, dh		; preserve seconds
 		mul	[cs:kMinSecRadix]
-		mov	cx, ax,CODE=LONG
+		mov_	cx, ax
 		; CX = ((hours * 60) + minutes) * 60
 
-		mov	al, bl,CODE=LONG; restore seconds
+		mov_	al, bl		; restore seconds
 		call	BcdToBinary
 		mov	ah, 0
-		add	ax, cx,CODE=LONG; add seconds to running tota;
+		add_	ax, cx		; add seconds to running tota;
 		jnb	.l1		; addition carried?
 		inc	dx		; propagate to upper word if so
 .l1		; AX = (((hours * 60) + minutes) * 60) + seconds
@@ -95,11 +95,11 @@ InitTimerTicks	PROC
 ;   BH destroyed
 ; =====================================================================
 BcdToBinary	PROC
-		mov	bh, al,CODE=LONG
+		mov_	bh, al
 		and	bh, 0Fh
 		shr	al, 4
 		mul	[cs:kBcdRadix]
-		add	al, bh,CODE=LONG
+		add_	al, bh
 		retn
 		ENDPROC	BcdToBinary
 

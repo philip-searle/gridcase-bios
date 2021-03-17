@@ -14,7 +14,7 @@ POST03_CmosReg	PROC
 .testCmosRam	mov	al, CMOS_SHUTDOWN_REASON | NMI_DISABLE
 		out	PORT_CMOS_ADDRESS, al
 		Delay	2
-		mov	al, ah,CODE=LONG
+		mov_	al, ah
 		out	PORT_CMOS_DATA, al
 		Delay	2
 
@@ -24,7 +24,7 @@ POST03_CmosReg	PROC
 		Delay	2
 		in	al, PORT_CMOS_DATA
 
-		cmp	al, ah,CODE=LONG	; does it match?
+		cmp_	al, ah			; does it match?
 		jz	.bitOk			; keep going if so
 		mov	al, BEEP_CMOS_FAIL	; if not, probable stuck bits in CMOS RAM
 		jmp	FatalBeeps

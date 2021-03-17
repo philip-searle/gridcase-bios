@@ -8,7 +8,7 @@ POST13_CmosDiag	PROC
 
 		jmp	.checkCmosCsum
 .decAndReadCmos	dec	bl			; decrement CMOS register number
-		mov	al, bl,CODE=LONG
+		mov_	al, bl
 		jmp	ReadCmos		; tail call
 
 		; Autodetect hardware changes where possible and then
@@ -34,23 +34,23 @@ POST13_CmosDiag	PROC
 		and	al, 0EFh		; clear mem size OK flag on soft reset (we autodetected the new memsize)
 
 		; Read stored CMOS checksum
-.rtcNotSoft	mov	bh, al,CODE=LONG	; store diagnostic bte for later
+.rtcNotSoft	mov_	bh, al			; store diagnostic bte for later
 		mov	bl, CMOS_EXPMEM2_LOBYTE | NMI_DISABLE
 		call	.decAndReadCmos
-		mov	cl, al,CODE=LONG
+		mov_	cl, al
 		call	.decAndReadCmos
-		mov	ch, al,CODE=LONG
+		mov_	ch, al
 
 		; Calculate new checksum and compare to stored one
 		mov	ah, 0			; CMOS checksum is calulated one byte at a time
 .calcCmosCsum	call	.decAndReadCmos
-		sub	cx, ax,CODE=LONG
+		sub_	cx, ax
 		cmp	bl, CMOS_FD_TYPE | NMI_DISABLE
 		jnz	.calcCmosCsum
 		jcxz	.rtcCsumDone		; CMOS checksum matched?
 		or	bh, 40h			; record if it didn't
 
-.rtcCsumDone	mov	al, bh,CODE=LONG	; store new diagnostic byte
+.rtcCsumDone	mov_	al, bh			; store new diagnostic byte
 		mov	ah, CMOS_STATUS_DIAG | NMI_DISABLE
 		call	WriteCmos
 		sti

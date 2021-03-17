@@ -21,7 +21,7 @@ GetCmosFdsPtr	PROC
 		cmp	al, 0Fh		; extended drive type needed?
 		jnz	.haveDriveType	; skip it if not
 
-		mov	al, ah,CODE=LONG; get extended drive type from CMOS
+		mov_	al, ah		; get extended drive type from CMOS
 		call	ReadCmos
 
 		; Special-case two drive types:
@@ -39,10 +39,10 @@ GetCmosFdsPtr	PROC
 .checkRange	cmp	al, 47
 		ja	.diskConfigErr
 
-.haveDriveType	xor	ah, ah,CODE=LONG
+.haveDriveType	xor_	ah, ah
 		shl	ax, 4		; multiply by sizeof(FDS_INSTANCE)
 		jz	.diskConfigErr
-		mov	bp, ax,CODE=LONG	; need indexed addressing mode
+		mov_	bp, ax		; need indexed addressing mode
 		; index into table offset by one entry because the drive type
 		; number is one-based (zero is used for "no drive").
 		lea	si, [bp+(FixedDiskParams - SIZE#FDS_E0)]
@@ -54,7 +54,7 @@ GetCmosFdsPtr	PROC
 
 .diskConfigErr	Inline	WriteString,'Hard disk configuration error',0Dh,0Ah,0
 		call	SetSoftResetFlag
-		xor	al, al,CODE=LONG
+		xor_	al, al
 		retn
 		ENDPROC	GetCmosFdsPtr
 
@@ -78,13 +78,13 @@ HdcAtInit	PROC
 		; BL contains the diagnostic byte throughout this proc, updated as the init proceeds
 		mov	al, CMOS_STATUS_DIAG | NMI_DISABLE
 		call	ReadCmos
-		mov	bl, al,CODE=LONG
+		mov_	bl, al
 		test	al, 0C0h		; invalid config or checksum bad?
 		jnz	.noHdConfigured
 
 		mov	al, CMOS_HD_TYPE | NMI_DISABLE
 		call	ReadCmos
-		mov	bh, al,CODE=LONG
+		mov_	bh, al
 		shr	al, 4			; isolate drive C nibble
 		mov	ah, CMOS_HD_EXTTYPE1 | NMI_DISABLE
 		call	GetCmosFdsPtr
@@ -119,7 +119,7 @@ HdcAtInit	PROC
 		mov	[IvtHd0Parms], si
 
 		; Determine whether we have a second hard disk and set fields accordingly
-		mov	al, bh,CODE=LONG
+		mov_	al, bh
 		and	al, 0Fh			; isolate drive D nibble
 		mov	ah, CMOS_HD_EXTTYPE2 | NMI_DISABLE
 		call	GetCmosFdsPtr
@@ -175,10 +175,10 @@ HdcAtInit	PROC
 		jmps	.diskFailure
 		nop				; assembler-inserted nop
 
-.calibrationOk	mov	bh, dl,CODE=LONG	; save drive number, next int13 destroys DL
+.calibrationOk	mov_	bh, dl			; save drive number, next int13 destroys DL
 		mov	ah, 8			; get current drive parameters
 		int	13h
-		mov	dl, bh,CODE=LONG	; restore drive number
+		mov_	dl, bh			; restore drive number
 		mov	al, 1			; verify one sector
 		mov	ah, 4			; verify sectors
 		int	13h			; head, sector, and cylinder (DH/CL/CH) from previous int13h call
@@ -201,7 +201,7 @@ HdcAtInit	PROC
 .updateCmosDiag	; Once all drives have been initialized (or failed) we update
 		; the CMOS diagnostic byte to reflect the HD init status.
 		mov	ah, CMOS_STATUS_DIAG | NMI_ENABLE
-		mov	al, bl,CODE=LONG
+		mov_	al, bl
 		call	WriteCmos
 
 .leaveFunction	sti

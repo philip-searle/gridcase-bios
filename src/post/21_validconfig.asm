@@ -7,7 +7,7 @@ POST21_ConfigOk	PROC
 
 		mov	al, CMOS_STATUS_DIAG | NMI_DISABLE
 		call	ReadCmos
-		mov	bh, al,CODE=LONG
+		mov_	bh, al
 					; BH contains diagnostic bits and will
 					; be updated as this proc proceeded
 		mov	cl, 2		; CL contains the ID of the most recent
@@ -41,19 +41,19 @@ POST21_ConfigOk	PROC
 		inc	cl
 		mov	al, CMOS_EXPMEM_LOBYTE | NMI_DISABLE
 		call	ReadCmos
-		mov	bl, al,CODE=LONG
+		mov_	bl, al
 		mov	al, CMOS_EXPMEM2_LOBYTE | NMI_DISABLE
 		call	ReadCmos
-		cmp	bl, al,CODE=LONG
+		cmp_	bl, al
 		jnz	.memSizeInvalid
 
 		inc	cl
 		mov	al, CMOS_EXPMEM_HIBYTE | NMI_DISABLE
 		call	ReadCmos
-		mov	bl, al,CODE=LONG
+		mov_	bl, al
 		mov	al, CMOS_EXPMEM2_HIBYTE | NMI_DISABLE
 		call	ReadCmos
-		cmp	bl, al,CODE=LONG
+		cmp_	bl, al
 		jnz	.memSizeInvalid
 
 		inc	cl
@@ -66,14 +66,14 @@ POST21_ConfigOk	PROC
 .memSizeInvalid	or	bh, 20h		; mark memory size as not good (again)
 
 .invalidConfig	; Rewrite CMOS diagnostic byte with updated value and report error
-		mov	al, bh,CODE=LONG
+		mov_	al, bh
 		mov	ah, CMOS_STATUS_DIAG | NMI_DISABLE
 		call	WriteCmos
 		sti
 
 		Inline	WriteString,'Invalid configuration information; code ',0
-		mov	al, cl,CODE=LONG
-		xor	ah, ah,CODE=LONG
+		mov_	al, cl
+		xor_	ah, ah
 		call	WriteCharHex2
 		Inline	WriteString,0Dh,0Ah,0
 		call	SetSoftResetFlag

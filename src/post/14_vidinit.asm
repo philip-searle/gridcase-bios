@@ -30,14 +30,14 @@ POST14_VidInit	PROC
 
 .l2		mov	al, CMOS_STATUS_DIAG | NMI_DISABLE
 		call	ReadCmos
-		mov	bl, al,CODE=LONG
+		mov_	bl, al
 		test	al, 0C0h		; invalid config or CMOS checksum bad?
 		jnz	.loc_F8664
 
 		; Update CMOS equipment byte with video mode
 		mov	al, CMOS_EQUIPMENT | NMI_DISABLE
 		call	ReadCmos
-		mov	bh, al,CODE=LONG
+		mov_	bh, al
 		and	al, 30h			; isolate CMOS equipment video bits
 		cmp	[EquipmentWord], al
 		jz	.loc_F8653
@@ -53,7 +53,7 @@ POST14_VidInit	PROC
 
 		nop				; lone NOP to jump over
 
-.loc_F865B	mov	al, bl,CODE=LONG
+.loc_F865B	mov_	al, bl
 		or	al, 20h
 		mov	ah, CMOS_STATUS_DIAG | NMI_DISABLE
 		call	WriteCmos
@@ -74,7 +74,7 @@ POST14_VidInit	PROC
 		; TODO: why is equipmentWord modified here?
 		push	[EquipmentWord]		; save original equipment word
 		mov	[EquipmentWord], 30h,DATA=BYTE	; set just reserved bits in equipment word
-		xor	ax, ax,CODE=LONG	; mode 0: 40x25 CGA text
+		xor_	ax, ax			; mode 0: 40x25 CGA text
 		int	10h			; set video mode
 		mov	[EquipmentWord], 10h,DATA=BYTE	; set just one reserved bit in equipment word
 		mov	ax, 3			; mode 3: 80x25 CGA text
@@ -97,7 +97,7 @@ POST14_VidInit	PROC
 		call	SetSoftResetFlag
 		jmp	.vidInitDone
 
-.vidInitFail	xor	ax, ax,CODE=LONG
+.vidInitFail	xor_	ax, ax
 		mov	ds, ax
 		mov	[40h], SoftwareIret,DATA=WORD
 

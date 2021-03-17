@@ -22,14 +22,14 @@ FatalBeeps	PROC
 		jmp	.l1
 		nop				; Mystery nop to jump over?
 .l1		mov	bh, [cs:BeepFactor]	; cs override because ds may not be valid
-		mov	dh, al,CODE=LONG	; move beep code to dh; al will be used for port writes
+		mov_	dh, al			; move beep code to dh; al will be used for port writes
 		mov	al, 0Ch			; setup KBC port B write: both parity checks disabled
 		rol	dh, 2			; pre-rotate beep code for main loop
 		mov	bl, 3			; three groups of beeps
 
 ; ---------------------------------------------------------------------------
 .beepGroup	rol	dh, 2			; rotate next beep group to lower bits of dh
-		mov	dl, dh,CODE=LONG	; copy beep group and isolate lower bits
+		mov_	dl, dh			; copy beep group and isolate lower bits
 		and	dl, 3
 		inc	dl			; beep codes are stored excess-one so adjust for true value
 
@@ -38,17 +38,17 @@ FatalBeeps	PROC
 .l2		xor	al, 2			; toggle speaker
 		out	PORT_KBC_PORTB, al
 
-		mov	cl, bh,CODE=LONG	; loop 4xbeep factor between toggles
+		mov_	cl, bh			; loop 4xbeep factor between toggles
 		mov	ch, 0
-		add	cx, cx,CODE=LONG
-		add	cx, cx,CODE=LONG
+		add_	cx, cx
+		add_	cx, cx
 		loop	$			; 4 clock loop
 
 		dec	si
 		jnz	.l2
 
 ; ---------------------------------------------------------------------------
-		mov	ch, bh,CODE=LONG	; delay 256xbeep factor between beeps
+		mov_	ch, bh			; delay 256xbeep factor between beeps
 .beepGap	Delay	1
 		loop	.beepGap
 
@@ -56,7 +56,7 @@ FatalBeeps	PROC
 		jnz	.beep			; loop if more in this group
 
 ; ---------------------------------------------------------------------------
-		mov	ch, bh,CODE=LONG			; delay 1024xbeep factor between beep groups
+		mov_	ch, bh			; delay 1024xbeep factor between beep groups
 .beepGroupGap	Delay	4
 		loop	.beepGroupGap
 
@@ -88,7 +88,7 @@ Reset_Actual	PROC
 		out	PORT_CMOS_ADDRESS, al
 		Delay	2
 		in	al, PORT_CMOS_DATA	; read shutdown reason form CMOS
-		mov	ah, al,CODE=LONG	; store it for later comparisons
+		mov_	ah, al			; store it for later comparisons
 .l1		Delay	2
 
 		; Reset CMOS shutdown reason now we've got it
@@ -165,7 +165,7 @@ Reset_Actual	PROC
 		jb	SDH_POST
 		cmp	ah, SD_JMP_WITHOUT_INT - SD_BOOTLOADER_REQ
 		ja	SDH_POST
-		mov	bl, ah,CODE=LONG
+		mov_	bl, ah
 		shl	bx, 1
 		jmp	[cs:.sdHandlers+bx]
 
@@ -229,7 +229,7 @@ SDH_POST	PROC
 		mov	al, 1			; set port 426 to 1
 		out	dx, al
 		mov	bl, 5			; delay for 5x64k nop loops
-		xor	cx, cx,CODE=LONG
+		xor_	cx, cx
 .l1		nop
 		loop	.l1
 		dec	bl
@@ -421,7 +421,7 @@ SDH_POST	PROC
 		; Issue FNSTCW, wait a bit, and see if it wrote the expected value.
 		; We can't use the no-wait version because if an NPU is not
 		; present then we will lockup waiting for it to response.
-		mov	bp, sp,CODE=LONG	; point BP to word we just reserved
+		mov_	bp, sp			; point BP to word we just reserved
 		fnstcw	[bp+0]			; store NPU control word
 		Delay	4
 		and	[bp+0], 01F3Fh,DATA=WORD	; mask off reserved bits to 0
@@ -468,7 +468,7 @@ SDH_POST	PROC
 		mov	ds, si
 		cmp	[0], 0AA55h,DATA=WORD	; check for option ROM signature
 		jnz	.afterSysRom
-		xor	cx, cx,CODE=LONG	; sys rom always 64KB in size
+		xor_	cx, cx			; sys rom always 64KB in size
 		call	ChecksumOptRom
 		jnz	.sysRomBad
 		mov	es, [cs:kBdaSegment]

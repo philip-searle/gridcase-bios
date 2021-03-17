@@ -36,6 +36,36 @@ i		%for	1..%1
 		%endfor
 %endmacro
 
+; Underscore-suffixed opcodes are actually macros that specify an alternate
+; instruction coding.  Used to match the encoding used by GRiD's original
+; assembler, which preferred the numerically higher of ambiguous encodings.
+add_		%macro
+		add	%*,CODE=LONG
+		%endmacro
+and_		%macro
+		and	%*,CODE=LONG
+		%endmacro
+cmp_		%macro
+		cmp	%*,CODE=LONG
+		%endmacro
+mov_		%macro
+		mov	%*,CODE=LONG
+		%endmacro
+or_		%macro
+		or	%*,CODE=LONG
+		%endmacro
+sub_		%macro
+		sub	%*,CODE=LONG
+		%endmacro
+xor_		%macro
+		xor	%*,CODE=LONG
+		%endmacro
+
+; Inline WriteString,'StringConstant',0
+; 
+; Encodes a call to WriteString_Inline with subroutine parameters encoded
+; as literals immediately following the call instruction.  Used for one-off
+; string literals that don't need individual names.
 Inline		%macro
 		%if "%1" == "WriteString"
 		call	WriteString_Inline

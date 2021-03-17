@@ -17,10 +17,10 @@ POST07_TestRam	PROC
 .testRamRefresh	dec	bl
 		jz	.ramRefreshOk		; detected three toggles? all is well then
 
-		mov	ah, al,CODE=LONG	; store last read of refresh toggle
+		mov_	ah, al			; store last read of refresh toggle
 .pollRamRefresh	in	al, dx			; read KBC port B
 		and	al, 10h			; isolate RAM refresh toggle
-		cmp	ah, al,CODE=LONG	; changed from previous read?
+		cmp_	ah, al			; changed from previous read?
 		jnz	.testRamRefresh		; go through the test again if so
 		loop	.pollRamRefresh
 
@@ -50,7 +50,7 @@ POST07_TestRam	PROC
 		in	al, PORT_KBC_PORTB
 		test	al, 80h			; RAM parity error occurred?
 		jz	.l1			; continue if not
-		xor	bx, bx,CODE=LONG	; if so, don't count it as a soft reset
+		xor_	bx, bx			; if so, don't count it as a soft reset
 		mov	al, 0Ch			; toggle IO and RAM parity checks
 		out	PORT_KBC_PORTB, al
 		mov	al, 0
@@ -80,7 +80,7 @@ POST07_TestRam	PROC
 		jmp	loc_F9369
 
 .loc_F83AC	jnb	.l5
-		mov	bx, ax,CODE=LONG
+		mov_	bx, ax
 		mov	al, BEEP_RAM_OE
 		cmp	dx, kOddEvenLogic
 		jz	.memTestBeep
@@ -88,13 +88,13 @@ POST07_TestRam	PROC
 		cmp	dx, kAddressLine
 		jz	.memTestBeep
 
-.memTestBeepDet	xor	bx, cx,CODE=LONG
+.memTestBeepDet	xor_	bx, cx
 		mov	cx, 10h
 		mov	ax, 0FH
 .l3		rol	bx, 1
 		jnb	.l4
 		inc	ah
-		add	al, cl,CODE=LONG
+		add_	al, cl
 .l4		loop	.l3
 		dec	ah
 		jz	.memTestBeep
@@ -107,12 +107,12 @@ POST07_TestRam	PROC
 		dw	.loc_F83E4
 .returnStack1	dw	.loc_F8387
 
-.loc_F83E4	mov	bx, ax,CODE=LONG
+.loc_F83E4	mov_	bx, ax
 		jb	.memTestBeepDet
 
-.memTestClear	xor	ax, ax,CODE=LONG	; clear first 64K of RAM
+.memTestClear	xor_	ax, ax		; clear first 64K of RAM
 		mov	es, ax
-		xor	di, di,CODE=LONG
+		xor_	di, di
 		mov	cx, 8000h
 		rep stosw
 

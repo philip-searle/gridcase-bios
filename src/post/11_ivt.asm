@@ -16,14 +16,14 @@ POST11_LoadIvt	PROC
 
 		; Set int 00h - 78h to DummyIsr
 		mov	cx, 78h
-.clearIvt	mov	ax, dx,CODE=LONG
+.clearIvt	mov_	ax, dx
 		stosw				; store ISR offset
-		mov	ax, bx,CODE=LONG
+		mov_	ax, bx
 		stosw				; store ISR segment
 		loop	.clearIvt
 
 		; Set int 60h - 67h to 0000:0000
-		mov	ax, cx,CODE=LONG	; CX was 0 from loop above
+		mov_	ax, cx			; CX was 0 from loop above
 		mov	di, IvtInt60		; start filling from int 60
 		mov	cx, (IvtInt67 - IvtInt60) / 2
 		rep stosw
@@ -34,7 +34,7 @@ POST11_LoadIvt	PROC
 		mov	cx, (IvtInt14 - IvtInt08) / 2
 		pop	dx			; why pop an unmodified value?
 .loadIvt1	lodsw				; load ISR offset
-		cmp	ax, dx,CODE=LONG	; ISR offset is DummyIsr?
+		cmp_	ax, dx			; ISR offset is DummyIsr?
 		jnz	.loadIvtEntry1
 		add	di, 4			; skip if so
 		jmp	.loadIvtLoop1
@@ -52,7 +52,7 @@ POST11_LoadIvt	PROC
 		mov	di, IvtInt70		; start filling in from int 70h
 		mov	cx, 78h - 70h
 .loadIvt2	lodsw				; load ISR offset
-		cmp	ax, dx,CODE=LONG	; ISR offset is DummyIsr?
+		cmp_	ax, dx			; ISR offset is DummyIsr?
 		jnz	.loadIvtEntry2
 		add	di, 4			; skip if so
 		jmp	.loadIvtLoop2
