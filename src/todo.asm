@@ -71,4 +71,5 @@ $		equ	%2
 		TODO	GridBootRom, 0D88Ah
 		TODO	ShortDelay, 0B20Dh
 		TODO	WaitKey, 0C4E7h
+		TODO	DriveIdentify, 0F56Fh
 

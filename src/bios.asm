@@ -55,6 +55,7 @@ $		equ	BIOS_START
 		include "src/int19.asm"
 		include "src/int18.asm"
 		include "src/int13_at.asm"
+		include "src/int13_grid.asm"
 
 ; ---------------------------------------------------------------------------
 ; System identification section at F000:DFD0

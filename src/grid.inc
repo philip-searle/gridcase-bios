@@ -39,6 +39,24 @@ GRID_SLED_90	equ	90h	; 9  =	1.44MB	None	AT-compatible (subtypes 5/6/7/8 identifi
 ; Sled IDs A-F not used?
 
 ; ---------------------------------------------------------------------------
+; GRiD hard disk autodetect values
+; 				  BIOS		SpinDown
+; 				  Type	 Size	Support		Notes
+GRID_HD_4	equ	4	;   17	 40MB	No
+GRID_HD_5	equ	5	;    2	 20MB	Yes
+GRID_HD_6	equ	6	;   17	 40MB	Yes
+GRID_HD_7	equ	7	;  224	100MB	No		*1
+GRID_HD_9	equ	9	;   17	 40MB	Yes
+
+; *1 Drive may support power commands but [TechRef 3-25] claims it is
+;    not supported in the BIOS because the disk's mass would consume
+;    too much power on spinup to be worthwhile spinning down.
+
+; ---------------------------------------------------------------------------
+; GRiD int15 extensions
+GRID_INT15_ERROR	equ	86h	; Error return in AX for unsupported functions
+
+; ---------------------------------------------------------------------------
 ; Mystery ports!
 ; No idea what these do yet.
 PORT_UNKNOWN_426	equ	0426h	; set to 1 then 0 in POST
