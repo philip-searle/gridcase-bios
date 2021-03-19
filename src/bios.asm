@@ -30,6 +30,7 @@
 		include	"src/video.inc"
 		include	"src/hdc_at.inc"
 		include	"src/grid.inc"
+		include "src/isr.inc"
 		include "src/int13.inc"
 		include	"src/segments.inc"
 		include	"src/descriptors.inc"
@@ -56,6 +57,7 @@ $		equ	BIOS_START
 		include "src/int18.asm"
 		include "src/int13_at.asm"
 		include "src/int13_grid.asm"
+		include "src/int14.asm"
 
 ; ---------------------------------------------------------------------------
 ; System identification section at F000:DFD0

@@ -5,7 +5,6 @@ $		equ	%2
 		%endmacro
 
 		TODO	IntNmi_Actual, 0C4F8h
-		TODO	Int14_Actual, 09E87h
 		TODO	Int16_Actual, 09FA2h
 		TODO	Int9_Actual, 0A1B0h
 		TODO	Int13Fd_Actual, 0A80Ah
@@ -32,7 +31,6 @@ $		equ	%2
 		TODO	kBdaSegment, 0C5E6h
 		TODO	kBootSegOffset, 0C5E7h
 		TODO	kIvtSegment, 0C5E9h
-		TODO	SerDetectPort, 09F7Ah
 		TODO	ParDetectPort, 0C5CEh
 		TODO	ReadCmos, 0C762h
 		TODO	WriteCmos, 0C773h
@@ -72,4 +70,7 @@ $		equ	%2
 		TODO	ShortDelay, 0B20Dh
 		TODO	WaitKey, 0C4E7h
 		TODO	DriveIdentify, 0F56Fh
+		TODO	MakeIsrStack, 0C415h
+		TODO	UnmakeIsrStack, 0C5ECh
+		TODO	FuncToOffset, 0C444h
 
