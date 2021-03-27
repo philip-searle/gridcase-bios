@@ -1,6 +1,22 @@
+GRiDCase 1520 BIOS Disassembly
+==============================
+
+This is a work-in-progress project to create a documented assembly listing of
+the GRiDCase 1520 BIOS that can be assembled into a byte-identical image of the
+original ROMs.
+
+Current progress is ~30% complete.
+
+Once completed, I hope to go back to the two earlier BIOS images that have been
+dumped and figure out what the differences are.
+
+This project is using EuroAssembler (<https://euroassembler.eu/eadoc/>).
+
+Why EuroAssembler?
+==================
 
 CODE=LONG instruction modifier
-==============================
+------------------------------
 
 The x86 instruction set includes several different ways of encoding certain
 instructions, usually those that encode a reg+reg/mem operand with a direction
@@ -25,8 +41,20 @@ CODE instruction is documented at:
 
 	<https://euroassembler.eu/eadoc/index.htm#CODEeq>
 
+Because these instruction suffixes are quite lengthy and often spill over
+into the comments column I have added some macros to make them less visually
+intrusive (see src/macros.inc).  These are named after the instruction they
+replace, suffixed with an underscore.  For example:
+
+	xchg	cx, dx,CODE=LONG	; Verbose but obvious
+	xchg_	cx, dx			; Less obvious but more readable
+
 Explicit segment override
-=========================
+-------------------------
+
+There is one problem I have found with EuroAssembler: it sometimes requires
+segment overrides to be given as explicit prefixes instead of recognizing them
+in the operand expression.
 
 EuroASM allows you to include a segment override as part of a memory variable
 "register expression" only.  It will not recognise one as part of a memory
