@@ -647,7 +647,7 @@ TestMemSegments	PROC
 		test	al, KBC_STATUS_OBF	; keyboard has data for us?
 		jz	.advanceSegment
 		in	al, PORT_KBC_DATA	; read it if so
-		cmp	al, SC1_ESC		; key was ESC?
+		cmp	al, SC2_ESC		; key was ESC?
 		jnz	.advanceSegment		; continue if not
 
 		; User pressed ESC if we reached here

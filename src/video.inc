@@ -23,6 +23,9 @@ MDA_REGEN_LEN		equ	0800h
 CGA_REGEN_SEG		equ	0B800h
 CGA_REGEN_LEN		equ	2000h
 
+; Offset from MDA/CGA register index port to mode control port
+VID_MODE_PORT_OFFSET	equ	4
+
 ; Offset from MDA/CGA register index port to status port
 VID_STATUS_PORT_OFFSET	equ	6
 

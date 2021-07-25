@@ -37,7 +37,7 @@ BeepBeepWaitF1	PROC
 		call	Beep
 
 .waitF1		call	WaitKey
-		cmp	ah, SC1_F1
+		cmp	ah, SC2_F1
 		jnz	.waitF1
 		retn
 		ENDPROC	BeepBeepWaitF1

@@ -57,6 +57,9 @@ or_		%macro
 sub_		%macro
 		sub	%*,CODE=LONG
 		%endmacro
+test_		%macro
+		test	%*,CODE=LONG
+		%endmacro
 xor_		%macro
 		xor	%*,CODE=LONG
 		%endmacro

@@ -53,11 +53,13 @@ $		equ	BIOS_START
 		include	"src/post/kbc.asm"
 		include	"src/post/timer.asm"
 		include	"src/post/protmode.asm"
-		include "src/int19.asm"
-		include "src/int18.asm"
-		include "src/int13_at.asm"
-		include "src/int13_grid.asm"
-		include "src/int14.asm"
+		include	"src/int19.asm"
+		include	"src/int18.asm"
+		include	"src/int13_at.asm"
+		include	"src/int13_grid.asm"
+		include	"src/int14.asm"
+		include	"src/int16.asm"
+		include	"src/int9.asm"
 
 ; ---------------------------------------------------------------------------
 ; System identification section at F000:DFD0

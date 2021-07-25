@@ -5,8 +5,6 @@ $		equ	%2
 		%endmacro
 
 		TODO	IntNmi_Actual, 0C4F8h
-		TODO	Int16_Actual, 09FA2h
-		TODO	Int9_Actual, 0A1B0h
 		TODO	Int13Fd_Actual, 0A80Ah
 		TODO	IntE_Actual, 0B1C9h
 		TODO	Int17_Actual, 0B3ABh
@@ -73,4 +71,22 @@ $		equ	%2
 		TODO	MakeIsrStack, 0C415h
 		TODO	UnmakeIsrStack, 0C5ECh
 		TODO	FuncToOffset, 0C444h
+		TODO	KbSyncLedState, 0A700h
+		TODO	KbExtendBuf, 0A75Ch
+		TODO	KbAdvanceBuf, 0A760h
+		TODO	KbDisable, 0A7BFh
+		TODO	KbWriteDataByte, 0A77Dh
+		TODO	KbEnable, 0A7B1h
+		TODO	KbXlat, 0A588h
+		TODO	KbXlatScancode, 0A74Dh
+		TODO	KbAckInt, 0A6F5h
+		TODO	KbKeyClick, 0C60Fh
+		TODO	LoadBdaToDs, 0C452h
+		TODO	CheckBiosChords, 0C632h
+		TODO	KbXlatAlt, 0A690h
+		TODO	KbXlatShift, 0A5E0h
+		TODO	KbXlatCtrl, 0A638h
+		TODO	KbShiftAdjSet, 0A559h
+		TODO	KbShiftAdjClear, 0A56Fh
+		TODO	KbXlatExtended, 0A6E8h
 

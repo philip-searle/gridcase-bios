@@ -74,8 +74,27 @@ MemorySizeKb		d w
 ErrorCodes		d w
 
 KB_BUFFER_LENGTH	equ	20h
+
 KbShiftFlags1		d b
+KBSHIFT1_RSHIFT		equ	01h	; Right shift key down
+KBSHIFT1_LSHIFT		equ	02h	; Left shift key down
+KBSHIFT1_CTRL		equ	04h	; Control key down
+KBSHIFT1_ALT		equ	08h	; Alt key down
+KBSHIFT1_SCRLOCK	equ	10h	; Scroll lock on
+KBSHIFT1_NUMLOCK	equ	20h	; Num lock on
+KBSHIFT1_CAPLOCK	equ	40h	; Caps lock on
+KBSHIFT1_INSERT		equ	80h	; Insert on
+
 KbShiftFlags2		d b
+KBSHIFT2_RALT		equ	01h	; Right alt key down
+KBSHIFT2_LALT		equ	02h	; Left alt key down
+KBSHIFT2_SYSREQ		equ	04h	; SysReq key down
+KBSHIFT2_PAUSE		equ	08h	; Pause key activated
+KBSHIFT2_SCRLOCK	equ	10h	; ScrollLock key down
+KBSHIFT2_NUMLOCK	equ	20h	; NumLock key down
+KBSHIFT2_CAPLOCK	equ	40h	; CapsLock key down
+KBSHIFT2_INSERT		equ	80h	; Insert key down
+
 AltNumpad		d b
 KbNextChar		d w
 KbLastChar		d w
@@ -84,8 +103,15 @@ KbBuffer		d KB_BUFFER_LENGTH * b
 $		equ	41h
 HdRegPacket		ds	HDC_REG_PACKET
 
+$		equ	49h
+VidActiveMode		d b
+
 $		equ	63h
+; I/O port address of the MDA/CGA index register
 VidBasePort		d w
+
+; Copy of MDA/CGA 6845 mode control register
+VidModeCtrl		d b
 
 ; Various places document this as 'adapter ROM offset/segment' with no
 ; further details.  It's actually just a scratch area for storing a far
@@ -97,7 +123,10 @@ AdapterRomSegment	d w
 $		equ	006Ch
 TimerTicks		d d
 
-$		equ	0072h
+$		equ	0071h
+; Non-zero if ctrl+break entered at keyboard
+CtrlBrkFlag		d b
+
 SoftResetFlag		d w
 SOFT_RESET_FLAG	equ	1234h	; Set in SoftResetFlag to mark software-initiated reset via JMP to F000:FFF0
 
@@ -146,4 +175,22 @@ Fd1MediaState		d b
 
 $		equ	96h
 KbStatusFlags3		d b
+KBSTAT3_LASTE1		equ	01h	; Last scancode was E1h
+KBSTAT3_LASTE0		equ	02h	; Last scancode was E0h
+KBSTAT3_RCTRL		equ	04h	; Right control key active
+KBSTAT3_RALT		equ	08h	; Right alt key active
+KBSTAT3_ENHKB		equ	10h	; 101/102 key keyboard present
+KBSTAT3_FORCE_NUMLOCK	equ	20h	; Forced numlock on
+KBSTAT3_ID_2		equ	40h	; Reading two byte KB ID, read first byte
+KBSTAT3_ID_1		equ	80h	; Reading two byte KB ID, read no bytes yet
+
+KbStatusFlags4		d b
+KBSTAT4_LED_SCRLOCK	equ	01h	; Scroll lock LED is lit
+KBSTAT4_LED_NUMLOCK	equ	02h	; Num lock LED is lit
+KBSTAT4_LED_CAPLOCK	equ	04h	; Caps lock LED is lit
+KBSTAT4_RESERVED	equ	08h	; Reserved
+KBSTAT4_ACK		equ	10h	; Ack received from KB
+KBSTAT4_RESEND		equ	20h	; Resend requested by KB
+KBSTAT4_LED_UPDATE	equ	40h	; LED update in progress
+KBSTAT4_TX_ERR		equ	80h	; Keyboard transmit error
 
