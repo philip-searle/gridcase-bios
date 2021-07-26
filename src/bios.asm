@@ -93,7 +93,7 @@ GridSysId	CompatAddress 0DFFEh
 		; [Public] CPU reset vector is top of address space minus 16 bytes
 		; AT BIOS calls this P_O_R (POWER ON RESET)
 Reset		CompatAddress 0FFF0h
-		jmp	0F000h:Reset_Compat
+		jmp	(BIOS_SEGMENT):Reset_Compat
 
 		; [Public] IBM BIOS stores ROM date at F000:FFF5 (AT BIOS calls this 'RELEASE MARKER')
 ReleaseMarker	CompatAddress 0FFF5h

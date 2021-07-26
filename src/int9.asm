@@ -203,7 +203,7 @@ Int9_Actual	PROC
 		call	CheckBiosChords		; both keys pressed, check third one
 		jnz	.notBiosChord		; zero flag set indicates reboot wanted
 		mov	[SoftResetFlag], SOFT_RESET_FLAG
-		jmpf	0f000h:Reset_Compat
+		jmpf	(BIOS_SEGMENT):Reset_Compat
 
 ; ---------------------------------------------------------------------
 ; Extended key codes introduced with the PC/AT keyboard have their own
