@@ -86,7 +86,5 @@ $		equ	%2
 		TODO	KbXlatAlt, 0A690h
 		TODO	KbXlatShift, 0A5E0h
 		TODO	KbXlatCtrl, 0A638h
-		TODO	KbShiftAdjSet, 0A559h
-		TODO	KbShiftAdjClear, 0A56Fh
 		TODO	KbXlatExtended, 0A6E8h
 

@@ -601,7 +601,7 @@ Int9_Actual	PROC
 ; ---------------------------------------------------------------------
 ; Handle alt being released by clearing the shift state and applying
 ; the alt+numpad code that has been built up (if any).
-.breakAlt	call	KbShiftAdjClear
+.breakAlt	call	KbShiftAdjClr
 		xor_	ax, ax
 		or	al, [AltNumpad]
 		jz	.ignoreModifier
@@ -611,7 +611,7 @@ Int9_Actual	PROC
 ; Handle ctrl being released by clearing the shift state.
 .breakLCtrl	test	ch, KBSTAT3_LASTE1
 		jnz	.skipShiftAdj
-		call	KbShiftAdjClear
+		call	KbShiftAdjClr
 		and	ch, ~KBSTAT3_LASTE0
 		jmp	.storeBdaFlags
 
@@ -755,4 +755,49 @@ Int9_Actual	PROC
 		jmp	.clearE0E1
 
 		ENDPROC	Int9_Actual
+
+; ---------------------------------------------------------------------
+; KbShiftAdjSet
+; Set a bit in bl (KbShiftFlags1) and either ch or bh (KbStatusFlags3/
+; KbShiftFlags2) depending on whether an E0h prefix code has been seen.
+; Bit to set will be adjusted as needed if bh needs modifying.
+;
+; On entry:
+;   CL == bits to set
+; ---------------------------------------------------------------------
+KbShiftAdjSet	PROC
+		rol	bh, 1		; rotate BH to match other flags
+		rol	bh, 1
+
+		test	ch, KBSTAT3_LASTE0
+		jz	.L1
+		or_	ch, cl
+		jmp	.L2
+.L1		or_	bh, cl
+
+.L2		or_	bl, cl
+		ror	bh, 1		; undo rotation
+		ror	bh, 1
+		retn
+		ENDPROC	KbShiftAdjSet
+
+; ---------------------------------------------------------------------
+; KbShiftAdjClr
+; As KbShiftAdjSet but clears the bit instead.
+; ---------------------------------------------------------------------
+KbShiftAdjClr	PROC
+		rol	bh, 1		; rotate BH to match other flags
+		rol	bh, 1
+
+		test	ch, KBSTAT3_LASTE0
+		jz	.L1
+		and_	ch, cl
+		jmp	.L2
+.L1		and_	bh, cl
+.L2		and_	bl, cl
+		not	cl
+		and_	cl, bh
+		and_	cl, ch
+		jmp	KbShiftAdjSet.L2
+		ENDPROC	KbShiftAdjClr
 
