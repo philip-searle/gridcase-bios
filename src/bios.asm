@@ -60,6 +60,7 @@ $		equ	BIOS_START
 		include	"src/int14.asm"
 		include	"src/int16.asm"
 		include	"src/int9.asm"
+		include	"src/kbxlat.asm"
 
 ; ---------------------------------------------------------------------------
 ; System identification section at F000:DFD0

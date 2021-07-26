@@ -77,14 +77,9 @@ $		equ	%2
 		TODO	KbDisable, 0A7BFh
 		TODO	KbWriteDataByte, 0A77Dh
 		TODO	KbEnable, 0A7B1h
-		TODO	KbXlat, 0A588h
 		TODO	KbXlatScancode, 0A74Dh
 		TODO	KbAckInt, 0A6F5h
 		TODO	KbKeyClick, 0C60Fh
 		TODO	LoadBdaToDs, 0C452h
 		TODO	CheckBiosChords, 0C632h
-		TODO	KbXlatAlt, 0A690h
-		TODO	KbXlatShift, 0A5E0h
-		TODO	KbXlatCtrl, 0A638h
-		TODO	KbXlatExtended, 0A6E8h
 
