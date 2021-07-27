@@ -20,6 +20,7 @@ KBC_CMD_RESET	equ	0AAh	; reset and self-test
 KBC_CMD_WRITE	equ	060h	; next write to data port is a command
 KBC_CMD_READ	equ	0C0h	; read KBC input port and place on KBC_PORT_DATA
 KBC_CMD_RD_TST	equ	0E0h	; read test inputs (T0, T1)
+KBC_CMD_DISABLE	equ	0ADh	; disable keyboard
 KBC_CMD_ENABLE	equ	0AEh	; enable keyboard
 KBC_CMD_IFTEST	equ	0ABh	; test keyboard interface
 
@@ -29,6 +30,7 @@ KBC_RESET_TIMEOUT	equ	1870h	; 18h x 70h loops waiting for reset response
 KBC_SHORT_TIMEOUT	equ	0179h	; 01h x 79h loops waiting for write command response
 KBC_STUCK_KEY_TIMEOUT	equ	02B7h	; 02h x B7h loops waiting for stuck key response
 KBC_IFTEST_TIMEOUT	equ	02E7h	; 02h x E7h loops waiting for interface test to complete
+KBC_DBYTE_TIMEOUT	equ	164Eh	; 5710 loops waiting for data byte write
 KBC_RESET_OK		equ	55h	; success response from KBC self test
 
 ; ---------------------------------------------------------------------------
@@ -36,6 +38,8 @@ KBC_RESET_OK		equ	55h	; success response from KBC self test
 KB_CMD_RESET		equ	0FFh	; reset keyboard and run basic assurance test
 KB_CMD_READ_KB_ID	equ	0F2h	; read 2-byte keyboard ID
 KB_CMD_SET_TYPEMATIC	equ	0F3h	; set typematic rate and delay
+KB_CMD_DEFAULTS		equ	0F4h	; reset to defaults
+KB_CMD_INDICATORS	equ	0EDh	; set/reset status indicators
 
 KB_REPLY_BAT_OK		equ	0AAh	; reset complete and Basic Assessment Tests OK
 KB_REPLY_RESEND		equ	0FEh	; host should resend last command

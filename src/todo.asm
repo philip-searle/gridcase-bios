@@ -71,14 +71,6 @@ $		equ	%2
 		TODO	MakeIsrStack, 0C415h
 		TODO	UnmakeIsrStack, 0C5ECh
 		TODO	FuncToOffset, 0C444h
-		TODO	KbSyncLedState, 0A700h
-		TODO	KbExtendBuf, 0A75Ch
-		TODO	KbAdvanceBuf, 0A760h
-		TODO	KbDisable, 0A7BFh
-		TODO	KbWriteDataByte, 0A77Dh
-		TODO	KbEnable, 0A7B1h
-		TODO	KbXlatScancode, 0A74Dh
-		TODO	KbAckInt, 0A6F5h
 		TODO	KbKeyClick, 0C60Fh
 		TODO	LoadBdaToDs, 0C452h
 		TODO	CheckBiosChords, 0C632h
