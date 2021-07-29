@@ -60,9 +60,6 @@ $		equ	%2
 		TODO	PwClearBuffer, 0F27Ah
 		TODO	WriteBadCsumMsg, 0C4A4h
 		TODO	WriteCrLf, 0BD31h
-		TODO	A20Enable, 0A7D4h
-		TODO	A20Disable, 0A7D9h
-		TODO	ResetCpu, 0A7FDh
 		TODO	WriteChar, 0BD28h
 		TODO	GridBootRom, 0D88Ah
 		TODO	ShortDelay, 0B20Dh

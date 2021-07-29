@@ -62,6 +62,7 @@ $		equ	BIOS_START
 		include	"src/int9.asm"
 		include	"src/kbxlat.asm"
 		include	"src/keyboard.asm"
+		include	"src/kbc_286.asm"
 
 ; ---------------------------------------------------------------------------
 ; System identification section at F000:DFD0
