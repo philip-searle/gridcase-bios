@@ -100,8 +100,36 @@ KbNextChar		d w
 KbLastChar		d w
 KbBuffer		d KB_BUFFER_LENGTH * b
 
+CompatAddress		3Eh
+; Floppy drive calibration status, i.e. whether the disk motor is up
+; to speed.  Our BIOS also uses the uppermost bit to communicate between
+; floppy disk int13 handlers and the intE hardware interrupt, although
+; this doesn't appear to be standardized between BIOS vendors.
+FdCalibStatus		d b
+FDCAL_INT	equ	80h		; 1 = waiting for intE to occur
+FDCAL_RESERVED	equ	78h
+FDCAL_FD2	equ	04h		; 1 = drive 1 calibrated
+FDCAL_FD1	equ	02h		; 1 = drive 1 calibrated
+FDCAL_FD0	equ	01h		; 1 = drive 0 calibrated
+
+CompatAddress		3Fh
+; Which floppy drive motors the BIOS thinks should be enabled
+FdMotorStatus		d b
+FDMOTOR_UNUSED	equ	0C8h
+FDMOTOR_DRIVE	equ	30h
+FDMOTOR_MOTOR2	equ	04h
+FDMOTOR_MOTOR1	equ	02h
+FDMOTOR_MOTOR0	equ	01h
+
+CompatAddress		40h
+FdMotorTimeout		d b
+
 $		equ	41h
+; int13 hard disk and floppy disk handlers do not execute simultaneously
+; so they share temporary storage space in the BDA
 HdRegPacket		ds	HDC_REG_PACKET
+$		equ	HdRegPacket
+FdScratch		ds	FDC_SCRATCH
 
 $		equ	49h
 VidActiveMode		d b
@@ -163,15 +191,52 @@ CompatAddress	80h
 KbBufStart		d w
 KbBufEnd		d w
 
+$		equ	8Bh
+FdConfig		d b	; Bitfield, see FDCONF_* constants
+
+FDCONF_DATA_RATE	equ	0C0h	; last data rate sent to contoller
+					;   mask for FDCONF_DTR_* values
+FDCONF_STEP_RATE	equ	030h	; last step rate sent to controller
+					;   mask for FDCONF_SR_* values
+FDCONF_OP_DTR		equ	00Ch	; data rate, set at start of operation
+FDCONF_UNUSED		equ	003h
+
 $		equ	8Ch
 HdStatus		d b
 HdError			d b
 HdTaskComplete		d b
 
-$		equ	90h
-Fd0MediaState		d b
+$		equ	8Fh
+FdDriveInfo		d b	; Bitfield, see FDDI_* constants (FD1/0 in upper/lower nibble)
+Fd0MediaState		d b	; Bitfield, see FDMS_* constants
 Fd1MediaState		d b
 ; Fd2MediaState stored elsewhere (external drive)
+
+FDDI_UNUSED		equ	08h
+FDDI_DETERMINED		equ	04h	; Drive type determined?
+FDDI_MULTIRATE		equ	02h	; Drive is multi-rate?
+FDDI_CHANGELINE		equ	01h	; Drive has change line detection?
+
+FDMS_DATA_TRANSFER_RATE	equ	0C0h	; mask for FDMS_DTR_* values
+FDMS_DOUBLE_STEP	equ	20h	; double stepping required?
+FDMS_KNOWN_MEDIA	equ	10h	; media in drive known?
+FDMS_UNUSED		equ	08h
+FDMS_LAST_ACCESS	equ	07h	; mask for FDMS_LA_* values
+
+FDMS_DTR_500K		equ	00h	; 500Kbit/sec data transfer rate
+FDMS_DTR_300K		equ	40h	; 300kbit/sec
+FDMS_DTR_250K		equ	80h	; 250Kbit/sec
+FDMS_DTR_1M		equ	0C0h	; 1Mbit/sec
+
+FDMS_LA_T360M_360D	equ	00h	; trying 360K media in 360K drive
+FDMS_LA_T360M_12D	equ	01h	; trying 360K media in 1.2M drive
+FDMS_LA_T12M_12D	equ	02h	; trying 1.2M media in 1.2M drive
+FDMS_LA_K360M_360D	equ	03h	; known 360K media in 360K drive
+FDMS_LA_K360M_12D	equ	04h	; known 360K media in 1.2M drive
+FDMS_LA_K12M_12D	equ	05h	; known 1.2M media in 1.2M drive
+FDMS_LA_UNUSED		equ	06h
+FDMS_LA_35		equ	07h	; 720K media in 720K drive or
+					; 1.44M media in 1.44M drive
 
 $		equ	96h
 KbStatusFlags3		d b
@@ -193,4 +258,7 @@ KBSTAT4_ACK		equ	10h	; Ack received from KB
 KBSTAT4_RESEND		equ	20h	; Resend requested by KB
 KBSTAT4_LED_UPDATE	equ	40h	; LED update in progress
 KBSTAT4_TX_ERR		equ	80h	; Keyboard transmit error
+
+$		equ	0A6h
+Fd2DriveInfo		d b		; as FdDriveInfo, but for the external drive
 

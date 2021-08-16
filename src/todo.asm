@@ -5,8 +5,6 @@ $		equ	%2
 		%endmacro
 
 		TODO	IntNmi_Actual, 0C4F8h
-		TODO	Int13Fd_Actual, 0A80Ah
-		TODO	IntE_Actual, 0B1C9h
 		TODO	Int17_Actual, 0B3ABh
 		TODO	Int10_Actual, 0B45Bh
 		TODO	Int12_Actual, 0BD3Ah
@@ -62,7 +60,6 @@ $		equ	%2
 		TODO	WriteCrLf, 0BD31h
 		TODO	WriteChar, 0BD28h
 		TODO	GridBootRom, 0D88Ah
-		TODO	ShortDelay, 0B20Dh
 		TODO	WaitKey, 0C4E7h
 		TODO	DriveIdentify, 0F56Fh
 		TODO	MakeIsrStack, 0C415h
@@ -71,4 +68,15 @@ $		equ	%2
 		TODO	KbKeyClick, 0C60Fh
 		TODO	LoadBdaToDs, 0C452h
 		TODO	CheckBiosChords, 0C632h
+		TODO	FdGetMediaState, 0D17Bh
+		TODO	FdGetMediaState2, 0D18Ah
+		TODO	FdSetMediaState, 0D192h
+		TODO	FdSetMediaState2, 0D1A3h
+		TODO	FdGetOpStartState, 0D1D8h
+		TODO	FdSetOpStartState, 0D1E7h
+		TODO	FdGetCylinder, 0D1F8h
+		TODO	FdSetCylinder, 0D207h
+		TODO	FdExternalType, 0D218h
+		TODO	FdCountDrives, 0D1ABh
+		TODO	IsExtFdIndex, 0D92Ch
 

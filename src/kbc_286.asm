@@ -31,9 +31,9 @@ A20Disable	PROC
 
 ; ---------------------------------------------------------------------
 ; A20SetState
-; Writes the value in ah to the keyboard controller's output port.
+; Writes the value in AH to the keyboard controller's output port.
 ; Intended to be used for enabling/disabling the A20 gate but can
-; actually modify any but in the output port.  Not intended to be
+; actually modify any bit in the output port.  Not intended to be
 ; called directly -- push AX, then jump to the function start.
 ; ---------------------------------------------------------------------
 A20SetState	PROC

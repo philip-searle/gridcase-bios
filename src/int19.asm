@@ -132,8 +132,8 @@ Int19_Actual	PROC
 
 		; Attempt boot from external floppy
 		push	cx
-		mov	cx, 12000	; Short delay (why?)
-.extFloppyDelay	call	ShortDelay
+		mov	cx, 12000	; 1.2ms delay (why?)
+.extFloppyDelay	call	TenthMilliDelay
 		loop	.extFloppyDelay
 		pop	cx
 		mov_	dl, bl
@@ -149,7 +149,7 @@ Int19_Actual	PROC
 		; Delay before retrying bootloader loop
 		push	cx
 		mov	cx, 12000
-.allFailedDelay	call	ShortDelay
+.allFailedDelay	call	TenthMilliDelay
 		loop	.allFailedDelay
 		pop	cx
 		jmp	.autoBoot

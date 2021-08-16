@@ -341,7 +341,7 @@ SDH_POST	PROC
 
 ; ---------------------------------------------------------------------------
 ; Update equipment byte based on detected floppy drives
-		call	CheckFdConfigValid
+		call	FdCheckConfigValid
 		cmp	[Fd1MediaState], 0
 		jz	.updatedFdCount
 		or	[EquipmentWord], 40h,DATA=BYTE	; why not add?

@@ -65,3 +65,13 @@ CMOS_INFO_RESERVED	equ	3Fh	; Reserved
 ; Not officially documented.
 GF_EMS			equ	01h	; use EMS instead of XMS
 
+; ---------------------------------------------------------------------------
+; Valid values for the CMOS_FD_TYPE register (upper/lower nibble = FD0/FD1)
+; Note that [TechRef 6-15 documents all values greater than two as 'reserved',
+; despite FdDasdType checking values up to four.
+FD_NONE			equ	00h
+FD_5_360K		equ	01h	; 360KB 5.25" drive
+FD_5_1M			equ	02h	; 1.2MB 5.25" drive
+FD_3_720K		equ	03h	; 720KB 3.5" drive
+FD_3_1M			equ	04h	; 1.44MB 3.5" drive
+

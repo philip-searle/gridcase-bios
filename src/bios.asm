@@ -29,6 +29,7 @@
 		include	"src/serial.inc"
 		include	"src/video.inc"
 		include	"src/hdc_at.inc"
+		include	"src/fdc.inc"
 		include	"src/grid.inc"
 		include "src/isr.inc"
 		include "src/int13.inc"
@@ -63,6 +64,13 @@ $		equ	BIOS_START
 		include	"src/kbxlat.asm"
 		include	"src/keyboard.asm"
 		include	"src/kbc_286.asm"
+		include	"src/int13_fd.asm"
+		include	"src/floppy/int13_handlers.asm"
+		include	"src/floppy/std_dpbs.asm"
+		include	"src/floppy/bda.asm"
+		include	"src/floppy/commands.asm"
+		include	"src/floppy/controller.asm"
+		include	"src/floppy/misc.asm"
 
 ; ---------------------------------------------------------------------------
 ; System identification section at F000:DFD0

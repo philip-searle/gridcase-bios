@@ -30,8 +30,34 @@ FDS_INSTANCE	%macro	; (cylinders, heads, writePreComp, control, landingZone, sec
 %endmacro
 
 ; ---------------------------------------------------------------------------
+; Floppy diskette parameter table
+; ---------------------------------------------------------------------------
+DISKETTE_PARMS	struc
+.specify1	db	0	; FDC specify cmd, first byte
+.specify2	db	0	; FDC specify cmd, second bye
+.motorWaitTime	db	0	; motor wait time in clock ticks
+.sectorSize	db	0	; log2 of bytes per sector (2=512)
+.lastSectorId	db	0	; last sector on track
+.gapLength	db	0	; in bytes
+.dtl		db	0	; disk data length (ignored)
+.formatGapLen	db	0
+.formatFillByte	db	0
+.headSettleTime	db	0	; in milliseconds
+.motorStartTime	db	0	; in 0.125 second intervals
+		endstruc
+
+; Extension of DISKETTE_PARMS that also stores media type and track count.
+; Used by FdSetMediaType to get the correct DPB for a given sector/track
+; count and drive type.
+DPB_MEDIA	struc
+.dpb		ds	DISKETTE_PARMS
+.maxTracks	db	0
+.mediaType	db	0
+		endstruc
+
+; ---------------------------------------------------------------------------
 ; Commands passed to Int13 in AH.
-; [TechRef 10-4]
+; [TechRef 9-4, 10-4]
 ; ---------------------------------------------------------------------------
 INT13CMD_RESET		equ	00h	; Reset disk drive system
 INT13CMD_LASTSTATUS	equ	01h	; Read disk drive status from last operation
@@ -55,11 +81,13 @@ INT13CMD_RECALIBRATE	equ	11h	; Recalibrate back to track zero
 ;				13h	  Unused
 INT13CMD_CONTROLLERDIAG	equ	14h	; Controller internal diagnostic
 INT13CMD_READDASDTYPE	equ	15h	; Read direct attached storage device (DASD) type
-COUNT_INT13CMD		equ	16h
+INT13CMD_CHANGELINE	equ	16h	; Read disk change line status
+INT13CMD_SETDASDTYPE	equ	17h	; Set DASD type for format
+INT13CMD_SETMEDIATYPE	equ	18h	; Set media type for format
 
 ; ---------------------------------------------------------------------------
 ; Status returns from Int13 BIOS calls.
-; [TechRef 10-9]
+; [TechRef 9-13, 10-9]
 ; ---------------------------------------------------------------------------
 INT13STAT_OK		equ	000h	; No error detected
 INT13STAT_BADCMD	equ	001h	; Bad command passed to disk I/O
@@ -73,7 +101,8 @@ INT13STAT_DMAOVERRUN	equ	008h	; DMA overrun
 INT13STAT_DMABOUNDARY	equ	009h	; DMA crossed 64K boundary
 INT13STAT_BADSECTOR	equ	00Ah	; Bad sector flag detected
 INT13STAT_NOTUSED	equ	00Bh	; "Not used"
-;				00Ch-00Fh	Omitted from TechRef
+INT13STAT_BADMEDIA	equ	00Ch	; Unsupported track/invalid media
+;				00Dh-00Fh	Omitted from TechRef
 INT13STAT_BADECC	equ	010h	; Uncorrectable data error
 INT13STAT_DATACORRECTED	equ	011h	; ECC corrected data error
 ;				012h-01Fh	Omitted from TechRef
@@ -92,9 +121,10 @@ INT13STAT_WRITEFAULT	equ	0CCh	; Write fault on selected drive
 INT13STAT_NOERROR	equ	0E0h	; "Status error/Error Register-0"
 ;				0E1h-0FFh	Omitted from TechRef
 
-; Int13 command handlers can rely on this stack layout to be in place when
-; they are called and can poke data into it to return values to our caller.
-Int13Stack	struc
+; Int13 hard-disk command handlers can rely on this stack layout to be in
+; place when they are called and can poke data into it to return values to
+; our caller.
+Int13HdStack	struc
 .flags		dw	0
 .es		dw	0
 .di		dw	0
@@ -110,7 +140,8 @@ Int13Stack	struc
 ; A 'packet' of values to send to the disk controller's registers.
 ; Used by BuildAtRegPacket/SendAtRegPacket.
 HDC_REG_PACKET	struc
-		db	0	; dummy byte because packet addresses are offset by one
+		db	0	; dummy byte because we share storage
+				; with an FdScratch instance
 .writePrecomp	db	0
 .sectorCount	db	0
 .sectorNumber	db	0
@@ -119,4 +150,32 @@ HDC_REG_PACKET	struc
 .driveHead	db	0
 .command	db	0
 		endstruc
+
+; Scratch space used by floppy disk int13 handlers to pass return values
+; back to the main int13 handler and store command results read from the
+; floppy disk controller.  Overlaid onto the same storage space as
+; HDC_REG_PACKET since the floppy and hard disk routines will not be
+; accessed simultaneously.
+FDC_SCRATCH	struc
+.returnAh	db	0	; return value to be placed in AH
+
+.fdcSt0		db	0	; fields returned from a standard 7-byte
+.fdcSt1		db	0	; FDC command result
+.fdcSt2		db	0
+.fdcCylinder	db	0
+.fdcHead	db	0
+.fdcSector	db	0
+.fdcNumBytes	db	0
+		endstruc
+
+; Return values from int13/15h (read DASD type)
+DASD_NO_DRIVE	equ	0
+DASD_FLOPPY	equ	1	; floppy drive without change line
+DASD_FLOPPY_CL	equ	2	; floppy drive with change line available
+DASD_HD		equ	3	; hard disk
+
+; Return values from int13/16h (disk change line status)
+FD_CL_ERROR	equ	80h
+FD_CL_UNCHANGED	equ	00h
+FD_CL_CHANGED	equ	06h
 

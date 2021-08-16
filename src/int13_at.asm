@@ -374,9 +374,9 @@ HdcAtReadDasd	PROC
 		mul	dx
 
 		mov_	bp, sp
-		mov	[ss:bp+Int13Stack.cx], dx
-		mov	[ss:bp+Int13Stack.dx], ax
-		mov	[ss:bp+Int13Stack.ax], 300h
+		mov	[ss:bp+Int13HdStack.cx], dx
+		mov	[ss:bp+Int13HdStack.dx], ax
+		mov	[ss:bp+Int13HdStack.ax], (DASD_HD << 8) + 00h
 
 		popf
 		pop	es
@@ -657,9 +657,9 @@ HdcAtDiskParms	PROC
 		jb	.validDrive	; first two hard disks?
 
 		; Invalid drive number, return empty result
-		mov	[ss:bp+Int13Stack.dx], 0,DATA=WORD
-		mov	[ss:bp+Int13Stack.cx], 0,DATA=WORD
-		mov	[ss:bp+Int13Stack.ax], 0,DATA=BYTE
+		mov	[ss:bp+Int13HdStack.dx], 0,DATA=WORD
+		mov	[ss:bp+Int13HdStack.cx], 0,DATA=WORD
+		mov	[ss:bp+Int13HdStack.ax], 0,DATA=BYTE
 		mov	ah, INT13STAT_BADPARAMTBL
 		jmp	HdcAtCmdDone
 
@@ -668,7 +668,7 @@ HdcAtDiskParms	PROC
 		mov	dh, [es:si+FIXED_DISK_PARMS.heads]
 		dec	dh
 		mov	dl, [HdCount]
-		mov	[ss:bp+Int13Stack.dx], dx
+		mov	[ss:bp+Int13HdStack.dx], dx
 
 		mov	cx, [es:si+FIXED_DISK_PARMS.cylinders]
 		dec	cx
@@ -676,9 +676,9 @@ HdcAtDiskParms	PROC
 		xchg	ch, cl
 		shl	cl, 6
 		add	cl, [es:si+FIXED_DISK_PARMS.sectorsPerTrk]
-		mov	[ss:bp+Int13Stack.cx], cx
+		mov	[ss:bp+Int13HdStack.cx], cx
 
-		mov	[ss:bp+Int13Stack.ax], 0
+		mov	[ss:bp+Int13HdStack.ax], 0
 
 		popf
 		pop	es

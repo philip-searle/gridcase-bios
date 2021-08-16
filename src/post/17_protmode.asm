@@ -61,7 +61,7 @@ POST17_ProtMode	PROC
 		call	WriteCmos
 
 		; Ask KBC to pulse the reset line
-		mov	al, 0FEh
+		mov	al, KBC_CMD_PULSEP2
 		out	PORT_KBC_CMD, al
 		sti
 		hlt

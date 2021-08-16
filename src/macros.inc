@@ -5,7 +5,7 @@
 ;
 ; ===========================================================================
 
-EUROASM FPU=ON, LISTINCLUDE=ON, LISTVAR=ON, LISTMACRO=OFF, LISTREPEAT=OFF, AUTOALIGN=OFF
+EUROASM FPU=ON, LISTINCLUDE=ON, LISTVAR=ON, LISTMACRO=OFF, LISTREPEAT=OFF, AUTOALIGN=OFF, MAXINCLUSIONS=100
 
 ; FillRom address, fill
 ; 
