@@ -71,6 +71,7 @@ $		equ	BIOS_START
 		include	"src/floppy/commands.asm"
 		include	"src/floppy/controller.asm"
 		include	"src/floppy/misc.asm"
+		include	"src/int17.asm"
 
 ; ---------------------------------------------------------------------------
 ; System identification section at F000:DFD0

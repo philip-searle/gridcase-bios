@@ -39,6 +39,7 @@ PRINTER_STATB_SLCT	equ	10h	; Printer is selected
 PRINTER_STATB_PE	equ	20h	; Printer is out of paper
 PRINTER_STATB_ACK	equ	40h	; Printer is ready to accept data
 PRINTER_STATB_BUSY	equ	80h	; Printer is not ready to accept data
+PRINTER_STATB_GRIDBITS	equ	07h	; Mask for GRiD-specific bits
 
 ; PORT_PRINTER_STATUSC bits [TechRef 11-6]
 PRINTER_STATC_STROBE	equ	01h	; Indicates valid data on the printer data bus
