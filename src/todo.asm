@@ -5,8 +5,6 @@ $		equ	%2
 		%endmacro
 
 		TODO	IntNmi_Actual, 0C4F8h
-		TODO	Int17_Actual, 0B3ABh
-		TODO	Int10_Actual, 0B45Bh
 		TODO	Int12_Actual, 0BD3Ah
 		TODO	Int11_Actual, 0BD43h
 		TODO	Int15_Actual, 0BD4Ch
@@ -79,4 +77,22 @@ $		equ	%2
 		TODO	FdExternalType, 0D218h
 		TODO	FdCountDrives, 0D1ABh
 		TODO	IsExtFdIndex, 0D92Ch
+		TODO	VidSetMode, 0B49Dh
+		TODO	VidSetCursor, 0B60Eh
+		TODO	VidSetCursorPos, 0B837h
+		TODO	VidReadLightPen, 0C6DFh
+		TODO	VidWinSelect, 0B637h
+		TODO	VidWinScrollUp, 0B76Dh
+		TODO	VidReadCell, 0B66Ah
+		TODO	VidWriteCell, 0B7AEh
+		TODO	VidWriteChar, 0B7B2h
+		TODO	VidSetPalette, 0B5E7h
+		TODO	VidWritePel, 0B73Ch
+		TODO	VidReadPel, 0B75Ah
+		TODO	VidTeletype, 0B7BDh
+		TODO	VidGetDispState, 0B83Dh
+		TODO	VidWriteString, 0BCD5h
+		TODO	VidCalcOffsets, 0B8DFh
+		TODO	VidGetCursorPos, 0B61Bh
+		TODO	VidWinScrollDn, 0B769h
 
