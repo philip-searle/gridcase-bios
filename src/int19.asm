@@ -221,7 +221,7 @@ LoadBootSector	PROC
 		pop	cx
 		jz	.leaveFunction
 		jmp	.jmpBootSector
-		nop			; assembler-inserted nop
+		FillerNop
 
 ; Ensure hard disk first sector is bootable.  Since hard disk boot sectors
 ; were never standardised in the same way that floppy disk boot sectors were,

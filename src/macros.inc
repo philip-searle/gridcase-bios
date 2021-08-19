@@ -7,6 +7,7 @@
 
 EUROASM FPU=ON, LISTINCLUDE=ON, LISTVAR=ON, LISTMACRO=OFF, LISTREPEAT=OFF, AUTOALIGN=OFF, MAXINCLUSIONS=100
 
+; ---------------------------------------------------------------------
 ; FillRom address, fill
 ; 
 ; Advances the current location to the specified address, filling any space
@@ -15,6 +16,7 @@ FillRom		%macro
 		d	(%1 - offset#$) * byte %2
 		%endmacro
 
+; ---------------------------------------------------------------------
 ; CompatAddress address
 ;
 ; Raises an error if the current assembly location is not equal to the address
@@ -27,6 +29,7 @@ CompatAddress	%macro
 		%endif
 		%endmacro
 
+; ---------------------------------------------------------------------
 ; Delay count
 ;
 ; Inserts short jumps to delay execution by count*7 clocks.
@@ -36,6 +39,20 @@ i		%for	1..%1
 		%endfor
 %endmacro
 
+; ---------------------------------------------------------------------
+; FillerNop
+;
+; Apparently 'useless' nop inserted after a jmp where the original assembler
+; couldn't determine the jump range.  EuroASM can reduce these jmp instructions
+; to their smallest possible representation with its multi-pass behavour, but
+; the assembler GRiD used was not so capable.  This macro allows us to pad out
+; such jmp instances to obtain a bit-identical ROM, with the possibility of
+; later making this macro a true no-op and saving some space in the ROM.
+FillerNop	%macro
+		nop
+%endmacro
+
+; ---------------------------------------------------------------------
 ; Underscore-suffixed opcodes are actually macros that specify an alternate
 ; instruction coding.  Used to match the encoding used by GRiD's original
 ; assembler, which preferred the numerically higher of ambiguous encodings.
@@ -64,6 +81,7 @@ xor_		%macro
 		xor	%*,CODE=LONG
 		%endmacro
 
+; ---------------------------------------------------------------------
 ; Inline WriteString,'StringConstant',0
 ; 
 ; Encodes a call to WriteString_Inline with subroutine parameters encoded

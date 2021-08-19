@@ -159,7 +159,7 @@ FdCheckConfigValid	PROC
 		test	bh, 70h		; checksum OK?
 		jz	.checksumOk
 		jmp	.leaveFunction
-		nop			; assembler-inserted nop
+		FillerNop
 
 .checksumOk	; Extract the CMOS floppy disk types into AL (FD0) and
 		; CL (FD1).  External drive is dynamic and not stored
@@ -218,7 +218,7 @@ FdMediaTypeOk	PROC
 		cmp	al, 0
 		jz	.configOk
 		jmp	.configMismatch
-		nop			; assembler-inserted nop
+		FillerNop
 
 .mediaStateSet	; Extra checks for 360KB media
 		cmp	[si], 93h,DATA=BYTE
@@ -226,14 +226,14 @@ FdMediaTypeOk	PROC
 		cmp	al, 1
 		jnz	.configMismatch
 		jmp	.configOk
-		nop			; assembler-inserted nop
+		FillerNop
 
 .not360K	cmp	al, 2
 		jb	.configMismatch
 
 .configOk	clc
 		jmp	.leaveFunction
-		nop			; assembler-inserted nop
+		FillerNop
 
 .configMismatch	stc
 

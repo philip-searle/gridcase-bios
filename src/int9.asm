@@ -263,7 +263,7 @@ Int9_Actual	PROC
 		test	bl, KBSHIFT1_RSHIFT | KBSHIFT1_LSHIFT
 		jnz	.xlatScancode
 		jmp	.noModifiers
-		nop				; useless nop
+		FillerNop
 
 .numLockOn	; If numlock is on, invert the shift key test
 		test	bl, KBSHIFT1_RSHIFT | KBSHIFT1_LSHIFT
@@ -308,7 +308,7 @@ Int9_Actual	PROC
 
 .gotExtKeyCode	xor_	al, al			; extended keys have no ASCII representation
 		jmp	.processKeyCode
-		db	90h			; assembler-inserted nop
+		FillerNop
 
 .notExtSolidus	cmp	al, SC2_ENTER		; ALT+KbEnter can also be
 		jnz	.notExtKey		; input using the normal
@@ -705,7 +705,7 @@ Int9_Actual	PROC
 		test	bl, KBSHIFT1_CTRL
 		jz	.lkTestCtrl
 		jmp	.scrLkClrPause
-		nop				; assembler-inserted nop
+		FillerNop
 
 .noEnhScrollLk	; 84-key keyboard clears pause if ctrl held down and in
 		; pause shift state, otherwise  is scroll lock.

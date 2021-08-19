@@ -17,7 +17,7 @@ FdGetDriveInfo	PROC
 		; standard two in the BDA
 		mov	al, [Fd2DriveInfo]
 		jmp	.gotDriveInfo
-		nop			; assembler-inserted nop
+		FillerNop
 
 .notFd2		; Move FD1 drive info nibble down if needed
 		cmp	[bp+IsrStackAx.dl], 0

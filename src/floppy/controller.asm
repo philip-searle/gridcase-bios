@@ -223,7 +223,7 @@ FdGetDriveType	PROC
 		jnz	.notFd2
 		call	FdExternalType
 		jmp	.driveTypeInAl
-		nop			; assembler-inserted nop
+		FillerNop
 
 .notFd2		cmp	[bp+IsrStackAx.dl], 0
 		jnz	.driveTypeInAl

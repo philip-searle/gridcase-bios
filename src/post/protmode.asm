@@ -438,7 +438,7 @@ TestAllMem	PROC
 		jz	.memExtended
 		Inline	WriteString,'00000K EMS Memory',0Dh,0Ah,0
 		jmp	.startMemTest
-		nop			; assembler-inserted NOP?
+		FillerNop
 .memExtended	Inline	WriteString,'00000K Extended',0Dh,0Ah,0
 
 .startMemTest	mov	si, 1		; start memtest offset at 1
@@ -580,7 +580,7 @@ TestMemSegments	PROC
 .nextSegment	cmp_	bl, bh
 		jb	.checkSegment
 		jmp	.leaveProc
-		nop			; assembler-inserted NOP?
+		FillerNop
 
 .checkSegment	; Enter protected-mode, update our reserved GDT entry
 		; to point to the segment we want to check, and then
@@ -684,7 +684,7 @@ TestMem		PROC
 		or_	si, si		; dispatch tail call to appropriate address handler
 		jns	TestMemHiAddr
 		jmp	TestMemLoAddr
-		nop			; assembler-inserted nop?
+		FillerNop
 		ENDPROC	TestMem
 
 ; =====================================================================
@@ -711,7 +711,7 @@ TestMemHiAddr	PROC
 		cmp_	ax, cx		; value written to different segment?
 		jz	TestMemData	; yes, tail call to next test
 		jmp	TestMemFail	; no, report failure
-		nop			; assembler-inserted nop?
+		FillerNop
 		ENDPROC	TestMemHiAddr
 
 ; =====================================================================

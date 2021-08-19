@@ -34,7 +34,7 @@ GetCmosFdsPtr	PROC
 		jnz	.checkRange
 		mov	si, FDS_E0	; special entry for type E0
 		jmp	.haveFdsPtr
-		nop			; assembler-inserted nop
+		FillerNop
 
 .checkRange	cmp	al, 47
 		ja	.diskConfigErr
@@ -173,7 +173,7 @@ HdcAtInit	PROC
 		int	13h
 		loop	.calibrateDrive
 		jmps	.diskFailure
-		nop				; assembler-inserted nop
+		FillerNop
 
 .calibrationOk	mov_	bh, dl			; save drive number, next int13 destroys DL
 		mov	ah, 8			; get current drive parameters

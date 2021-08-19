@@ -124,7 +124,7 @@ KbReadChar	PROC
 		jnz	.notExtCode
 		call	KbTranslateExt
 		jmp	.gotKey
-		nop				; assembler-inserted nop
+		FillerNop
 
 .notExtCode	; Mysterious extra translation...
 		; Maybe something in the int9 handler produces these values...
@@ -212,7 +212,7 @@ KbCheckChar	PROC
 		jnz	.notExtCode
 		call	KbTranslateExt
 		jmp	.gotKey
-		nop				; assembler-inserted nop
+		FillerNop
 
 .notExtCode	; Mysterious extra translation...
 		; Maybe something in the int9 handler produces these values...
@@ -285,7 +285,7 @@ KbPlaceChar	PROC
 		mov	[KbLastChar], di
 		mov	al, 0			; success
 		jmp	.leaveFunction
-		nop				; assembler-inserted nop
+		FillerNop
 
 .kbBufFull	mov	al, 1			; failure
 

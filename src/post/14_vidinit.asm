@@ -50,8 +50,7 @@ POST14_VidInit	PROC
 .loc_F8653	test	bh, 1
 		jnz	.loc_F8664
 		jmp	.loc_F8669
-
-		nop				; lone NOP to jump over
+		FillerNop
 
 .loc_F865B	mov_	al, bl
 		or	al, 20h
@@ -64,8 +63,7 @@ POST14_VidInit	PROC
 		test	[InterruptFlag], 20h
 		jnz	.loc_F8674
 		jmp	.vidInitFail
-
-		nop				; lone NOP to jumo over
+		FillerNop
 
 		; Init the display now we know what type it is
 .loc_F8674	mov	al, CHECKPOINT_VIDEO_INIT
