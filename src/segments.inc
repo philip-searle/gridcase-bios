@@ -35,6 +35,7 @@ IvtInt05		equ	05h * 4
 IvtInt08		equ	08h * 4
 IvtInt13		equ	13h * 4
 IvtInt14		equ	14h * 4
+IvtVidParms		equ	1Dh * 4	; Int1D is a far pointer, not a real ISR
 IvtDisketteTable	equ	1Eh * 4	; Int1E is a far pointer, not a real ISR
 IvtInt1F		equ	1Fh * 4
 IvtInt40		equ	40h * 4
@@ -133,6 +134,12 @@ FdScratch		ds	FDC_SCRATCH
 
 $		equ	49h
 VidActiveMode		d b
+VidTextColumns		d w
+VidPageSize		d w
+VidPageOffset		d w
+VidCursorPos		d 8 * w
+VidCursorShape		d w
+VidActivePage		d b
 
 $		equ	63h
 ; I/O port address of the MDA/CGA index register
@@ -140,6 +147,8 @@ VidBasePort		d w
 
 ; Copy of MDA/CGA 6845 mode control register
 VidModeCtrl		d b
+
+VidColorPalette		d b
 
 ; Various places document this as 'adapter ROM offset/segment' with no
 ; further details.  It's actually just a scratch area for storing a far
