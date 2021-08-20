@@ -52,9 +52,38 @@ VID_MODE_EXT_74	equ 74h	; G    .     .    640x400  2         .   B800 *2
 ;         [TechRef 7-8]
 
 ; Some code checks the video mode to determine CGA/MDA
-VID_FIRST_CGA_TEXT_MODE	equ	VID_MODE_CGA_4
+VID_FIRST_CGA_GRAP_MODE	equ	VID_MODE_CGA_4
 VID_LAST_CGA_MODE	equ	VID_MODE_CGA_6
 VID_MDA_MODE		equ	VID_MODE_MDA_7
+
+; ---------------------------------------------------------------------------
+; 6845 CRT Controller register numbers.
+; The Yamaha V6366 used in the GRiDCase 1500 series video boards has
+; 6854-compatible registers mapped at the same addresses as the IBM CGA/MDA.
+
+CRTC_REG_HTOTAL		equ	00h	; Horizontal total
+CRTC_REG_HDISPLAY	equ	01h	; Horizontal display
+CRTC_REG_HSYNC_POS	equ	02h	; Horizontal sync position
+CRTC_REG_SYNC_PULSE	equ	03h	; Sync pulse width
+CRTC_REG_VTOTAL		equ	04h	; Vertical total
+CRTC_REG_VTOTAL_ADJ	equ	05h	; Vertical total adjust
+CRTC_REG_VDISPLAY	equ	06h	; Vertical display
+CRTC_REG_VSYNC_POS	equ	07h	; Vertical sync position
+CRTC_REG_INTERLACE	equ	08h	; Interlace
+CRTC_REG_MAX_RASTER	equ	09h	; Maximum raster address
+CRTC_REG_CURSOR_START	equ	0Ah	; Cursor start raster
+CRTC_REG_CURSOR_END	equ	0Bh	; Cursor end raster
+CRTC_REG_STARTADDR_HI	equ	0Ch	; Start address high-byte
+CRTC_REG_STARTADDR_LO	equ	0Dh	; Start address low-byte
+CRTC_REG_CURSORADDR_HI	equ	0Eh	; Cursor address high-byte
+CRTC_REG_CURSORADDR_LO	equ	0Fh	; Cursor address low-byte
+CRTC_REG_LPEN_HI	equ	10h	; Light-pen high-byte
+CRTC_REG_LPEN_LO	equ	11h	; Light-pen low-byte
+
+; Some code addresses CRTC registers in pairs, with two register numbers stored
+; in a single 16-bit register.
+CRTC_RPAIR_STARTADDR	equ	(CRTC_REG_STARTADDR_HI << 8) | CRTC_REG_STARTADDR_LO
+CRTC_RPAIR_CURSORADDR	equ	(CRTC_REG_CURSORADDR_HI << 8) | CRTC_REG_CURSORADDR_LO
 
 ; ---------------------------------------------------------------------------
 ; Misc video constants

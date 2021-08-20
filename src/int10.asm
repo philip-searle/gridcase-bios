@@ -266,7 +266,7 @@ VidSetMode	PROC
 		; 'blank screen' attribute/character pair, then fill the screen
 		; with it.
 		mov	ax, 0720h		; white on black space char
-		cmp	[VidActiveMode], VID_FIRST_CGA_TEXT_MODE
+		cmp	[VidActiveMode], VID_FIRST_CGA_GRAP_MODE
 		jl	.L1
 		xor_	ax, ax			; graphics mode: clear to black
 .L1		mov	bx, CGA_REGEN_SEG
@@ -338,12 +338,128 @@ VidSetMode	PROC
 		loop	$
 		mov	cx, 4000h		; even more delay
 		loop	$
-		jmp	.leaveFunction
+		jmp	VidOutRetn
 
 .dispEnOk	pop	dx			; return to mode ctrl reg
 		mov	al, [VidModeCtrl]
-
-.leaveFunction	out	dx, al			; set mode ctrl reg
-		jmp	VidRetn
+		; fallthrough to VidOutRetn
 		ENDPROC	VidSetMode
+
+; ---------------------------------------------------------------------
+; VidOutRetn
+; Shared function tail that outputs the value in AL to port DX before
+; jumping to VidRetn.
+; ---------------------------------------------------------------------
+VidOutRetn	PROC
+		out	dx, al
+		jmp	VidRetn
+		ENDPROC	VidOutRetn
+
+; ---------------------------------------------------------------------
+; VidSetPalette [TechRef 7-13]
+; Sets either border/background color or graphics palette, depending on
+; the value of BL.
+; ---------------------------------------------------------------------
+VidSetPalette	PROC
+		mov	dx, [VidBasePort]
+		add	dx, VID_CCR_PORT_OFFSET
+		mov	al, [VidColorPalette]
+
+		; BH determines subfunction
+		or_	bh, bh
+		jnz	.setPalette
+
+		; Set border/background color from AL
+		and	al, 0E0h	; mask existing border/bg color
+		and	bl, 1Fh		; mask argument
+		or_	al, bl		; merge in new value
+		jmp	.updatePalette
+
+.setPalette	and	al, 0DFh	; mask existing palette bit
+		and	bl, 1		; mask argument
+		or_	bl, bl
+		jz	.updatePalette
+		or	al, 20h		; add palette bit back in
+
+.updatePalette	mov	[VidColorPalette], al
+		jmp	VidOutRetn
+		ENDPROC	VidSetPalette
+
+; ---------------------------------------------------------------------
+; VidSetCursor [TechRef 7-11]
+; Sets the start and end lines on which the text mode cursor is visible
+; as well as its blink rate.
+; ---------------------------------------------------------------------
+VidSetCursor	PROC
+		mov	bx, 0A0Bh	; CRTC cursor shape registers
+		call	VidWriteCrtc2	; write both from CH/CL
+		mov	[VidCursorShape], cx
+		ENDPROC	VidSetCursor
+
+; ---------------------------------------------------------------------
+; VidRetn
+; Shared function tail that returns from the int10 interrupt routine.
+; ---------------------------------------------------------------------
+VidRetn		PROC
+		jmp	UnmakeIsrStack
+		ENDPROC	VidRetn
+
+; ---------------------------------------------------------------------
+; VidGetCursorPos [TechRef 7-11]
+; Returns the cursor start/end lines in CH/CL and the cursor position
+; in DH/DL for the video page in BH.
+; ---------------------------------------------------------------------
+VidGetCursorPos	PROC
+		cmp	[VidActiveMode], VID_FIRST_CGA_GRAP_MODE
+		jb	.textMode
+
+		; Graphics modes only have one page
+		xor_	bh, bh
+
+.textMode	mov_	bl, bh
+		call	VidPageCursorPos
+		mov_	bp, sp
+		mov	[bp+IsrStack.dx], dx
+		mov	dx, [VidCursorShape]
+		mov	[bp+IsrStack.cx], dx
+		jmp	VidRetn
+		ENDPROC	VidGetCursorPos
+
+; ---------------------------------------------------------------------
+; VidPageSelect [TechRef 7-11=
+; Switches the active video page.
+; ---------------------------------------------------------------------
+VidPageSelect	PROC
+		; Graphics mode and MDA do not support multiple pages
+		cmp	[VidActiveMode], VID_FIRST_CGA_GRAP_MODE
+		jnb	.leaveFunction
+
+		mov	[VidActivePage], al	; store new page index
+
+		; Multiply VidActivePage by VidPageSize manually.
+		; TODO: check whether this is faster than mul.
+		xor_	ah, ah
+		mov	bx, [VidPageSize]
+		xor_	cx, cx
+		inc	ax
+		sub_	cx, bx
+.mulPageSize	add_	cx, bx
+		dec	ax
+		jnz	.mulPageSize
+
+		; Store calculated page offset to BDA and CRTC (CRTC counts in
+		; character units, not bytes so divide by two).
+		mov	[VidPageOffset], cx
+		sar	cx, 1
+		mov	bx, CRTC_RPAIR_STARTADDR
+		call	VidWriteCrtc2
+
+		; Update the cursor position to account for possibly changed
+		; column count in the new video mode
+		mov	bl, [VidActivePage]
+		call	VidPageCursorPos
+		call	VidCursorPosChanged
+
+.leaveFunction	jmp	UnmakeIsrStack
+		ENDPROC	VidPageSelect
 

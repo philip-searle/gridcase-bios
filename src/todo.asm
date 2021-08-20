@@ -77,7 +77,7 @@ $		equ	%2
 		TODO	FdExternalType, 0D218h
 		TODO	FdCountDrives, 0D1ABh
 		TODO	IsExtFdIndex, 0D92Ch
-		TODO	VidSetCursor, 0B60Eh
+		TODO	VidWriteCrtc2, 0B8B7h
 		TODO	VidSetCursorPos, 0B837h
 		TODO	VidReadLightPen, 0C6DFh
 		TODO	VidWinSelect, 0B637h
@@ -85,16 +85,15 @@ $		equ	%2
 		TODO	VidReadCell, 0B66Ah
 		TODO	VidWriteCell, 0B7AEh
 		TODO	VidWriteChar, 0B7B2h
-		TODO	VidSetPalette, 0B5E7h
 		TODO	VidWritePel, 0B73Ch
 		TODO	VidReadPel, 0B75Ah
 		TODO	VidTeletype, 0B7BDh
 		TODO	VidGetDispState, 0B83Dh
 		TODO	VidWriteString, 0BCD5h
 		TODO	VidCalcOffsets, 0B8DFh
-		TODO	VidGetCursorPos, 0B61Bh
 		TODO	VidWinScrollDn, 0B769h
 		TODO	GridVidInit, 0D4DFh
 		TODO	GridVidInitHi, 0D4B9h
-		TODO	VidRetn, 0B618h
+		TODO	VidPageCursorPos, 0BC1Eh
+		TODO	VidCursorPosChanged, 0B8A0h
 
