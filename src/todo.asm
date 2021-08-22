@@ -82,7 +82,6 @@ $		equ	%2
 		TODO	VidReadLightPen, 0C6DFh
 		TODO	VidWinSelect, 0B637h
 		TODO	VidWinScrollUp, 0B76Dh
-		TODO	VidReadCell, 0B66Ah
 		TODO	VidWriteCell, 0B7AEh
 		TODO	VidWriteChar, 0B7B2h
 		TODO	VidWritePel, 0B73Ch
@@ -96,4 +95,7 @@ $		equ	%2
 		TODO	GridVidInitHi, 0D4B9h
 		TODO	VidPageCursorPos, 0BC1Eh
 		TODO	VidCursorPosChanged, 0B8A0h
+		TODO	VidIsTextMode, 0BC29h
+		TODO	VidRetn2, 0B766h
+		TODO	VidGrapCursorOffset, 0B851h
 

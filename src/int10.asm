@@ -426,7 +426,7 @@ VidGetCursorPos	PROC
 		ENDPROC	VidGetCursorPos
 
 ; ---------------------------------------------------------------------
-; VidPageSelect [TechRef 7-11=
+; VidPageSelect [TechRef 7-11]
 ; Switches the active video page.
 ; ---------------------------------------------------------------------
 VidPageSelect	PROC
@@ -462,4 +462,159 @@ VidPageSelect	PROC
 
 .leaveFunction	jmp	UnmakeIsrStack
 		ENDPROC	VidPageSelect
+
+; ---------------------------------------------------------------------
+; VidReadCell [TechRef 7-12]
+; Reads character and attribute at cursor position.
+; ---------------------------------------------------------------------
+VidReadCell	PROC
+.kGrapCellSize	equ	8		; height of character cell
+.kCgaBankStride	equ	2000h		; bytes between bank origins
+
+		call	VidIsTextMode
+		jc	.graphicsMode
+
+		; Text mode is simple: one byte for character,
+		; one for the attributes.
+		call	VidReadCell2
+		jmp	UnmakeIsrStack
+
+.graphicsMode	; Graphics mode is complicated: we need to read the bitmap
+		; representing the character at the cursor position and compare
+		; it to each character in the ROM font as well as any extended
+		; graphics font loaded.
+
+		; Convert current cursor position into an offset to the
+		; cursor location's top left pixel in the refresh buffer.
+		xor_	bl, bl		; only one page in graphics mode
+		call	VidPageCursorPos
+		call	VidGrapCursorOffset
+		mov	es, [cs:kCgaRefreshSeg]	; ES:DI -> character
+
+		; Reserve some space on the stack to store a copy of the
+		; bitmap from the refresh buffer.
+		; DH will store the highest color index used in the character
+		; and will be returned to the caller in AH (even though that
+		; is documented as only valid in text mode).
+		mov	cx, .kGrapCellSize
+		sub	sp, .kGrapCellSize+2	; ??? why plus two?
+		mov_	bp, sp
+		xor_	dh, dh
+		mov	bl, [VidActiveMode]	; we use this throughout
+
+.extractBitmap	; Load a word from the refresh buffer and jump to the
+		; appropriate code for the current video mode's bit depth.
+		mov	ax, [es:di]
+		cmp	bl, VID_MODE_CGA_6
+		jnb	.extract1Bpp
+
+		; Two bits per pixel needs a loop to convert to 1bpp
+		xchg	ah, al			; word reads on byte data needs swapping
+		mov	bh, 8			; eight pixels per word
+		xor_	dl, dl			; DL will store extracted row
+
+.extract2Bpp	; Make room for the next bit in DL, then shift out two bits
+		; from AX.  If either bit is set then mark it DL and record
+		; the largest pixel value seen so far in DH.
+		shl	dl, 1
+		shl	ax, 1
+		jnc	.hiBitDone2Bpp
+		or	dx, 0201h
+.hiBitDone2Bpp	shl	ax, 1
+		jnc	.loBitDone2Bpp
+		or	dx, 0101h
+.loBitDone2Bpp	dec	bh			; count pixel as done
+		jnz	.extract2Bpp		; loop until row done
+		mov_	al, dl			; store extracted pixels
+		jmp	.extractedRow
+
+.extract1Bpp	; 1Bpp is a simple copy
+		or_	al, al			; evaluate row
+		jz	.extractedRow
+		mov	dh, 1			; any bit set -> attribute byte
+
+.extractedRow	; Adjust DI to point to the next row.  The CGA memory layout
+		; makes this awkward: we need to alternate between the low
+		; bank (0000h) and the high bank (2000h) on each row.
+		; We use the low bit of the row number (CX) to jump to the
+		; adjustment code.
+		; The extended graphic modes (40h/48h/74h) complicate things
+		; further -- they have two additional memory banks at 4000h and
+		; 6000h. Code seems to have been patched in to special-case this,
+		; which maskes the code look worse than it really is.
+		add	di, .kCgaBankStride	; advance to next bank
+		cmp	bl, VID_MODE_EXT_48
+		jnz	.notMode48
+
+		; Mode 48h uses all four memory banks and only needs the offset
+		; resetting to the first bank after every four rows.
+		dec	cx
+		test	cl, 3
+		jnz	.L1
+		sub	di, 7FB0h		; reset to bank 0
+.L1		inc	cx
+		jmp	.nextRow
+
+.notMode48	; Modes other than 48h are simpler.
+		; TODO: comment this properly...
+		cmp	bl, VID_MODE_EXT_40
+		jb	.notExtMode
+		add	di, .kCgaBankStride
+.notExtMode	test	cx, 1
+		jz	.nextRow
+		sub	di, 3FB0h
+		cmp	bl, VID_MODE_EXT_40
+		jb	.nextRow
+		sub	di, 2 * .kCgaBankStride
+
+.nextRow	inc	bp			; save extracted pixels
+		mov	[bp+0], al
+		loop	.extractBitmap
+
+		; Adjust BP back to the start of th extracted pixel data and
+		; prepare to compare it to the ROM font data.
+		sub	bp, 7
+		mov_	ah, dh			; return attributes in AH
+		xor_	al, al			; AL will hold returned char
+
+		; Setup for comparison of extracted pixel data on stack via
+		; DS:SI against ROM font data via ES:DI.
+		push	cs
+		pop	es
+		mov	di, GraphicsChars
+		push	ss
+		pop	ds
+
+.compareChar	mov_	si, bp
+		mov	cx, 4			; compare by words
+		repe	cmpsw
+		jz	.leaveFunction		; char matched?
+		add_	di, cx			; skip unmatched data if not
+		add_	di, cx
+		inc	al			; try next character
+		jns	.compareChar
+
+		; Setup for comparison of extracted pixel data on stack via
+		; DS:SI against extended font data (if any) via ES:DI.
+		xor_	di, di
+		mov	es, di
+		les	di, [es:IvtVidGrapFont]
+		mov	cx, es
+		or_	cx, di			; evaluate flags
+		jz	.noCharMatched		; is there extended font data?
+
+.compHiChar	mov_	si, bp
+		mov	cx, 4			; compare by words
+		repe	cmpsw
+		jz	.leaveFunction		; char matched?
+		add_	di, cx			; skip unmatched data if not
+		add_	di, cx
+		inc	al			; try next character
+		jnz	.compHiChar
+
+.noCharMatched	xor_	ax, ax
+
+.leaveFunction	add	sp, 0Ah
+		jmp	VidRetn2
+		ENDPROC	VidReadCell
 

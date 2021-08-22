@@ -37,7 +37,7 @@ IvtInt13		equ	13h * 4
 IvtInt14		equ	14h * 4
 IvtVidParms		equ	1Dh * 4	; Int1D is a far pointer, not a real ISR
 IvtDisketteTable	equ	1Eh * 4	; Int1E is a far pointer, not a real ISR
-IvtInt1F		equ	1Fh * 4
+IvtVidGrapFont		equ	1Fh * 4
 IvtInt40		equ	40h * 4
 IvtHd0Parms		equ	41h * 4	; Int41 is a far pointer, not a real ISR
 IvtHd1Parms		equ	46h * 4	; Int46 is a far pointer, not a real ISR

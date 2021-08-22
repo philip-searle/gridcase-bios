@@ -45,7 +45,7 @@ POST11_LoadIvt	PROC
 
 		; Set int 1Fh to 0000:0000 (InitialIvt sets the offset to 0
 		; but the segment was set to CS, so we must correct it)
-		mov	[es:IvtInt1F + 2], 0,DATA=WORD
+		mov	[es:IvtVidGrapFont + 2], 0,DATA=WORD
 
 		; Set int 70h to 78h
 		; DI is still pointing to InitialIvt table from previous loop
