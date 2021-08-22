@@ -84,8 +84,6 @@ $		equ	%2
 		TODO	VidWinScrollUp, 0B76Dh
 		TODO	VidWriteCell, 0B7AEh
 		TODO	VidWriteChar, 0B7B2h
-		TODO	VidWritePel, 0B73Ch
-		TODO	VidReadPel, 0B75Ah
 		TODO	VidTeletype, 0B7BDh
 		TODO	VidGetDispState, 0B83Dh
 		TODO	VidWriteString, 0BCD5h
@@ -96,6 +94,6 @@ $		equ	%2
 		TODO	VidPageCursorPos, 0BC1Eh
 		TODO	VidCursorPosChanged, 0B8A0h
 		TODO	VidIsTextMode, 0BC29h
-		TODO	VidRetn2, 0B766h
+		TODO	VidGrapPelMask, 0BC37h
 		TODO	VidGrapCursorOffset, 0B851h
 

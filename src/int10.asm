@@ -618,3 +618,54 @@ VidReadCell	PROC
 		jmp	VidRetn2
 		ENDPROC	VidReadCell
 
+; ---------------------------------------------------------------------
+; VidWritePel [7-13]
+; Writes the value in AL to the pixel located at row/column DX/CX.  If
+; the high-bit of AL is set the value will be XOR-ed instead of
+; replacing the existing value.
+; ---------------------------------------------------------------------
+VidWritePel	PROC
+		; Convert row/column to refresh buffer pointer and mask/shift
+		call	VidGrapPelMask
+		jc	VidRetn2
+
+		mov_	dh, dl		; duplicate pixel mask
+		and_	dl, al		; convert mask to masked value
+		shl	dx, cl		; shift mask and value
+		or_	al, al		; xor bit set?
+		js	.xorOp
+
+		; Replace existing pixel
+		not	dh		; invert mask
+		and	[es:bx], dh	; clear pixel
+		or	[es:bx], dl	; merge new pixel value
+		jmp	VidRetn2
+
+.xorOp		; Merge pixel value with existing
+		xor	[es:bx], dl
+		jmp	VidRetn2
+		ENDPROC	VidWritePel
+
+; ---------------------------------------------------------------------
+; VidReadPel [7-13]
+; Reads the pixel located at row/column DX/CX to AL.
+; ---------------------------------------------------------------------
+VidReadPel	PROC
+		; Convert row/column to refresh buffer pointer and mask/shift
+		call	VidGrapPelMask
+		jc	VidRetn2
+
+		mov	al, [es:bx]	; read pixel byte
+		shr	al, cl		; shift pixel to low bits
+		and_	al, dl		; mask off other pixels
+		; fallthrough to VidRetn2
+		ENDPROC	VidReadPel
+
+; ---------------------------------------------------------------------
+; VidRetn2
+; Shared function tail that forwards to UnmakeIsrStack.
+; ---------------------------------------------------------------------
+VidRetn2	PROC
+		jmp	UnmakeIsrStack
+		ENDPROC	VidRetn2
+
