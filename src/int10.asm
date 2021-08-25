@@ -669,3 +669,68 @@ VidRetn2	PROC
 		jmp	UnmakeIsrStack
 		ENDPROC	VidRetn2
 
+; ---------------------------------------------------------------------
+; VidWinScrollDn [TechRef 7-12]
+; ---------------------------------------------------------------------
+VidWinScrollDn	PROC
+		mov	bl, 1
+		jmp	VidWinScroll
+		ENDPROC	VidWinScrollDn
+
+; ---------------------------------------------------------------------
+; VidWinScrollUp [TechRef 7-11]
+; ---------------------------------------------------------------------
+VidWinScrollUp	PROC
+		xor_	bl, bl
+		ENDPROC
+
+; ---------------------------------------------------------------------
+; VidWinScroll
+; Copies data around in video refresh buffer to scroll a rectangular area
+; of the screen up or down.
+; On entry:
+;   AL == number of lines to scroll, 00 == blank window
+;   BH == attributes to use for blank lines
+;   BL == 0 (scroll up), 1 (scroll down)
+;   CX == row,column of upper left corner of window
+;   DX == row,column of lower right corner of scroll
+; ---------------------------------------------------------------------
+VidWinScroll	PROC
+		; Move total number of lines on screen into AH
+		mov	ah, 25
+		cmp	[VidActiveMode], VID_MODE_EXT_48
+		jnz	.gotMaxLines
+		mov	ah, 50		; mode 48 is double-height
+
+.gotMaxLines	cmp_	dh, ah		; window extends past last line?
+		jb	.rowInRange
+		mov_	dh, ah		; clamp if so
+		dec	dh
+
+.rowInRange	cmp	dl, [VidTextColumns]	; column too high?
+		jb	.colInRange
+		mov	dl, [VidTextColumns]	; clamp if so
+		dec	dl
+
+.colInRange	sub_	dl, cl		; dl <- window width
+		push	ax		; convert stack to IsrStackAx layout
+
+		mov_	ah, dh
+		sub_	ah, ch		; ah <- window height
+
+		inc	dl
+		xchg	ch, cl
+		xchg	dl, cl
+		sub_	ah, al		; subtract lines to scroll
+					; from window width
+		jnb	.L1		; scrolling more than a
+					; full window height?
+		xor_	al, al		; scroll no lines if so
+.L1		or_	al, al		; scrolling no lines?
+		jnz	.L2
+		mov	ah, -1
+.L2		inc	ah
+		call	VidScrollImpl
+		jmp	VidRetn3
+		ENDPROC	VidWinScroll
+
