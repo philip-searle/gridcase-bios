@@ -734,3 +734,40 @@ VidWinScroll	PROC
 		jmp	VidRetn3
 		ENDPROC	VidWinScroll
 
+; ---------------------------------------------------------------------
+; VidWriteCell [TechRef 7-12]
+; Writes attribute+character at cursor location, CX times.
+; ---------------------------------------------------------------------
+VidWriteCell	PROC
+		xor_	dl, dl
+		jmp	VidWriteCell2
+		ENDPROC	VidWriteCell
+
+; ---------------------------------------------------------------------
+; VidWriteChar [7-12]
+; Writes character at cursor location, CX times.
+; ---------------------------------------------------------------------
+VidWriteChar	PROC
+		mov	dl, 1
+		; fall-through to VidWriteCell2
+		ENDPROC	VidWriteChar
+
+; ---------------------------------------------------------------------
+; VidWriteCell2
+; Shared function tail for VidWriteCell and VidWriteChar.
+; ---------------------------------------------------------------------
+VidWriteCell2	PROC
+		jcxz	VidRetn2	; early-out for no-op calls
+		push	ax		; convert stack frame to IsrStackAx
+		call	VidWriteCell3
+		; fall-through to VidRetn3
+		ENDPROC
+
+; ---------------------------------------------------------------------
+; VidRetn3
+; Shared function tail.
+; ---------------------------------------------------------------------
+VidRetn3	PROC
+		jmp	UnmakeIsrStack2
+		ENDPROC	VidRetn3
+
