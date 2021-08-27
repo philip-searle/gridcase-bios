@@ -50,6 +50,7 @@ VID_MODE_EXT_74	equ 74h	; G    .     .    640x400  2         .   B800 *2
 ; Note 2: "The 640x400 graphics mode display is compatible at the ROM-BIOS
 ;          level with both the AT&T 6300 and Toshiba T3100 computers."
 ;         [TechRef 7-8]
+;         The AT&T 6300 is also known as the Olivetti M24.
 
 ; Some code checks the video mode to determine CGA/MDA
 VID_FIRST_CGA_GRAP_MODE	equ	VID_MODE_CGA_4
