@@ -744,7 +744,7 @@ VidWriteCell	PROC
 		ENDPROC	VidWriteCell
 
 ; ---------------------------------------------------------------------
-; VidWriteChar [7-12]
+; VidWriteChar [TechRef 7-12]
 ; Writes character at cursor location, CX times.
 ; ---------------------------------------------------------------------
 VidWriteChar	PROC
@@ -772,7 +772,7 @@ VidRetn3	PROC
 		ENDPROC	VidRetn3
 
 ; ---------------------------------------------------------------------
-; VidTeletype [7-13]
+; VidTeletype [TechRef 7-13]
 ; Writes the character in AL to the screen, interpreting basic control
 ; characters to update the cursor and sound the speaker (BEL/CR/LF/BS).
 ; Attribute for character cells scrolled into view are taken from BL
@@ -882,4 +882,163 @@ VidTeletypeChar	PROC
 
 .leaveFunction	retn
 		ENDPROC	VidTeletypeChar
+
+; ---------------------------------------------------------------------
+; VidSetCursorPos [TechRef 7-11]
+; ---------------------------------------------------------------------
+VidSetCursorPos	PROC
+		call	VidStoreCurs
+		jmp	UnmakeIsrStack
+		ENDPROC	VidSetCursorPos
+
+; ---------------------------------------------------------------------
+; VidGetDispState [TechRef 7-13]
+; ---------------------------------------------------------------------
+VidGetDispState	PROC
+		; AX can be returned directly
+		mov	ah, [VidTextColumns]
+		mov	al, [VidActiveMode]
+
+		; BH must be returned via the saved stack image
+		mov	bh, [VidActivePage]
+		mov_	bp, sp
+		mov	[bp+IsrStack.bh], bh
+
+		jmp	UnmakeIsrStack
+		ENDPROC	VidGetDispState
+
+; ---------------------------------------------------------------------
+; VidGrapCursorOffset
+; Takes cursor position in DX and returns the offset in the refresh
+; buffer where the top-left pixel of the character is located.
+; ---------------------------------------------------------------------
+kCgaGrapStride	db	80 * 2
+
+VidGrapCursorOffset	PROC
+		push	ax		; save trashed registers
+		push	dx
+
+		; Convert cursor row in DH to byte offset to top-left pixel
+		; of row in refresh buffer.  Since CGA uses a split memory
+		; layout, half the pixels are stored in the upper memory bank
+		; and can be ignored.  We just need to double the row number
+		; to account for the lower memory bank's rows (except for
+		; video mode 48h which has four memory banks and doesn't
+		; double-up rows in bank 0).
+		mov_	al, dh		; get cursor row
+		cmp	[VidActiveMode], VID_MODE_EXT_48
+		jz	.L1
+		add_	al, al		; double row number
+.L1		mul	[cs:kCgaGrapStride]
+		mov_	di, ax		; accumulate offset in DI
+
+		; Calclate the column offset and add it to DI.
+		; Video modes < 6 have 2bpp and need twice as many bytes
+		; as video modes >= 6 do.
+		xor_	al, al
+		cmp	[VidActiveMode], VID_MODE_CGA_6
+		adc	al, 1
+		mul	dl
+		add_	di, ax		; accumulate
+
+		pop	dx		; restore trashed registers
+		pop	ax
+		retn
+		ENDPROC	VidGrapCursorOffset
+
+; ---------------------------------------------------------------------
+; VidGetPage
+; Returns VidActivePage in BH, or 0 if graphics/MDA mode.  Destroys BL.
+; ---------------------------------------------------------------------
+VidGetPage	PROC
+		mov	bl, [VidActivePage]
+		cmp	[VidActiveMode], VID_FIRST_CGA_GRAP_MODE
+		jl	.return
+		xor_	bl, bl
+.return		mov_	bh, bl
+		retn
+		ENDPROC	VidGetPage
+
+; ---------------------------------------------------------------------
+; VidStoreCurs
+; Updates BDA and CRTC with new cursor position from DX. For text modes
+; the current video page is taken from BH.
+; ---------------------------------------------------------------------
+VidStoreCurs	PROC
+		cmp	[VidActiveMode], VID_FIRST_CGA_GRAP_MODE
+		jb	.gotPage
+		xor_	bh, bh		; graphics mode has only one page
+
+.gotPage	; Store new cursor position to BDA
+		mov_	bl, bh
+		xor_	bh, bh
+		shl	bx, 1
+		mov	[bx+VidCursorPos], dx
+		sar	bx, 1
+
+		; If we're updating the cursor for the current video page
+		; then let the CRTC know where it should be rendering it.
+		cmp	[VidActivePage], bl
+		jnz	VidRetn4
+		; fall-through to VidUpdCrtcCurs
+		ENDPROC	VidStoreCurs
+
+; ---------------------------------------------------------------------
+; VidUpdCrtcCurs
+; Writes DH and DL to the CRTC cursor position registers.
+; ---------------------------------------------------------------------
+VidUpdCrtcCurs	PROC
+		push	ax		; store trashed register
+
+		; Convert row/column to refresh buffer character offset
+		mov_	al, dh
+		mul	[VidTextColumns],DATA=BYTE
+		xor_	dh, dh
+		add_	ax, dx
+		mov	cx, [VidPageOffset]
+		shr	cx, 1
+		add_	cx, ax
+
+		; Fall-through to VidWriteCrtc2
+		mov	bx, CRTC_RPAIR_CURSORADDR
+		pop	ax
+		ENDPROC	VidUpdCrtcCurs
+
+; ---------------------------------------------------------------------
+; VidWriteCrtc2
+; Writes the bytes in CH/CL to CRTC the register numbers in BH/BL.
+; ---------------------------------------------------------------------
+VidWriteCrtc2	PROC
+		push	ax
+		mov	dx, [VidBasePort]
+
+		mov_	al, bh		; save second address
+		out	dx, al		; set address
+		inc	dx		; move to data port
+		mov_	al, ch		; get first data
+		Delay	2
+		out	dx, al		; write data
+
+		dec	dx		; back to address port
+		xchg	ax, bx		; retrieve second address
+		Delay	2
+		out	dx, al		; set second address
+		xchg	ax, bx
+		inc	dx		; move to data port
+		xchg	ax, cx
+		Delay	2
+		out	dx, al		; write second data
+		xchg	ax, cx
+
+		pop	ax
+		; fall-through to VidRetn4
+		ENDPROC	VidWriteCrtc2
+
+; ---------------------------------------------------------------------
+; VidRetn4
+; Shared fnction tail for normal returns.
+; ---------------------------------------------------------------------
+VidRetn4	PROC
+		retn
+		ENDPROC	VidRetn4
 

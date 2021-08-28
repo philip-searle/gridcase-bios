@@ -13,6 +13,11 @@ IsrStack	struc
 .returnOffset	dw	0
 .returnSegment	dw	0
 .returnFlags	dw	0
+
+; Add aliases for byte registers
+$		equ	.bx
+.bl		db	0
+.bh		db	0
 		endstruc
 
 ; Stack layout used by floppy disk int13, which adds AX to the saved registers

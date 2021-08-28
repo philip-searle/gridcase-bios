@@ -77,11 +77,8 @@ $		equ	%2
 		TODO	FdExternalType, 0D218h
 		TODO	FdCountDrives, 0D1ABh
 		TODO	IsExtFdIndex, 0D92Ch
-		TODO	VidWriteCrtc2, 0B8B7h
-		TODO	VidSetCursorPos, 0B837h
 		TODO	VidReadLightPen, 0C6DFh
 		TODO	VidWinSelect, 0B637h
-		TODO	VidGetDispState, 0B83Dh
 		TODO	VidWriteString, 0BCD5h
 		TODO	VidCalcOffsets, 0B8DFh
 		TODO	GridVidInit, 0D4DFh
@@ -90,9 +87,7 @@ $		equ	%2
 		TODO	VidCursorPosChanged, 0B8A0h
 		TODO	VidIsTextMode, 0BC29h
 		TODO	VidGrapPelMask, 0BC37h
-		TODO	VidGrapCursorOffset, 0B851h
 		TODO	VidScrollImpl, 0BA37h
 		TODO	VidWriteCell3, 0BAD5h
 		TODO	UnmakeIsrStack2, 0C5EBh
-		TODO	VidGetPage, 0B875h
 
