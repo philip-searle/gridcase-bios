@@ -80,14 +80,12 @@ $		equ	%2
 		TODO	VidReadLightPen, 0C6DFh
 		TODO	VidWinSelect, 0B637h
 		TODO	VidWriteString, 0BCD5h
-		TODO	VidCalcOffsets, 0B8DFh
 		TODO	GridVidInit, 0D4DFh
 		TODO	GridVidInitHi, 0D4B9h
 		TODO	VidPageCursorPos, 0BC1Eh
 		TODO	VidCursorPosChanged, 0B8A0h
 		TODO	VidIsTextMode, 0BC29h
 		TODO	VidGrapPelMask, 0BC37h
-		TODO	VidScrollImpl, 0BA37h
 		TODO	VidWriteCell3, 0BAD5h
 		TODO	UnmakeIsrStack2, 0C5EBh
 

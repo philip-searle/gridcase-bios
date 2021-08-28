@@ -54,7 +54,7 @@ VidReadCell2	PROC
 
 		; Convert cursor position to offset in DI, get refresh
 		; buffer segment in ES.
-		call	VidCalcOffsets
+		call	VidPageOffsets
 
 		; Do we need to work around CGA 'snow'?
 		; CGA lacks bandwidth in 80x25 text modes for CPU/display
@@ -1041,4 +1041,333 @@ VidWriteCrtc2	PROC
 VidRetn4	PROC
 		retn
 		ENDPROC	VidRetn4
+
+; ---------------------------------------------------------------------
+; VidOffsets
+; Calculates offsets into refresh buffer for active video page.
+; On entry:
+;   DH == cursor row
+;   DL == cursor column
+; On return:
+;   As VidCalcOffsets
+; ---------------------------------------------------------------------
+VidOffsets	PROC
+		mov	bl, [VidActivePage]
+		jmp	VidCalcOffsets
+		ENDPROC	VidOffsets
+
+; ---------------------------------------------------------------------
+; VidPageOffsets
+; Calculates offsets into refresh buffer for specified video page using
+; its current cursor position.
+; On entry:
+;   BH == page index
+; On return:
+;   As VidCalcOffsets
+; ---------------------------------------------------------------------
+VidPageOffsets	PROC
+		mov_	bl, bh
+		call	VidPageCursorPos
+		; fall-through to VidCalcOffsets
+		ENDPROC	VidPageOffsets
+
+; ---------------------------------------------------------------------
+; VidCalcOffsets
+; Calculates offsets into refresh buffer for the specfied position on a
+; specific video page.
+; On entry:
+;   BL == page index
+;   DH == row
+;   DL == column
+; On return:
+;   BX == offset into video page
+;   DI == offset into video refresh buffer
+; ---------------------------------------------------------------------
+VidCalcOffsets	PROC
+		push	ax		; save modified register
+
+		xor_	di, di		; accumulate offset in ES:DI
+		mov	es, [cs:kMdaRefreshSeg]
+
+		; Adjust segment if we're not using CGA
+		mov	al, [EquipmentWord]
+		or	al, 0CFh
+		inc	al
+		jz	.gotPageBase	; MDA?  Nothing to do if so.
+		mov	es, [cs:kCgaRefreshSeg]
+
+		; Adjust page base if we're not on page zero
+		cmp	[VidActiveMode], VID_FIRST_CGA_GRAP_MODE
+		jnb	.gotPageBase	; Graphics mode has only one page
+		mov	ax, [VidPageSize]
+		xor_	bh, bh
+		push	dx
+		mul	bx		; multiply page index by page size
+		pop	dx
+		mov_	di, ax		; DI == page start offset
+
+.gotPageBase	; Add columns to offset
+		mov_	al, dh
+		mul	[VidTextColumns],DATA=BYTE
+		add_	al, dl
+		adc	ah, 0
+		shl	ax, 1		; mul by 2 for attributes
+		mov_	bx, ax		; BX == offset into page
+		add_	di, ax		; DI == offset into refresh buffer
+		pop	ax
+		retn
+		ENDPROC	VidCalcOffsets
+
+; ---------------------------------------------------------------------
+; VidGrapScroll
+; Scrolls the screen in graphics mode.  Complicated by the CGA memory
+; layout.  TODO: figure out how this works and comment it.
+; ---------------------------------------------------------------------
+VidGrapScroll	PROC
+		cmp	[VidActiveMode], VID_LAST_CGA_MODE
+		mov_	dl, ch
+		jnb	.L1
+		shl	cx, 1		; extended video modes are 2x vres
+
+.L1		call	VidGrapCursorOffset
+		mov	es, [cs:kCgaRefreshSeg]
+		xor_	ch, ch
+		mov	dx, 2000h
+		sub_	dx, cx
+		mov	bp, 1FB0h
+		add_	bp, cx
+		push	cx
+		cmp	[VidActiveMode], VID_MODE_EXT_48
+		jnz	.L2
+		shl	ah, 1
+		mov	cx, 0A0h
+		or_	bl, bl
+		jz	.L3
+		add	di, 50h
+		add	bp, 0A0h
+		neg	cx
+		jmp	.L3
+
+.L2		shl	ah, 1
+		shl	ah, 1
+		mov	cx, 140h
+		or_	bl, bl
+		jz	.L3
+		add	di, 0F0h
+		add	bp, 0A0h
+		neg	cx
+
+.L3		or_	al, al
+		jnz	.L4
+		mov	al, [VidActiveMode]
+		cmp	al, VID_MODE_EXT_74
+		jnz	.L5
+		mov	al, 40h
+
+.L5		jmp	.L6
+		FillerNop
+
+.L4		mov_	si, di
+.L7		add_	si, cx
+		dec	al
+		jnz	.L7
+		mov	al, [VidActiveMode]
+		cmp	al, VID_MODE_EXT_74
+		jnz	.L8
+		mov	al, 40h
+
+.L8		pop	cx
+		mov	ds, [cs:kCgaRefreshSeg]
+
+.L9		push	cx
+		shr	cx, 1
+		jnb	.L10
+		movsb
+.L10		rep movsw
+		sti
+		pop	cx
+		add_	si, dx
+		add_	di, dx
+		push	cx
+		shr	cx, 1
+		jnb	.L11
+		movsb
+.L11		rep	movsw
+		sti
+		pop	cx
+		cmp	al, 6
+		jbe	.L12
+		add_	si, dx
+		add_	di, dx
+		push	cx
+		shr	cx, 1
+		jnb	.L13
+		movsb
+.L13		rep movsw
+		sti
+		pop	cx
+		add_	si, dx
+		add_	di, dx
+		push	cx
+		shr	cx, 1
+		jnb	.L14
+		movsb
+.L14		rep	movsw
+		sti
+		pop	cx
+		sub	si, 4000h
+		sub	di, 4000h
+.L12		sub_	si, bp
+		sub_	di, bp
+		dec	ah
+		jnz	.L9
+		push	cx
+.L6		pop	cx
+		mov_	ah, bh
+		pop	bx
+		inc	bh
+		sub_	bh, bl
+		shl	bh, 1
+		mov_	bl, al
+		mov_	al, ah
+		cmp	bl, 40h
+		ja	.L15
+		shl	bh, 1
+.L15		mov_	si, cx
+.L16		shr	cx, 1
+		jnb	.L17
+		stosb
+.L17		rep stosw
+		sti
+		mov_	cx, si
+		add_	di, dx
+		shr	cx, 1
+		jnb	.L18
+		stosb
+.L18		rep	stosw
+		sti
+		cmp	bl, 6
+		jbe	.L19
+		mov_	cx, si
+		add_	di, dx
+		shr	cx, 1
+		jnb	.L20
+		stosb
+.L20		rep stosw
+		sti
+		mov_	cx, si
+		add_	di, dx
+		shr	cx, 1
+		jnb	.L21
+		stosb
+.L21		rep	stosw
+		sti
+		sub	di, 4000h
+.L19		mov_	cx, si
+		sub_	di, bp
+		dec	bh
+		jnz	.L16
+		retn
+		ENDPROC	VidGrapScroll
+
+; ---------------------------------------------------------------------
+; VidGrapScroll2
+; Seemingly unnecessary thunk to VidGrapScroll.
+; ---------------------------------------------------------------------
+VidGrapScroll2	PROC
+		jmp	VidGrapScroll
+		ENDPROC	VidGrapScroll2
+
+; ---------------------------------------------------------------------
+; VidScrollImpl
+; TODO: figure out how this works and document it.
+; ---------------------------------------------------------------------
+VidScrollImpl	PROC
+		mov_	si, dx
+		add_	dl, ah
+		push	dx
+		mov_	dx, si
+		or_	bl, bl		; scrolling down?
+		jnz	.L1
+		mov_	dh, dl
+.L1		call	VidIsTextMode
+		jc	VidGrapScroll2	; handle graphics mode separately
+
+		mov_	dl, ch
+		push	bx
+		call	VidOffsets	; DI == offset into refresh buffer
+		pop	bx
+		xor_	ch, ch
+		push	cx
+		shl	cx, 1
+		mov_	dx, cx
+		mov	bp, [VidTextColumns]
+		shl	bp, 1
+		mov_	cx, bp
+		sub_	bp, dx
+		or_	bl, bl
+		jz	.L2
+		sub_	bp, cx
+		sub_	bp, cx
+		neg	cx
+
+.L2		mov	bl, [VidActiveMode]
+		and	bl, 0FEh
+		cmp	bl, 2
+		jnz	.L3
+		push	dx		; disable CGA display for copy?
+		push	ax
+		mov	dx, [VidBasePort]
+		add	dx, 4
+		mov	al, [VidModeCtrl]
+		and	al, 0F7h
+		out	dx, al
+		pop	ax
+		pop	dx
+
+.L3		or_	al, al
+		jz	.L4
+		mov_	si, di
+
+.L5		add_	si, cx
+		dec	al
+		jnz	.L5
+		pop	cx
+		push	ds
+		push	es
+		pop	ds
+.L6		push	cx
+		rep movsw
+		pop	cx
+		add_	si, bp
+		add_	di, bp
+		dec	ah
+		jnz	.L6
+		pop	ds
+		push	cx
+.L4		pop	cx
+		mov_	ah, bh
+		mov	al, ' '
+		pop	bx
+		inc	bh
+		sub_	bh, bl
+		mov_	si, cx
+.L7		rep stosw
+		sti
+		mov_	cx, si
+		add_	di, bp
+		dec	bh
+		jnz	.L7
+
+		mov	bl, [VidActiveMode]
+		and	bl, 0FEh
+		cmp	bl, 2
+		jnz	.L8
+		mov	dx, [VidBasePort]
+		add	dx, 4
+		mov	al, [VidModeCtrl]
+		out	dx, al		; re-enable CGA display?
+
+.L8		retn
+		ENDPROC	VidScrollImpl
 
