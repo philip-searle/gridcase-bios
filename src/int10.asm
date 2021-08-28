@@ -771,3 +771,115 @@ VidRetn3	PROC
 		jmp	UnmakeIsrStack2
 		ENDPROC	VidRetn3
 
+; ---------------------------------------------------------------------
+; VidTeletype [7-13]
+; Writes the character in AL to the screen, interpreting basic control
+; characters to update the cursor and sound the speaker (BEL/CR/LF/BS).
+; Attribute for character cells scrolled into view are taken from BL
+; (for graphics mode) and from the previous content in text mode.
+; ---------------------------------------------------------------------
+VidTeletype	PROC
+		push	ax		; convert stack layout to IsrStackAx
+
+		; Get the current page (or 0 for graphics mode)
+		mov_	cl, bl		; preserve BL around call
+		call	VidGetPage
+		mov_	bl, cl
+
+		; Get cursor position into DH/DL
+		push	ax
+		mov	ah, 03h
+		int	10h
+		pop	ax
+
+		; Perform character write and get new cursor position in DX
+		mov	cl, 0Ah		; write with int10/0Ah (VidWriteChar)
+		call	VidTeletypeChar
+
+		; Update stored cursor location from DX
+		mov	ah, 02h
+		int	10h
+
+		jmp	UnmakeIsrStack2
+		ENDPROC	VidTeletype
+
+; ---------------------------------------------------------------------
+; VidTeletypeChar
+; Backend for VidTeletype and VidWriteString.
+; On entry:
+;   AL == character to write
+;   DH == cursor row
+;   DL == cursor column
+;   CL == int 10h function to use when writing non-control characters
+; On return:
+;   DX updated with new cursor position
+; ---------------------------------------------------------------------
+VidTeletypeChar	PROC
+		; Apply control characters
+
+		cmp	al, 07h		; ASCII BEL
+		jnz	.notBEL
+		jmp	Beep
+
+.notBEL		cmp	al, 0Dh		; ASCII CR
+		jz	.applyCR
+
+		cmp	al, 08h		; ASCII BS
+		jnz	.notBS
+		sub	dl, 1		; move back a space
+		jnb	.charWritten	; clamp to start of line
+		jmp	.applyCR
+
+.notBS		cmp	al, 0Ah		; ASCII LF
+		jnz	.notLF
+		inc	dh		; move to next line
+		jmp	.charWritten
+
+.notLF		; Write character to screen
+		mov_	ah, cl
+		mov	cx, 1
+		int	10h
+
+		; Advance cursor and move to next line if past last column
+		inc	dx
+		cmp	dl, [VidTextColumns]
+		jnz	.charWritten
+		inc	dh
+
+.applyCR	xor_	dl, dl		; move back to start of line
+
+.charWritten	; Check whether we've run off the end of the page and
+		; scroll up by one line if so.
+		mov	ah, 25
+		cmp	[VidActiveMode], VID_MODE_EXT_48
+		jnz	.checkScroll
+		mov	ah, 50
+.checkScroll	cmp_	dh, ah		; passed end of page?
+		jnz	.leaveFunction
+		dec	dh		; pull back to last valid row
+
+		; Determine attribute for newly-visible line and then scroll
+		; it into view.  Graphics modes need the attribute (foreground
+		; color) to be specified by the caller, while text mode can
+		; read fore/back-ground from the refresh buffer.
+		push	dx
+		push	bx
+		call	VidIsTextMode
+		mov	ah, 0		; graphics mode attribute
+		jc	.gotAttribute
+		mov	ah, 08h		; read attribute/char
+		int	10h
+
+.gotAttribute	; Perform the scroll
+		mov_	bh, ah
+		mov	ax, 0601h	; scroll one line	
+		mov	cx, 0		; scroll entire screen
+		mov	dl, [VidTextColumns]
+		dec	dx
+		int	10h
+		pop	bx
+		pop	dx
+
+.leaveFunction	retn
+		ENDPROC	VidTeletypeChar
+

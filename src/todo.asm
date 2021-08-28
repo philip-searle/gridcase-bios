@@ -81,7 +81,6 @@ $		equ	%2
 		TODO	VidSetCursorPos, 0B837h
 		TODO	VidReadLightPen, 0C6DFh
 		TODO	VidWinSelect, 0B637h
-		TODO	VidTeletype, 0B7BDh
 		TODO	VidGetDispState, 0B83Dh
 		TODO	VidWriteString, 0BCD5h
 		TODO	VidCalcOffsets, 0B8DFh
@@ -95,4 +94,5 @@ $		equ	%2
 		TODO	VidScrollImpl, 0BA37h
 		TODO	VidWriteCell3, 0BAD5h
 		TODO	UnmakeIsrStack2, 0C5EBh
+		TODO	VidGetPage, 0B875h
 
