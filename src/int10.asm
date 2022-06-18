@@ -1,4 +1,25 @@
 
+INT10	PROGRAM	OutFile=build/int10.obj
+
+	include	"macros.inc"
+	include	"segments/bda.inc"
+	include	"segments/ivt.inc"
+	include	"isr.inc"
+	include	"video.inc"
+
+	EXTERN	Beep, FuncToOffset
+	EXTERN	MakeIsrStack, UnmakeIsrStack, UnmakeIsrStack2
+	EXTERN	GridVidInitHi, GridVidInit
+	EXTERN	VidRegenLengths, VidColumns, VidModeSets
+	EXTERN	VidReadLightPen, VidWinSelect, VidWriteString
+	EXTERN	VidPageCursorPos, VidIsTextMode, VidGrapPelMask
+	EXTERN	VidWriteCell3
+	EXTERN	GraphicsChars
+
+	PUBLIC	Int10_Actual
+
+; =====================================================================
+
 Int10.handlers		dw	VidSetMode
 			dw	VidSetCursor
 			dw	VidSetCursorPos
@@ -114,6 +135,7 @@ kCgaRefreshSeg	dw	0B800h
 ; Dead code - forwards to VidReserved, unreferenced.
 ; ---------------------------------------------------------------------
 VidReserved2	PROC
+		Unused	VidReserved2
 		jmp	VidReserved
 		ENDPROC	VidReserved2
 
@@ -458,7 +480,7 @@ VidPageSelect	PROC
 		; column count in the new video mode
 		mov	bl, [VidActivePage]
 		call	VidPageCursorPos
-		call	VidCursorPosChanged
+		call	VidUpdCrtcCurs
 
 .leaveFunction	jmp	UnmakeIsrStack
 		ENDPROC	VidPageSelect
@@ -872,7 +894,7 @@ VidTeletypeChar	PROC
 
 .gotAttribute	; Perform the scroll
 		mov_	bh, ah
-		mov	ax, 0601h	; scroll one line	
+		mov	ax, 0601h	; scroll one line
 		mov	cx, 0		; scroll entire screen
 		mov	dl, [VidTextColumns]
 		dec	dx
@@ -1371,3 +1393,6 @@ VidScrollImpl	PROC
 .L8		retn
 		ENDPROC	VidScrollImpl
 
+; =====================================================================
+
+ENDPROGRAM	INT10

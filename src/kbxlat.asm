@@ -1,4 +1,13 @@
 
+KBXLAT		PROGRAM	OutFile=build/kbxlat.obj
+
+		include	"macros.inc"
+		include	"segments.inc"
+
+		PUBLIC	KbXlat
+		PUBLIC	KbXlatShift, KbXlatCtrl, KbXlatAlt
+		PUBLIC	KbXlatExtended
+
 ; ---------------------------------------------------------------------
 ; KbXlat
 ; Scancode set 2 to ASCII translation table.
@@ -17,13 +26,13 @@ KbXlat		db	01Bh, '1234567890-=', 08h
 ; As KbXlat but with the shift state active.
 ; ---------------------------------------------------------------------
 KbXlatShift	db	01Bh, '!@#$%%^&*()_+', 08h
-		db	0, 'QWERTYUIOP{}', 0Dh 
+		db	0, 'QWERTYUIOP{}', 0Dh
 		db	0FFh, 'ASDFGHJKL:"~'
 		db	0FFh, '|ZXCVBNM<>?'
 		db	0FFh, 0FFh, 0FFh, ' ', 0FFh, 'TUVWXY'
 		db	'Z[\]', 0FFh, 0FFh, '789-456+1230.'
 		db	0FFh, 0FFh, '|', 087h, 088h
-		
+
 ; ---------------------------------------------------------------------
 ; KbXlatCtrl
 ; As KbXlat but with the ctrl key held down.
@@ -55,3 +64,4 @@ KbXlatAlt	db	0F0h, 78h, 79h, 7Ah, 7Bh, 7Ch, 7Dh, 7Eh, 7Fh, 80h, 81h, 82h, 83h, 0
 KbXlatExtended	db	097h, 098h, 099h, 0FFh, 09Bh, 0FFh, 09Dh, 0FFh
 		db	09Fh, 0A0h, 0A1h, 0A2h, 0A3h
 
+ENDPROGRAM	KBXLAT

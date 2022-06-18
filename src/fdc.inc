@@ -142,3 +142,5 @@ FDC_ST3_HEAD		equ	04h
 FDC_ST3_US1		equ	02h
 FDC_ST3_US0		equ	01h
 
+; Minimum motor timeout following a disk operation
+FD_MIN_MOTOR_TIMEOUT	equ	0EDh

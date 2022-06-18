@@ -1,4 +1,15 @@
 
+INT17		PROGRAM	OutFile=build/int17.obj
+
+		include	"macros.inc"
+		include	"segments/bda.inc"
+		include	"parallel.inc"
+
+		EXTERN	MakeIsrStack, UnmakeIsrStack
+		EXTERN	FuncToOffset
+
+		PUBLIC	Int17_Actual
+
 ; PC/AT BIOS technically supported four parallel ports, but the GRiD
 ; 1520 only implements I/O ports for the first one.  Expansion hardware
 ; could, in theory, decode the additional I/O port addresses although
@@ -130,3 +141,4 @@ Int17_Actual	PROC
 		jmp	.buildStatus
 		ENDPROC	Int17_Actual
 
+ENDPROGRAM	INT17

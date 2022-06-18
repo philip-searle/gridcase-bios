@@ -1,4 +1,48 @@
 
+RESET		PROGRAM	OutFile=build/reset.obj
+
+		include	"macros.inc"
+		include	"segments.inc"
+		include	"segments/bda.inc"
+		include	"segments/ivt.inc"
+		include	"cmos.inc"
+		include	"descriptors.inc"
+		include	"diagnostics.inc"
+		include	"dma.inc"
+		include	"grid.inc"
+		include	"keyboard.inc"
+		include	"npu.inc"
+		include	"parallel.inc"
+		include	"pic.inc"
+		include	"pit.inc"
+		include	"serial.inc"
+		include	"video.inc"
+
+		EXTERN	Beep, BeepFactor
+		EXTERN	kIvtSegment, kBdaSegment, InitialIvt
+		EXTERN	kAddressLine, kOddEvenLogic, kRomBadChecksum
+		EXTERN	DummyIsr, IntNmi_Compat, PrntScrn_Compat, SoftwareIret, Int8_Compat
+		EXTERN	VidInit, VidInitBacklite
+		EXTERN	VidTestMem, TestAllMem, TestMemData, TestMemLoAddr
+		EXTERN	DetectMemController, DetectMemSize, MemSetXmsEms
+		EXTERN	ChecksumRom, ChecksumOptRom, InitOptionRoms, ResetNmiChecks
+		EXTERN	SerDetectPort, ParDetectPort
+		EXTERN	TestDmaRegs, TestPicMaskReg
+		EXTERN	KbWaitReady, KbWaitResponse, KbWaitEmpty
+		EXTERN	ReadCmos, WriteCmos
+		EXTERN	SetSoftResetFlag, InitTimerTicks
+		EXTERN	GridAutodetect, FdCheckConfigValid, IdeAutodetect_70, HdcTestDriveReady, HdcHookIvt
+		EXTERN	A20Disable, PmClearTraces
+		EXTERN	PwEnabled, PwStartInput, PwPrompt, PwProcessInput, PwEndInput
+		EXTERN	PwCompareStored, PwBackdoor2, PwIncorrect, PwClearBuffer
+		EXTERN	WriteString, WriteString_Inline, WriteCharHex2, WriteCharHex4
+		EXTERN	WriteChecksumFailMsg, WriteBiosBanner
+		EXTERN	PromptF1Cont
+		EXTERN	SDH_03, SDH_04
+
+		PUBLIC	FatalBeeps
+		PUBLIC	Reset_Actual
+
 ; Number of times to toggle the speaker for a fatal beep
 FATAL_BEEP_LENGTH	equ	300
 
@@ -204,7 +248,7 @@ SDH_02		PROC
 SDH_05		PROC
 		mov	ss, [AdapterRomSegment]	; restore temporary stack
 		mov	sp, [AdapterRomOffset]
-		call	DisableA20		; no A20 needed now we're back in real mode
+		call	A20Disable		; no A20 needed now we're back in real mode
 		mov	al, NMI_ENABLE		; NMI can be turned on since we're running user code again
 		out	PORT_CMOS_ADDRESS, al
 
@@ -268,29 +312,29 @@ SDH_POST	PROC
 ; by 'falling through' from the previous file.  It is expected to continue to
 ; the next part of the POST code in the same way: by 'falling off' the end of
 ; the PROC.
-		include	"src/post/01_cpu.asm"
-		include "src/post/02_vidoff.asm"
-		include "src/post/03_cmosreg.asm"
-		include "src/post/04_bioscsum.asm"
-		include "src/post/05_pitinit.asm"
-		include "src/post/06_dmainit.asm"
-		include "src/post/07_testram.asm"
-		include "src/post/08_bdainit.asm"
-		include "src/post/09_dmareg.asm"
-		include "src/post/10_picreg.asm"
-		include "src/post/11_ivt.asm"
-		include "src/post/12_kbc.asm"
-		include "src/post/13_cmosdiag.asm"
-		include "src/post/14_vidinit.asm"
-		include "src/post/15_hdroms.asm"
-		include "src/post/16_vidinit.asm"
+		include	"post/01_cpu.asm"
+		include "post/02_vidoff.asm"
+		include "post/03_cmosreg.asm"
+		include "post/04_bioscsum.asm"
+		include "post/05_pitinit.asm"
+		include "post/06_dmainit.asm"
+		include "post/07_testram.asm"
+		include "post/08_bdainit.asm"
+		include "post/09_dmareg.asm"
+		include "post/10_picreg.asm"
+		include "post/11_ivt.asm"
+		include "post/12_kbc.asm"
+		include "post/13_cmosdiag.asm"
+		include "post/14_vidinit.asm"
+		include "post/15_hdroms.asm"
+		include "post/16_vidinit.asm"
 
 		; Enough hardware is initialized that we can safely ID ourselves
 		call	WriteBiosBanner
 
-		include "src/post/17_protmode.asm"
-		include "src/post/18_timer2.asm"
-		include "src/post/19_keyboard.asm"
+		include "post/17_protmode.asm"
+		include "post/18_timer2.asm"
+		include "post/19_keyboard.asm"
 
 		; Comprehensive memory test only on cold boots
 		mov	ax, [SoftResetFlag]
@@ -320,7 +364,7 @@ SDH_POST	PROC
 ; ---------------------------------------------------------------------------
 ; POST tests that require keyboard and timer interrupts can now be run
 .l3
-		include	"src/post/20_rtc.asm"
+		include	"post/20_rtc.asm"
 
 ; ---------------------------------------------------------------------------
 ; If we don't have video at this point (and no earlier failures were fatal)
@@ -333,7 +377,7 @@ SDH_POST	PROC
 ; ---------------------------------------------------------------------------
 ; Check CMOS config matches detected hardware
 .haveVideo
-		include	"src/post/21_validconfig.asm"
+		include	"post/21_validconfig.asm"
 
 ; ---------------------------------------------------------------------------
 ; Reconfigure memory controller for EMS if required
@@ -388,7 +432,7 @@ SDH_POST	PROC
 
 ; ---------------------------------------------------------------------------
 ; If POST checks resulted in a critically important message, prompt the user
-; to 
+; to
 .pastKbLock	test	[SoftResetFlag], 1,DATA=BYTE	; lowest bit set (important message)?
 		jz	.pastF1Prompt
 		call	PromptF1Cont		; make sure user has read POST messages
@@ -528,3 +572,4 @@ SDH_00		PROC
 
 		ENDPROC	SDH_00
 
+ENDPROGRAM	RESET

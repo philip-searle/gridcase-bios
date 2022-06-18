@@ -1,4 +1,14 @@
 
+POST_KBC	PROGRAM	OutFile=build/post/kbc.obj
+
+		include	"macros.inc"
+		include	"segments.inc"
+		include	"keyboard.inc"
+
+		PUBLIC	KbWaitEmpty
+		PUBLIC	KbWaitReady
+		PUBLIC	KbWaitResponse
+
 ; =====================================================================
 ; Procedures in this file are called during POST while testing the
 ; keyboard controller.  They cannot use any timers, or IVT entries as
@@ -30,11 +40,11 @@ KbWaitEmpty	PROC
 ; =====================================================================
 ; KbWaitResponse
 ; Waits for the keyboard controller to have data for reading.
-; 
+;
 ; On entry:
 ;   DL == timeout (will test KBC DL*256 times waiting for data)
 ;   DH == repeat count for timeout
-; 
+;
 ; On return:
 ;   AL == KBC status register
 ;   ZF set if no response from KBC within timeout
@@ -69,3 +79,4 @@ KbWaitReady	PROC
 		retn
 		ENDPROC	KbWaitReady
 
+ENDPROGRAM	POST_KBC

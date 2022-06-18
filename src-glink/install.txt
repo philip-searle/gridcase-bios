@@ -1,0 +1,11 @@
+
+For dev build:
+  1. Install carton using cpanm: `cpanm Carton`.
+  2. Install cpanfile dependencies into a project-local directory: `carton install`
+
+For production build:
+  1. Install carton using cpanm: `cpanm Carton`.
+  2. Install cpanfile.snapshot dependencies into a project-local directory: `carton install --deployment`
+
+To run application:
+  carton exec -- ./test.pl ../build/reset.obj

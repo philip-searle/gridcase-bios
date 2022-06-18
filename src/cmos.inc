@@ -45,8 +45,8 @@ SD_AFTER_MEMTEST	equ	02h	; Reset after mem tests performed
 SD_AFTER_MEMERROR	equ	03h	; Reset after parity check
 SD_BOOTLOADER_REQ	equ	04h	; Boot loader request ???
 SD_JMP_WITH_INT		equ	05h	; Reset (JMP to [0:0467h] after resetting PIC)
-SD_PM_TEST7_PASS	equ	06h	; 
-SD_PM_TEST7_FAIL	equ	07h	; 
+SD_PM_TEST7_PASS	equ	06h	;
+SD_PM_TEST7_FAIL	equ	07h	;
 SD_PM_TEST1		equ	08h	; Reset after protected-mode test 1
 SD_BLOCK_MOVE		equ	09h	; Reset after performing block move
 SD_JMP_WITHOUT_INT	equ	0Ah	; Reset (JMP to [0:0467h] without resetting PIC)
@@ -67,7 +67,7 @@ GF_EMS			equ	01h	; use EMS instead of XMS
 
 ; ---------------------------------------------------------------------------
 ; Valid values for the CMOS_FD_TYPE register (upper/lower nibble = FD0/FD1)
-; Note that [TechRef 6-15 documents all values greater than two as 'reserved',
+; Note that [TechRef 6-15] documents all values greater than two as 'reserved',
 ; despite FdDasdType checking values up to four.
 FD_NONE			equ	00h
 FD_5_360K		equ	01h	; 360KB 5.25" drive

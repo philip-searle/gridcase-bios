@@ -32,7 +32,7 @@ DESC_TABLE      %MACRO
 ; When used, the macro invocation's label will be defined to be the
 ; descriptor's offset from the start of the descriptor table.
 DESC_GENERIC    %MACRO  Base, Limit, Flags
-                %:      equ     $ - %DESC_TABLE_BASE
+                %:      equ     OFFSET#($ - %DESC_TABLE_BASE)
                 ds      DESCRIPTOR, \
                         .Limit=%Limit, \
                         .BaseLo=(%Base & 0FFFFh), \

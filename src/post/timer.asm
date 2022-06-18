@@ -1,4 +1,13 @@
 
+POST_TIMER	PROGRAM	OutFile=build/post/timer.obj
+
+		include	"macros.inc"
+		include	"segments/bda.inc"
+
+		EXTERN	kBdaSegment
+
+		PUBLIC	InitTimerTicks
+
 ; =====================================================================
 ; POST utilities related to the timer interrupt.
 ; =====================================================================
@@ -86,10 +95,10 @@ InitTimerTicks	PROC
 ; =====================================================================
 ; BcdToBinary
 ; Converts BCD byte to its binary equivalent.
-; 
+;
 ; On entry:
 ;   AL == BCD input
-; 
+;
 ; On return:
 ;   AL == binary output
 ;   BH destroyed
@@ -103,3 +112,4 @@ BcdToBinary	PROC
 		retn
 		ENDPROC	BcdToBinary
 
+ENDPROGRAM	POST_TIMER

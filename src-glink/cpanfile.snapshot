@@ -1,0 +1,139 @@
+# carton snapshot format: version 1.0
+DISTRIBUTIONS
+  Config-Scoped-0.22
+    pathname: G/GA/GAISSMAI/Config-Scoped-0.22.tar.gz
+    provides:
+      Config::Scoped 0.22
+      Config::Scoped::Error 0.22
+      Config::Scoped::Error::IO 0.22
+      Config::Scoped::Error::Parse 0.22
+      Config::Scoped::Error::Validate 0.22
+      Config::Scoped::Error::Validate::Declaration 0.22
+      Config::Scoped::Error::Validate::Macro 0.22
+      Config::Scoped::Error::Validate::Parameter 0.22
+      Config::Scoped::Error::Validate::Permissions 0.22
+    requirements:
+      Carp 0
+      Digest::MD5 0
+      Error 0
+      File::Basename 0
+      File::Spec 0
+      Module::Build 0
+      Parse::RecDescent 1.94
+      Safe 0
+      Storable 0
+      Test::More 0
+  Data-Dumper-2.183
+    pathname: N/NW/NWCLARK/Data-Dumper-2.183.tar.gz
+    provides:
+      Data::Dumper 2.183
+    requirements:
+      ExtUtils::MakeMaker 0
+  Error-0.17029
+    pathname: S/SH/SHLOMIF/Error-0.17029.tar.gz
+    provides:
+      Error 0.17029
+      Error::Simple 0.17029
+      Error::WarnDie 0.17029
+      Error::subs 0.17029
+    requirements:
+      Carp 0
+      Exporter 0
+      ExtUtils::MakeMaker 0
+      Module::Build 0.28
+      Scalar::Util 0
+      overload 0
+      perl 5.006
+      strict 0
+      vars 0
+      warnings 0
+  Modern-Perl-1.20200211
+    pathname: C/CH/CHROMATIC/Modern-Perl-1.20200211.tar.gz
+    provides:
+      Modern::Perl 1.20200211
+      odern::Perl 1.20200211
+    requirements:
+      ExtUtils::MakeMaker 0
+      IO::File 0
+      IO::Handle 0
+      feature 0
+      mro 0
+      perl 5.010
+      strict 0
+      warnings 0
+  Module-Build-0.4231
+    pathname: L/LE/LEONT/Module-Build-0.4231.tar.gz
+    provides:
+      Module::Build 0.4231
+      Module::Build::Base 0.4231
+      Module::Build::Compat 0.4231
+      Module::Build::Config 0.4231
+      Module::Build::Cookbook 0.4231
+      Module::Build::Dumper 0.4231
+      Module::Build::Notes 0.4231
+      Module::Build::PPMMaker 0.4231
+      Module::Build::Platform::Default 0.4231
+      Module::Build::Platform::MacOS 0.4231
+      Module::Build::Platform::Unix 0.4231
+      Module::Build::Platform::VMS 0.4231
+      Module::Build::Platform::VOS 0.4231
+      Module::Build::Platform::Windows 0.4231
+      Module::Build::Platform::aix 0.4231
+      Module::Build::Platform::cygwin 0.4231
+      Module::Build::Platform::darwin 0.4231
+      Module::Build::Platform::os2 0.4231
+      Module::Build::PodParser 0.4231
+    requirements:
+      CPAN::Meta 2.142060
+      Cwd 0
+      Data::Dumper 0
+      ExtUtils::CBuilder 0.27
+      ExtUtils::Install 0
+      ExtUtils::Manifest 0
+      ExtUtils::Mkbootstrap 0
+      ExtUtils::ParseXS 2.21
+      File::Basename 0
+      File::Compare 0
+      File::Copy 0
+      File::Find 0
+      File::Path 0
+      File::Spec 0.82
+      Getopt::Long 0
+      Module::Metadata 1.000002
+      Perl::OSType 1
+      Pod::Man 2.17
+      TAP::Harness 3.29
+      Text::Abbrev 0
+      Text::ParseWords 0
+      perl 5.006001
+      version 0.87
+  Parse-RecDescent-1.967015
+    pathname: J/JT/JTBRAUN/Parse-RecDescent-1.967015.tar.gz
+    provides:
+      Parse::RecDescent 1.967015
+      Parse::RecDescent::Action 1.967015
+      Parse::RecDescent::ColCounter 1.967015
+      Parse::RecDescent::Directive 1.967015
+      Parse::RecDescent::Error 1.967015
+      Parse::RecDescent::Expectation 1.967015
+      Parse::RecDescent::InterpLit 1.967015
+      Parse::RecDescent::LineCounter 1.967015
+      Parse::RecDescent::Literal 1.967015
+      Parse::RecDescent::OffsetCounter 1.967015
+      Parse::RecDescent::Operator 1.967015
+      Parse::RecDescent::Production 1.967015
+      Parse::RecDescent::Repetition 1.967015
+      Parse::RecDescent::Result 1.967015
+      Parse::RecDescent::Rule 1.967015
+      Parse::RecDescent::Subrule 1.967015
+      Parse::RecDescent::Token 1.967015
+      Parse::RecDescent::UncondReject 1.967015
+    requirements:
+      Test::More 0
+      Text::Balanced 1.95
+  Struct-Dumb-0.12
+    pathname: P/PE/PEVANS/Struct-Dumb-0.12.tar.gz
+    provides:
+      Struct::Dumb 0.12
+    requirements:
+      Module::Build 0.4004

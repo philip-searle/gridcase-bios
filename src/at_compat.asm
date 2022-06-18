@@ -1,13 +1,46 @@
+
+AT_COMPAT	PROGRAM	OutFile=build/at_compat.obj
+
+		include	"macros.inc"
+		include	"segments.inc"
+		include	"int13.inc"
+
+		EXTERN	Reset_Actual
+		EXTERN	IntNmi_Actual, HdcAtInt13, Int19_Actual
+		EXTERN	Int14_Actual, Int16_Actual, Int9_Actual, Int13Fd_Actual
+		EXTERN	IntE_Actual, Int17_Actual, Int12_Actual, Int11_Actual
+		EXTERN	Int15_Actual, Int1A_Actual, Int8_Actual, EoiPic1
+		EXTERN	DummyIsr, Int18, Int70, Int71, Int75, Int10_Actual
+		EXTERN	EoiPic1and2, PrntScrn_Actual
+
+		PUBLIC	Reset_Compat, IntNmi_Compat, Int13Hd_Compat
+		PUBLIC	Int8_Compat, DisketteParams, FixedDiskParams
+		PUBLIC	BaudRateInit, InitialIvt, PrntScrn_Compat, SoftwareIret
+		PUBLIC	DelayFactor, BeepFactor
+		PUBLIC	VidRegenLengths, VidColumns, VidModeSets
+		PUBLIC	GraphicsChars
+
+		; Symbols that are exposed as part of the public API but which
+		; are otherwise unreferenced
+		Unused	Copyr_Phoenix
+		Unused	Copyr_Phoenix2
+
+		; Symbols that are currently unused because the codebase is
+		; not yet complete.
+		Unused	VidUnknown1
+
+%XxxBase	%seta 0E000h
+
 ; ===========================================================================
 ; IBM AT compatibility section
-; 
+;
 ; The IBM XT BIOS was located at F000:E000 and many programs hardcoded the
 ; addresses of various entrypoints and data structures (despite the published
 ; BIOS listing warning against this in favour of the documented interrupt
 ; handlers).  To prevent these programs from breaking when the AT BIOS was
 ; released, all BIOS code was located below this zone with 'stub' entrypoints
 ; to redirect any direct callers to the real code elsewhere.
-; 
+;
 ; Since large portions of this area ended up consisting entirely of unused
 ; bytes (0FFh) GRiD reused some of the spare space for GRiD-specific code
 ; such as the BIOS password feature.
@@ -45,7 +78,7 @@ IntNmi_Compat	jmpn	IntNmi_Actual
 ; ---------------------------------------------------------------------------
 
 ; [Compat] Int13 fixed disk entrypoint must be the same as the XT BIOS.
-		FillRom 0xE3FE,0FFh
+		FillRom 0E3FEh,0FFh
 Int13Hd_Compat	jmpn	HdcAtInt13
 
 ; ---------------------------------------------------------------------------
@@ -78,12 +111,12 @@ FixedDiskParams	FDS_INSTANCE	0132h,  4,    80h, 0h, 131h, 11h	; Type 01 10MB
 		FDS_INSTANCE	02DDh,  5,   12Ch, 0h, 2DDh, 11h	; Type 22 30MB GRiD supported [TechRef 6-18]
 		FDS_INSTANCE	0132h,  4,     0h, 0h, 150h, 11h	; Type 23 10MB GRiD supported [TechRef 6-18]
 		FDS_INSTANCE	0000h,  0,     0h, 0h,   0h,  0h	; Type 24 UNUSED
-		FDS_INSTANCE	0267h,  4,     0h, 0h, 267h, 11h	; Type 25 20MB 
-		FDS_INSTANCE	0400h,  4, 0FFFFh, 0h, 3FFh, 11h	; Type 26 34MB  
-		FDS_INSTANCE	0400h,  5, 0FFFFh, 0h, 3FFh, 11h	; Type 27 43MB  
-		FDS_INSTANCE	0400h,  8, 0FFFFh, 0h, 3FFh, 11h	; Type 28 68MB  
-		FDS_INSTANCE	0200h,  8,   100h, 0h, 200h, 11h	; Type 29 34MB  
-		FDS_INSTANCE	0267h,  2,   267h, 0h, 267h, 11h	; Type 30 10MB  
+		FDS_INSTANCE	0267h,  4,     0h, 0h, 267h, 11h	; Type 25 20MB
+		FDS_INSTANCE	0400h,  4, 0FFFFh, 0h, 3FFh, 11h	; Type 26 34MB
+		FDS_INSTANCE	0400h,  5, 0FFFFh, 0h, 3FFh, 11h	; Type 27 43MB
+		FDS_INSTANCE	0400h,  8, 0FFFFh, 0h, 3FFh, 11h	; Type 28 68MB
+		FDS_INSTANCE	0200h,  8,   100h, 0h, 200h, 11h	; Type 29 34MB
+		FDS_INSTANCE	0267h,  2,   267h, 0h, 267h, 11h	; Type 30 10MB
 		FDS_INSTANCE	0000h,  0,     0h, 0h,   0h,  0h	; Type 31 UNUSED
 		FDS_INSTANCE	0000h,  0,     0h, 0h,   0h,  0h	; Type 32 UNUSED
 		FDS_INSTANCE	0000h,  0,     0h, 0h,   0h,  0h	; Type 33 UNUSED
@@ -128,7 +161,7 @@ BaudRateInit	dw	1047	; 100 Baud
 ; ---------------------------------------------------------------------------
 
 ; [Compat] Int14 (serial I/O) entrypoint must be the same place as the XT BIOS
-		FillRom	0E739h, 0FFh
+		CompatAddress 0E739h
 Int14_Compat	jmpn	Int14_Actual
 
 ; ---------------------------------------------------------------------------
@@ -174,7 +207,7 @@ DisketteParams	db	0DFh	; 1st specify byte
 ; ---------------------------------------------------------------------------
 
 ; [Compat] Int17 (printer services) must be same location as the XT BIOS
-		FillRom	0EFD2h, 0FFh
+		CompatAddress 0EFD2h
 Int17_Compat	jmpn	Int17_Actual
 
 ; ---------------------------------------------------------------------------
@@ -235,11 +268,11 @@ Int15_Compat	jmpn	Int15_Actual
 ; [Compat] CGA graphics character set must be in same location as the XT BIOS
 		FillRom	0FA6Eh, 0FFh
 GraphicsChars:
-INCLUDE		"src/graphics_charset.asm"
+INCLUDE		"graphics_charset.asm"
 
 ; ---------------------------------------------------------------------------
 ; [Compat] Int1A (timer) must be in the same location as the XT BIOS
-		FillRom	0FE6Eh, 0FFh
+		CompatAddress 0FE6Eh
 Int1A_Compat	jmpn	Int1A_Actual
 
 ; ---------------------------------------------------------------------------
@@ -297,7 +330,7 @@ SoftwareIret	iret
 
 ; ---------------------------------------------------------------------------
 ; [Compat] Print screen handler is called by applications; don't move it
-		FillRom	0FF54h, 0FFh
+		CompatAddress 0FF54h
 PrntScrn_Compat	jmpn	PrntScrn_Actual
 
 
@@ -317,3 +350,4 @@ BeepFactor	db	3Ch	; Timing for speaker beep pitch
 		db	0,0
 		db	0E0h,24h
 
+ENDPROGRAM	AT_COMPAT

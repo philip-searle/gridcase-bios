@@ -1,4 +1,26 @@
 
+INT9		PROGRAM	OutFile=build/int9.obj
+
+		include	"macros.inc"
+		include	"segments/bda.inc"
+		include	"keyboard.inc"
+		include	"pic.inc"
+		include	"video.inc"
+
+		EXTERN	LoadBdaToDs
+		EXTERN	MakeIsrStack, UnmakeIsrStack
+		EXTERN	KbDisable, KbEnable
+		EXTERN	CheckBiosChords
+		EXTERN	Reset_Compat
+		EXTERN	KbXlat, KbXlatExtended, KbXlatScancode
+		EXTERN	KbXlatShift, KbXlatCtrl, KbXlatAlt
+		EXTERN	KbAdvanceBuf, KbExtendBuf
+		EXTERN	KbKeyClick
+		EXTERN	KbAckInt, KbSyncLedState
+		EXTERN	Beep
+
+		PUBLIC	Int9_Actual
+
 ; Useful reference for int9 handler is PC Tech Journal, Vol 5 No 7.
 ; https://archive.org/details/PC_Tech_Journal_vol05_n07/page/n149/mode/2up
 
@@ -203,7 +225,7 @@ Int9_Actual	PROC
 		call	CheckBiosChords		; both keys pressed, check third one
 		jnz	.notBiosChord		; zero flag set indicates reboot wanted
 		mov	[SoftResetFlag], SOFT_RESET_FLAG
-		jmpf	(BIOS_SEGMENT):Reset_Compat
+		jmpf	Reset_Compat
 
 ; ---------------------------------------------------------------------
 ; Extended key codes introduced with the PC/AT keyboard have their own
@@ -801,3 +823,4 @@ KbShiftAdjClr	PROC
 		jmp	KbShiftAdjSet.L2
 		ENDPROC	KbShiftAdjClr
 
+ENDPROGRAM	INT9

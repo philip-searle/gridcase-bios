@@ -1,4 +1,20 @@
 
+INT19		PROGRAM	OutFile=build/int19.obj
+
+		include	"macros.inc"
+		include	"segments/bda.inc"
+		include	"segments/ivt.inc"
+		include	"grid.inc"
+		include	"parallel.inc"
+
+		EXTERN	kBdaSegment, kBootSegOffset
+		EXTERN	WriteString
+		EXTERN	GridBootRom
+		EXTERN	TenthMilliDelay
+		EXTERN	DisketteParams
+
+		PUBLIC	Int19_Actual
+
 ; ===========================================================================
 ; Int19_Actual
 ; Bootloader, called after POST (and in theory by any application software
@@ -160,10 +176,10 @@ Int19_Actual	PROC
 ; LoadBootSector
 ; Attempts to load the boot sector from a disk drive to 0000:7C00.
 ; If successful, jumps to the loaded code and does not return.
-; 
+;
 ; On entry:
 ;   DL == drive ID
-; 
+;
 ; On return:
 ;   Load failed or sector was not considered to be executable.
 ; ===========================================================================
@@ -172,7 +188,7 @@ LoadBootSector	PROC
 
 ; Attempt to load the boot sector, retrying multiple times.  Need to reset
 ; the disk system between each try to maximise changes of success.
-		mov	cx, 5
+		mov	cx, .LOAD_RETRIES
 .loadSector	push	bx
 		push	cx
 		sti
@@ -194,19 +210,19 @@ LoadBootSector	PROC
 ; Ensure floppy disk first sector is executable.
 ; First word must be >= xx06h and the next eight words must contain at least
 ; one word with a different value to the first.
-; 
+;
 ; This accounts for all DOS boot sectors, which start with a short JMP:
 ;  * DOS 1.0 did not have a BIOS Parameter Block but jumps over the first
 ;    31h bytes of the boot sector (EB 1F).
 ;  * DOS 2+ which jump over the BPB (EB 14+ depending on DOS version).
 ; All of these boot sectors have constant data in the following eight words
 ; which differs from the first two bytes.
-; 
+;
 ; Non-executable boot sectors will likely be encountered on unformatted media
 ; which will have sectors initialised to a constant value: not necessarily
 ; zero (values such as 4E are common fill bytes) but the check for the next
 ; eight words catches them.
-; 
+;
 ; Note that we do NOT check for the last two bytes being the 55AAh marker
 ; as many sources say we should -- it is not present in DOS 1.0 boot sectors.
 		SEGES mov	ax, [7C00h]
@@ -268,7 +284,7 @@ Int19_kDiskBootError	db	' Disk Boot Error',0Dh,0Ah,0
 ; Waits for a short delay.  If keyboard buffer contains any keypresses on
 ; entry or keys are pressed during the delay, then the most recent keypress
 ; is returned.
-; 
+;
 ; On return:
 ;   AX = last key code pressed
 ;   CF set if no keys pressed
@@ -298,7 +314,7 @@ GridWaitKey	PROC
 ; ===========================================================================
 ; GridBootFdIds
 ; Detects appropriate floppy drive IDs for booting from (00 to 02).
-; 
+;
 ; On return:
 ;   BH = primary floppy boot drive ID
 ;   BL = extra floppy boot drive ID
@@ -349,3 +365,4 @@ GridBootFdIds	PROC
 		retn
 		ENDPROC	GridBootFdIds
 
+ENDPROGRAM	INT19

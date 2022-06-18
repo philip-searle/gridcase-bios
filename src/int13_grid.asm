@@ -1,4 +1,18 @@
 
+INT13_GRID	PROGRAM	OutFile=build/int13_grid.obj
+
+		include	"macros.inc"
+		include	"segments/bda.inc"
+		include	"grid.inc"
+		include	"hdc_at.inc"
+		include	"int13.inc"
+
+		EXTERN	DriveIdentify
+		EXTERN	kBdaSegment
+		EXTERN	MakeAtRegPacket, SendAtRegPacket
+		EXTERN	HdDecideError
+		EXTERN	HdWaitTask
+
 ; ===========================================================================
 ; HdSpinDown [TechRef 3-25]
 ; GRiD-specific BIOS call that controls hard disk spin down behaviour.
@@ -116,7 +130,7 @@ HdIdentify	PROC
 
 		; Setup for AT disk controller command
 		mov	ds, [cs:kBdaSegment]
-		mov	[HdLastOpStatus], 0
+		mov	[HdLastOpStatus], 0, DATA=BYTE
 		sti
 
 		mov	bl, 2	; ??? unused, possible this code originally
@@ -201,3 +215,4 @@ HdIdentify	PROC
 		retn
 		ENDPROC	HdIdentify
 
+ENDPROGRAM	INT13_GRID

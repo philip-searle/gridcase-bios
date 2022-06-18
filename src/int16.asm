@@ -1,4 +1,18 @@
 
+INT16		PROGRAM	OutFile=build/int16.obj
+
+		include	"macros.inc"
+		include	"segments/bda.inc"
+		include	"keyboard.inc"
+
+		EXTERN	FuncToOffset
+		EXTERN	KbSyncLedState
+		EXTERN	KbAdvanceBuf, KbExtendBuf
+		EXTERN	KbDisable, KbEnable
+		EXTERN	KbWriteDataByte
+
+		PUBLIC	Int16_Actual
+
 ; ===========================================================================
 ; Int16_Actual [TechRef 8-5]
 ; Provides BIOS keyboard services.
@@ -351,3 +365,4 @@ KbTranslateExt	PROC
 .L3		retn
 		ENDPROC	KbTranslateExt
 
+ENDPROGRAM	INT16

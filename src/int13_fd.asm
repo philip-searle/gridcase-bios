@@ -1,7 +1,22 @@
 
+INT13_FD	PROGRAM	OutFile=build/int13_fd.obj
+
+		include	"macros.inc"
+		include	"segments.inc"
+		include	"isr.inc"
+
+		EXTERN	FuncToOffset
+		EXTERN	MakeIsrStack
+		EXTERN	FdChangeLine, FdReset, FdStatus
+		EXTERN	FdPerformOp, FdFormat, FdUnsupported
+		EXTERN	FdDiskParms, FdDasdType, FdSetDasdType, FdSetMediaType
+		EXTERN	WriteString_Inline
+
+		PUBLIC	Int13Fd_Actual
+
 ; Constants for drive count and 0-based indexes
 MAX_FLOPPY_DRIVES	equ	3
-MAX_FLOPPY_INDEX	equ	(MAX_FLOPPY_DRIVES - 1)
+;MAX_FLOPPY_INDEX	equ	(MAX_FLOPPY_DRIVES - 1)
 
 ; ---------------------------------------------------------------------
 ; Int13Fd_Actual
@@ -66,3 +81,4 @@ Int13Fd_Actual	PROC
 .handlersLast	dw	FdSetMediaType
 		ENDPROC	Int13Fd_Actual
 
+ENDPROGRAM	INT13_FD

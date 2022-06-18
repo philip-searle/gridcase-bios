@@ -1,4 +1,17 @@
 
+INT18		PROGRAM	OutFile=build/int18.obj
+
+		include	"macros.inc"
+		include	"segments.inc"
+		include	"keyboard.inc"
+
+		EXTERN	Beep, BeepFactor
+		EXTERN	WaitKey
+		EXTERN	WriteString_Inline
+
+		PUBLIC	Int18
+		PUBLIC	PromptF1Cont
+
 ; ===========================================================================
 ; Int18
 ; Called after bootloader failure.
@@ -42,3 +55,4 @@ BeepBeepWaitF1	PROC
 		retn
 		ENDPROC	BeepBeepWaitF1
 
+ENDPROGRAM	INT18

@@ -1,4 +1,26 @@
 
+INT13_AT	PROGRAM	OutFile=build/int13_at.obj
+
+		include	"macros.inc"
+		include	"segments/bda.inc"
+		include	"segments/ivt.inc"
+		include	"cmos.inc"
+		include	"hdc_at.inc"
+		include	"int13.inc"
+		include	"pic.inc"
+
+		EXTERN	kBdaSegment
+		EXTERN	ReadCmos, WriteCmos
+		EXTERN	SetSoftResetFlag
+		EXTERN	FixedDiskParams
+		EXTERN	WriteString_Inline
+
+		PUBLIC	HdcAtInt13
+		PUBLIC	HdDecideError
+		PUBLIC	HdWaitTask
+		PUBLIC	MakeAtRegPacket
+		PUBLIC	SendAtRegPacket
+
 ; Constant used to locate the interrupt vector table.
 ; The int13 code has its own copy of this constant, probably because it was
 ; written seperately from the main BIOS codebase before being merged in.
@@ -7,7 +29,7 @@ kIvtSegment2	dw	0
 ; ===========================================================================
 ; GetCmosFdsPtr
 ; Returns a pointer to the fixed disk parameter table for a given drive.
-; 
+;
 ; On entry:
 ;   AH = CMOS register number for extended hard drive type
 ;   AL = hard drive type in lower nibble
@@ -293,8 +315,12 @@ HdcAtInt13	PROC
 ; The macro here generates constants so we don't have to keep track of
 ; which command handler is at what offset manually.
 JumpTableEntry	%macro
+		; Suppress "unused symbol" warning for tableOffset label
+		; We normally only use a couple of them
+		EUROASM	PUSH, NOWARN=2101
 %1_tableOffset	equ	$ - .int13Handlers
 		dw	%1
+		EUROASM	POP
 		%endmacro
 
 .int13Handlers	JumpTableEntry	HdcAtReset
@@ -330,7 +356,7 @@ JumpTableEntry	%macro
 ; Shared function tail for HdcAtInt13 and most Int13 command handlers.
 ; Updates HdLastOpStatus (if it's not already an error code) and cleans up
 ; the stack frame setup by HdcAtInt13.
-; 
+;
 ; On return:
 ; 	AH == HdLastOpStatus
 ;	CF set on error
@@ -358,7 +384,7 @@ HdcAtCmdDone	PROC
 ; Int13 command handler that returns details about direct attached storage
 ; devices (DASD -- disk drives).  Unlike other int13 command handlers, this
 ; has a non-standard return: AH is not a status/error code.
-; 
+;
 ; On return;
 ; 	AH == 00 if drive not present
 ;	AH == 03 if hard drive present
@@ -824,10 +850,10 @@ HdcAtDiagnostic	PROC
 ; ===========================================================================
 ; GetIvtFdsPtr
 ; Loads the fixed disk parameters table pointer from IVT entries 41h and 46h.
-; 
+;
 ; On entry:
 ; 	DL == hard disk drive index (0/1)
-; 
+;
 ; On return:
 ; 	ES:SI -> fixed disk parameter table entry
 ; ===========================================================================
@@ -842,11 +868,11 @@ GetIvtFdsPtr	PROC
 
 ; ===========================================================================
 ; ValidHdXferBuf
-; 
+;
 ; On entry:
 ; 	ES:BX -> disk tranfer buffer start
 ; 	AL == count of sectors
-; 
+;
 ; On return:
 ; 	ES_DI -> normalized disk transfer buffer start
 ; 	AH = error code
@@ -854,7 +880,7 @@ GetIvtFdsPtr	PROC
 ; 	       non-zero error code if:
 ; 	         sector count > 80h
 ; 	         or buffer would cross a 64K DMA boundary
-; 	     
+;
 ; ===========================================================================
 ValidHdXferBuf	PROC
 		push	bx	; normalize ES:BX into ES:DI
@@ -930,14 +956,14 @@ ValidHdXferBuf	PROC
 		jnb	.done	; set error code if calculated size was over 64K
 		mov	ah, INT13STAT_DMABOUNDARY
 
-.done		retn	
+.done		retn
 		ENDPROC	ValidHdXferBuf
 
 ; ===========================================================================
 ; HdWaitTask
 ; Waits for the disk controller to signal an interrupt by checking the
 ; HdTaskComplete flag in the BDA.
-; 
+;
 ; On return:
 ; 	CF set on timeout
 ; 	CF clear on interrupt before timeout
@@ -982,22 +1008,22 @@ HdWaitTask	PROC
 ; Converts a sector address from int13 input format to a block of memory
 ; suitable for sending to the AT hard disk controller registers.  Register
 ; values are stored in ascending order by port number.
-; 
+;
 ; On entry:
 ; 	AH == disk controller command [TechRef 10-17]
 ; 	AL == count of sectors
 ; 	CH == low eight bits of cylinder number
 ; 	CL == sector number 1-63 (bits 0-5)
-; 	      upper tow bits of cylinder (bits 6-7)
+; 	      upper two bits of cylinder (bits 6-7)
 ; 	DH == head number
 ; 	DL == drive number (only lowest bit used)
-; 
+;
 ; On successful returnL
 ; 	CF clear
 ; 	ZF set if retry-on-disk-error wanted
 ; 	BH == count of sectors
 ; 	Register packer assembled at BDA:HdRegPacket for SendAtRegPacket to use
-; 
+;
 ; On failure:
 ; 	CF set
 ; 	AH == int13 error code
@@ -1052,7 +1078,7 @@ MakeAtRegPacket	PROC
 ; SendAtRegPacket
 ; Sends the register packet previously assembled by MakeAtRegPacket to the AT
 ; hard disk controller.
-; 
+;
 ; On return:
 ; 	CF set on error, AH = error code
 ; ===========================================================================
@@ -1112,7 +1138,7 @@ SendAtRegPacket	PROC
 ; DecSectorCount
 ; Decrements the sector count in BHm checking for hard disk controller errors
 ; along the way.
-; 
+;
 ; On return:
 ; 	BH decremented
 ; 	CF set on controller error, AH is error code
@@ -1147,7 +1173,7 @@ DecSectorCount	PROC
 ; HdWaitNotBusy
 ; Waits for the AT hard disk controller to not be busy, updating the
 ; controller status byte in the BDA.
-; 
+;
 ; On return:
 ; 	CF clear on success
 ; 	AH = int13 error code, CF set if controller still busy after timeout
@@ -1174,7 +1200,7 @@ HdWaitNotBusy	PROC
 ; HdWaitData
 ; Waits for the AT hard disk controller to report that it is ready for a data
 ; transfer to take place.
-; 
+;
 ; On return:
 ; 	CF clear on success
 ; 	CF set on failure, AH = error code
@@ -1204,7 +1230,7 @@ HdWaitData	PROC
 ; HdDecideError
 ; Examines the AT hard disk controller and updates the status and error bytes
 ; in the BDA.
-; 
+;
 ; On return:
 ; 	if error determined:
 ; 	  CF set
@@ -1303,3 +1329,4 @@ HdDecideError	PROC
 .returnOk	retn
 		ENDPROC	HdDecideError
 
+ENDPROGRAM	INT13_AT

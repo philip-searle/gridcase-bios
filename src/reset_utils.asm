@@ -1,4 +1,21 @@
 
+POST_RESET_UTIL	PROGRAM	OutFile=build/reset_utils.obj
+
+		include	"macros.inc"
+		include	"segments/bda.inc"
+		include	"pic.inc"
+
+		EXTERN	kBdaSegment
+		EXTERN	ChecksumOptRom
+		EXTERN	WriteCharHex4, WriteCrLf, WriteString_Inline
+		EXTERN	WriteBadCsumMsg
+		EXTERN	SetSoftResetFlag
+
+		PUBLIC	kRomBadChecksum
+		PUBLIC	InitOptionRoms
+		PUBLIC	TestDmaRegs
+		PUBLIC	TestPicMaskReg
+
 ; Prefix for ROM checksum failure message
 kRomBadChecksum	db	'ROM bad checksum = ',0
 
@@ -23,7 +40,7 @@ InitOptionRoms	PROC
 		push	cx
 		push	ds
 		mov	si, 80h		; SI = ROM header increment (2K)
-		cmp	[0], 0AA55h,DATA=WORD	; option ROM header found?
+		cmp	[0], kOptionRomSig,DATA=WORD	; option ROM header found?
 		jnz	.advanceSearch	; if not, try again
 
 		; Load the ROM size byte (count of 512 byte pages).
@@ -37,7 +54,7 @@ InitOptionRoms	PROC
 					; by 16, making a segment address)
 		push	si		; save segment address of next potential ROM
 		shl	cx, 1		; multiply by two to get back original byte count
-					; 
+					;
 		call	ChecksumOptRom
 		jnz	.badChecksum
 
@@ -172,3 +189,4 @@ TestDmaRegs	PROC
 		retn
 		ENDPROC	TestDmaRegs
 
+ENDPROGRAM	POST_RESET_UTIL

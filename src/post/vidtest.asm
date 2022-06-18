@@ -1,4 +1,16 @@
 
+POST_VIDTEST	PROGRAM	OutFile=build/post/vidtest.obj
+
+		include	"macros.inc"
+		include	"segments/bda.inc"
+		include	"diagnostics.inc"
+		include	"video.inc"
+
+		EXTERN	Beep
+		EXTERN	TestMemData, TestMemLoAddr, ResetNmiChecks
+
+		PUBLIC	VidTestMem
+
 ; =====================================================================
 ; Procedures in this file are called during POST to test video adapter
 ; functionality.  They cannot use any timers, IVT entries, or keyboard
@@ -146,3 +158,4 @@ VidTestMem	PROC
 		retn
 		ENDPROC	VidTestMem
 
+ENDPROGRAM	POST_VIDTEST

@@ -10,7 +10,29 @@ Current progress is ~30% complete.
 Once completed, I hope to go back to the two earlier BIOS images that have been
 dumped and figure out what the differences are.
 
-This project is using EuroAssembler (<https://euroassembler.eu/eadoc/>).
+This project is using EuroAssembler (<https://euroassembler.eu/eadoc/>),
+MakePP (<http://makepp.sourceforge.net/>), and Perl 5.10.
+
+References
+==========
+
+Some code comments are prefixed with a tag in square brackets.  These are
+denote important compatibility constraints or restrictions on behaviour
+imposed on the BIOS.  The possible tags are:
+
+ * [TechRef]
+   Refers to the GRiDCase 1500 Series Hardware Technical Reference.
+
+ * [Public]
+   Identifies locations/APIs mentioned in publicly available documentation,
+   e.g. Ralph Brown's Interrupt List or IBM Technical Reference.
+
+ * [Compat]
+   Identifies places where data/code layout must remain fixed for compatibility
+   with software that relies on undocumented or semi-documented functionality.
+
+ * [ReadMe]
+   Refers to the file README.txt in this project.
 
 Why EuroAssembler?
 ==================
@@ -28,7 +50,7 @@ can be encoded as either 87CA or as 87D1.  Most assemblers arbitrarily choose
 one variant (usually the numerically lowest as a side effect of how they are
 coded).
 
-While it is not known which assembler was used to create the GRiDCase 1520
+While I don't know which assembler was used to create the GRiDCase 1520
 BIOS, it seems to have consistently picked the numerically higher variant for
 instructions that reference two register operands.
 

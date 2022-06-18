@@ -1,10 +1,22 @@
 
+INT14		PROGRAM	OutFile=build/int14.obj
+
+		include	"macros.inc"
+		include	"segments/bda.inc"
+
+		EXTERN	MakeIsrStack, UnmakeIsrStack
+		EXTERN	FuncToOffset
+		EXTERN	BaudRateInit
+
+		PUBLIC	Int14_Actual
+		PUBLIC	SerDetectPort
+
 MAX_SERIAL_PORTS	equ	4
 
 ; ===========================================================================
 ; Int14_Actual [TechRef 12-2]
 ; Provides int14 serial communications services.
-; 
+;
 ; On entry:
 ; 	AH == function number
 ; 	AL == function data
@@ -55,7 +67,7 @@ Int14_Actual	PROC
 ; ===========================================================================
 ; SerInit [12-3]
 ; Initialize a serial I/O port.
-; 
+;
 ; On entry:
 ; 	AL == initialization parameters
 ; 	DX == serial port Modem Control register
@@ -99,11 +111,11 @@ SerInit		PROC
 ; ===========================================================================
 ; SerStatus [TechRef 12-3]
 ; Returns contents of Line Status register.
-; 
+;
 ; On entry:
 ; 	DX == serial port Modem Control register
 ; 	Stack layout from MakeIsrStack
-; 
+;
 ; On return:
 ; 	AH = line status
 ; 	AL = modem status
@@ -224,11 +236,11 @@ SerReceive	PROC
 
 ; ===========================================================================
 ; SerSetDivisor
-; 
+;
 ; On entry:
 ; 	DX == serial port Line Control register
 ; 	BX == baud divisor latch register value
-; 
+;
 ; On return:
 ; 	DX == unchanged
 ; 	DI == baud divisor latch LSB register port number
@@ -264,11 +276,11 @@ SerSetDivisor	PROC
 ; written to the address in SI and the number of serial ports in the BDA is
 ; incremented.  The serial port will need resetting after this method is
 ; called as the detection process changes the baud rate divisor.
-; 
+;
 ; On entry:
 ; 	DX == serial port Line Control register
 ; 	SI -> serial port IO base address word
-; 
+;
 ; On return (if serial port detected):
 ; 	SI advanced by two
 ; 	Count of serial ports in BDA equipment word incremented
@@ -304,3 +316,4 @@ SerDetectPort	PROC
 .done		retn
 		ENDPROC	SerDetectPort
 
+ENDPROGRAM	INT14

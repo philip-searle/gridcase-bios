@@ -1,4 +1,31 @@
 
+POST_PROTMODE	PROGRAM	OutFile=build/post/protmode.obj
+
+		include	"macros.inc"
+		include	"segments/bda.inc"
+		include	"cmos.inc"
+		include	"descriptors.inc"
+		include	"diagnostics.inc"
+		include	"keyboard.inc"
+
+		EXTERN	A20Disable, A20Enable
+		EXTERN	ReadCmos, WriteCmos
+		EXTERN	FatalBeeps
+		EXTERN	WriteString_Inline, WriteString, WriteCrLf
+		EXTERN	WriteChar, WriteCharHex2, WriteCharHex4
+		EXTERN	kBdaSegment
+		EXTERN	SetSoftResetFlag
+		EXTERN	ResetNmiChecks, ResetCpu
+
+		PUBLIC	kAddressLine
+		PUBLIC	kOddEvenLogic
+		PUBLIC	DetectMemSize
+		PUBLIC	PmClearTraces
+		PUBLIC	TestAllMem
+		PUBLIC	TestMemData
+		PUBLIC	TestMemLoAddr
+		PUBLIC	SDH_04
+
 ; =====================================================================
 ; Procedures in this file are called to enter, leave, and run tests
 ; within the 80286's protected mode.
@@ -14,7 +41,7 @@ kProtModeMsw	dw	1
 ; Start of system data structures
 kPmSysData	equ	0D0A0h
 
-; Interrupt descriptor table	
+; Interrupt descriptor table
 kPmIdt		equ	kPmSysData
 kPmIdtLen	equ	800h
 
@@ -22,7 +49,7 @@ kPmIdtLen	equ	800h
 kPmGdt		equ	kPmIdt+kPmIdtLen
 kPmGdtLen	equ	88h
 
-kPmSysDataLen	equ	kPmGdt+kPmGdtLen
+;kPmSysDataLen	equ	kPmGdt+kPmGdtLen
 
 ; =====================================================================
 ; Protected mode GDT template.
@@ -97,13 +124,13 @@ PmClearTraces	PROC
 ; =====================================================================
 ; PmEnter
 ; Attempts to enter protected mode.
-; 
+;
 ; On success, returns in protected mode with:
 ; 	GDT setup with contents of kProtModeGdt
 ; 	IDT setup with entries pointed to PmIret
 ; 	CS and SS set to appropriate selectors from GDT
 ; 	All other registers preserved
-; 
+;
 ; On failure, stays in real mode with:
 ; 	error message printed with with beep code
 ; 	CF set
@@ -141,7 +168,7 @@ PmEnter		PROC
 
 .setupIdtEntry	mov	ax, PmIret
 		stosw			; store handler offset
-		mov	ax, dtiBiosCode
+		mov	ax, OFFSET#dtiBiosCode
 		stosw			; store code segment descriptor
 		mov	ax, 8700h
 		stosw			; store flags: present, DPL=0, type=trap gate
@@ -179,7 +206,14 @@ PmEnter		PROC
 		lgdt	[es:kPmGdt+dtiGdt]
 		lidt	[es:kPmGdt+dtiIdt]
 		lmsw	[kProtModeMsw]
-		jmpf	(dtiBiosCode):.clearPrefetch
+
+		; Can't figure out how to get EuroASM to encode a far jump
+		; with a protected-mode selector and an instruction-relative
+		; offset... hand-coding it for now.
+		;jmpf	(dtiBiosCode):.clearPrefetch
+		db	0EAh
+		dw	.clearPrefetch
+		dw	dtiBiosCode
 
 ; ---------------------------------------------------------------------
 ; We are now in protected mode
@@ -262,11 +296,11 @@ SDH_04		PROC
 ; PmDescToSegment
 ; Loads the base from a descriptor table entry and converts it to a
 ; real-mode segment base.
-; 
+;
 ; On entry:
 ;   DS -> descriptor table base
 ;   SI == table index to load
-; 
+;
 ; On return:
 ;   AX == real-mode segment base
 ; =====================================================================
@@ -350,12 +384,12 @@ DetectMemSize	PROC
 ; Detects writable memory by altering GDT descriptor dtiDetectMem and
 ; reading/writing tests pattern 55AAh to the start of each 64KB segment
 ; in turn.
-; 
+;
 ; On entry:
 ;   BL == index of 64KB segment to start at (e.g. 1 == 64KB)
 ;   BH == index of 64KB segment to end at (e.g. 0Ah == 640KB)
 ;   DS -> descriptor for GDT
-; 
+;
 ; On return:
 ;   BL == index of highest 64KB segment to pass tests
 ;   ZF set on success, clear on failure
@@ -554,14 +588,14 @@ TestAllMem	PROC
 ; TestMemSegments
 ; Checks a range of memory segments testing address and data lines.
 ; Call from real-mode (switches to/from protected-mode internally).
-; 
+;
 ; On entry:
 ;   BL == lowest 64K segment to check
 ;   BH == highest 64K segment to check
 ;   DX == cursor position from int10h/03
 ;   SI == count of 64KB segments checked so far
 ;         bit 15 ignored (used as a flag by called subproc)
-; 
+;
 ; On return:
 ;   BL, SI incremented by successfully checked segment count
 ;   CF clear on success
@@ -668,14 +702,14 @@ TestMemSegments	PROC
 ; =====================================================================
 ; TestMem
 ; Tests a segment of memory can be successfully written and read.
-; 
+;
 ; On entry:
 ;   SI == bit 15 1 to test high address line
 ;         bit 15 0 to test regular address line
 ;   BP == length of segment to test
 ;   ES -> segment to be tested
 ;   SP -> different segment
-; 
+;
 ; On return:
 ;   DX -> string describing last check made
 ;   CF set on failure
@@ -694,7 +728,7 @@ TestMem		PROC
 ; moved to the same offset in the segment being checked read back
 ; differently.  If the upper address bits are stuck then the readback
 ; via the ES segment would actually load data from the SP segment.
-; 
+;
 ; On entry/return:
 ;   See TestMem header comment
 ; =====================================================================
@@ -718,7 +752,7 @@ TestMemHiAddr	PROC
 ; TestMemData
 ; Tests data lines and read/write to all words in segment, as well as
 ; the odd/even byte swap logic.
-; 
+;
 ; On entry/return:
 ;   See TestMem header comment
 ; =====================================================================
@@ -893,6 +927,8 @@ kHiAddressLine	db	'high '			; combines with next constant
 kAddressLine	db	'address line',0
 kWriteRead	db	'write/read',0
 
+		Unused	kDwordLogic		; ???
+
 ; =====================================================================
 ; ReportMemError
 ; Writes an error message to the screen reporting a memory failure.
@@ -977,3 +1013,4 @@ WriteMemSize	PROC
 		dw	10000
 .divisorsEnd	ENDPROC	WriteMemSize
 
+ENDPROGRAM	POST_PROTMODE

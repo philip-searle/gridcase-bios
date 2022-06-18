@@ -1,4 +1,22 @@
 
+KEYBOARD	PROGRAM	OutFile=build/keyboard.obj
+
+		include	"macros.inc"
+		include	"segments/bda.inc"
+		include	"keyboard.inc"
+		include	"pic.inc"
+
+		PUBLIC	KbAckInt
+		PUBLIC	KbAdvanceBuf
+		PUBLIC	KbDisable
+		PUBLIC	KbEnable
+		PUBLIC	KbExtendBuf
+		PUBLIC	KbSyncLedState
+		PUBLIC	KbWaitIbe
+		PUBLIC	KbWaitIbe_Cli
+		PUBLIC	KbWriteDataByte
+		PUBLIC	KbXlatScancode
+
 ; ---------------------------------------------------------------------
 ; KbAckInt
 ; Disables interrupts, issues a non-specific EOI to PIC1, then enables
@@ -231,3 +249,4 @@ KbDisable	PROC
 .leaveFunction	retn
 		ENDPROC	KbDisable
 
+ENDPROGRAM	KEYBOARD

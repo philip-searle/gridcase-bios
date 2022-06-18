@@ -1,4 +1,16 @@
 
+KBC_286		PROGRAM	OutFile=build/kbc_286.obj
+
+		include	"macros.inc"
+		include	"segments.inc"
+		include	"keyboard.inc"
+
+		EXTERN	KbWaitIbe, KbWaitIbe_Cli
+
+		PUBLIC	A20Disable
+		PUBLIC	A20Enable
+		PUBLIC	ResetCpu
+
 ; ---------------------------------------------------------------------
 ; A20Enable
 ; Uses the keyboard controller to enable the A20 gate, granting access
@@ -79,3 +91,4 @@ ResetCpu	PROC
 		jmp	.hlt
 		ENDPROC	ResetCpu
 
+ENDPROGRAM	KBC_286

@@ -137,37 +137,6 @@ Int13HdStack	struc
 .ax		dw	0
 		endstruc
 
-; A 'packet' of values to send to the disk controller's registers.
-; Used by BuildAtRegPacket/SendAtRegPacket.
-HDC_REG_PACKET	struc
-		db	0	; dummy byte because we share storage
-				; with an FdScratch instance
-.writePrecomp	db	0
-.sectorCount	db	0
-.sectorNumber	db	0
-.cylinderLo	db	0
-.cylinderHi	db	0
-.driveHead	db	0
-.command	db	0
-		endstruc
-
-; Scratch space used by floppy disk int13 handlers to pass return values
-; back to the main int13 handler and store command results read from the
-; floppy disk controller.  Overlaid onto the same storage space as
-; HDC_REG_PACKET since the floppy and hard disk routines will not be
-; accessed simultaneously.
-FDC_SCRATCH	struc
-.returnAh	db	0	; return value to be placed in AH
-
-.fdcSt0		db	0	; fields returned from a standard 7-byte
-.fdcSt1		db	0	; FDC command result
-.fdcSt2		db	0
-.fdcCylinder	db	0
-.fdcHead	db	0
-.fdcSector	db	0
-.fdcNumBytes	db	0
-		endstruc
-
 ; Return values from int13/15h (read DASD type)
 DASD_NO_DRIVE	equ	0
 DASD_FLOPPY	equ	1	; floppy drive without change line
