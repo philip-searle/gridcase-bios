@@ -120,11 +120,10 @@ linker {
 		VidWriteString			=> F000:BCD5
 		GridVidInit				=> F000:D4DF
 		GridVidInitHi			=> F000:D4B9
-		VidPageCursorPos		=> F000:BC1E
-		VidIsTextMode			=> F000:BC29
 		VidGrapPelMask			=> F000:BC37
-		VidWriteCell3			=> F000:BAD5
 		UnmakeIsrStack2			=> F000:C5EB
+		ConString2				=> F000:C5A5
+		kCrLf					=> F000:C5F6
 	}
 	script => [
 		advance	{ to 		=> 0000:0000									}

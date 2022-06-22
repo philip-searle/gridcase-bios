@@ -55,6 +55,7 @@ VID_MODE_EXT_74	equ 74h	; G    .     .    640x400  2         .   B800 *2
 ; Some code checks the video mode to determine CGA/MDA
 VID_FIRST_CGA_GRAP_MODE	equ	VID_MODE_CGA_4
 VID_LAST_CGA_MODE	equ	VID_MODE_CGA_6
+VID_80COL_CGA_GRAP_MODE	equ	VID_MODE_CGA_6
 VID_MDA_MODE		equ	VID_MODE_MDA_7
 
 ; ---------------------------------------------------------------------------

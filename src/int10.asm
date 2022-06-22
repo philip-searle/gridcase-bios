@@ -11,12 +11,12 @@ INT10	PROGRAM	OutFile=build/int10.obj
 	EXTERN	MakeIsrStack, UnmakeIsrStack, UnmakeIsrStack2
 	EXTERN	GridVidInitHi, GridVidInit
 	EXTERN	VidRegenLengths, VidColumns, VidModeSets
-	EXTERN	VidReadLightPen, VidWinSelect, VidWriteString
-	EXTERN	VidPageCursorPos, VidIsTextMode, VidGrapPelMask
-	EXTERN	VidWriteCell3
+	EXTERN	VidReadLightPen, VidWinSelect
 	EXTERN	GraphicsChars
+	EXTERN	kCrLf, ConString2
 
 	PUBLIC	Int10_Actual
+	PUBLIC	ConChar, ConCrLf, ConString
 
 ; =====================================================================
 
@@ -1393,6 +1393,418 @@ VidScrollImpl	PROC
 .L8		retn
 		ENDPROC	VidScrollImpl
 
-; =====================================================================
+; ---------------------------------------------------------------------
+; VidWriteCell3
+; Writes a character to the screen, optionally writing the attribute
+; byte as well (for text modes).
+; On entry:
+;   AL == character to display
+;   BH == page number (text mode)
+;   BL == attribute (text mode) or colour (graphics mode)
+;   CX == number of times to write character
+;   DL == 0 to write char+attributes, 1 to write char only
+; On return:
+;   Interrupts enabled
+; ---------------------------------------------------------------------
+VidWriteCell3	PROC
+		mov_	ah, bl			; start assembling AX into char+attribute
+		call	VidIsTextMode
+		jc	.graphicsMode
+
+		; --------------------- Text mode write
+		push	dx
+		call	VidPageOffsets		; calulate refresh buffer write offset
+		pop	dx
+
+		mov_	si, ax			; unnecessary save of AX?
+		mov	bl, [VidActiveMode]
+		and	bl, 0FEh		; why mask the video mode here? nothing uses it?
+		or_	dl, dl			; test attribute byte write
+		mov	dx, [VidBasePort]	; unnecessary load? nothing uses DX after this
+		jnz	.textCharOnly
+
+		; --------------------- Text mode char+attribute write
+		mov_	ax, si			; restore AX from unnecessary save
+		repne	stosw			; write cells
+		sti
+		retn
+
+		; --------------------- Text mode char only write
+.textCharOnly	mov_	ax, si			; restore aX from unnecessary save
+.copyTextChar	stosb				; copy char
+		inc	di			; skip attribute byte
+		loop	.copyTextChar
+		retn
+
+		; --------------------- Graphics mode write
+		; TODO: figure out how all this works and document it
+.graphicsMode	xor_	bl, bl			; only one page in graphics mode
+		call	VidPageCursorPos
+		; convert cursor position to refresh buffer offset
+		mov_	bp, ax			; save char and colour
+		mov_	al, dh			; get cursor column positon
+		mov	ah, 40			; multiply row position by row length
+		mul	ah
+		xor_	bh, bh
+		mov_	bl, dl
+		cmp	[VidActiveMode], VID_80COL_CGA_GRAP_MODE
+		jb	.1
+		shl	ax, 1
+.1		add_	bx, ax
+		mov_	ax, bp			; restore char and colour
+
+		; Convert character code into ES:SI pointer to font data
+		and	ah, 0BFh
+		or_	al, al
+		jns	.lowerHalfChar
+		; Characters > 80h must use the soft-font data located by IVT pointer
+		sub	al, 80h
+		xor_	si, si
+		mov	es, si
+		les	si, [es:IvtVidGrapFont]
+		mov	bx, es
+		or_	bx, si			; did we have soft-font data loaded?
+		jnz	.gotFontPtr
+		or	ah, 40h			; adjust colour and display the equivalent
+						; character from the lower-half of the font?
+
+.lowerHalfChar	; Characters <= 80h can use the font data from ROM
+		mov	si, GraphicsChars
+		push	cs
+		pop	es
+
+.gotFontPtr	; Index into font data by character code
+		mov_	bl, al
+		xor_	bh, bh
+		shl	bx, 1			; multiply by 8 (character height)
+		shl	bx, 1
+		shl	bx, 1
+		add_	si, bx
+
+		; ----------------------------- Graphics mode copy loop
+		; TODO: figure out how all this works and document it
+.c1		push	cx
+		push	dx
+		push	si
+		call	VidGrapCursorOffset
+		mov	dl, [VidActiveMode]
+		cmp	dl, VID_MODE_EXT_74
+		jnz	.c2
+		mov	dl, VID_MODE_EXT_40
+.c2		mov	bp, 8
+.c3		push	ax
+		mov	al, [es:si]
+		test	ah, 40h
+		jz	.c4
+		not	al
+.c4		mov_	dh, ah
+		cmp	dl, VID_80COL_CGA_GRAP_MODE
+		jnb	.c5
+		mov	cx, 8
+		and	ah, 3
+		xor_	bx, bx
+.c6		shl	bx, 1			; BUG?
+		shl	bx, 1			; Should this be 3 shifts
+		shl	al, 1			; of BX?
+		jnb	.c7
+		or_	bl, ah
+.c7		loop	.c6
+		mov_	al, bh
+		mov_	ah, bl
+
+.c5		push	es
+		mov	es, [cs:kCgaRefreshSeg]
+		or_	dh, dh
+		js	.c8
+		cmp	dl, 6
+		jnb	.c9
+		mov	[es:di], ax
+		jmp	.c10
+.c11		jmp	.c1
+
+.c9		mov	[es:di], al
+		cmp	dl, 40h
+		jnz	.c10
+		mov	[es:di+CGA_REGEN_LEN], al
+		jmp	.c10
+
+.c8		cmp	dl, 6
+		jnb	.c12
+		xor	[es:di], ax
+		jmp	.c10
+
+.c12		xor	[es:di], al
+		cmp	dl, 40h
+		jnz	.c10
+		xor	[es:di+CGA_REGEN_LEN], al
+
+.c10		pop	es
+		add	di, CGA_REGEN_LEN
+		cmp	dl, 48h
+		jnz	.c13
+		dec	bp
+		test	bp, 3
+		jnz	.c14
+		sub	di, 7FB0h		; reset to bank 0
+
+.c14		inc	bp
+		jmp	.c15
+
+.c13		cmp	dl, 6
+		jbe	.c16
+		add	di, CGA_REGEN_LEN
+
+.c16		test	bp, 1
+		jz	.c15
+		sub	di, 3FB0h		; reset to bank 0
+		cmp	dl, 6
+		jbe	.c15
+		sub	di, 4000h		; back one bank?
+
+.c15		pop	ax
+		inc	si			; next row of font data
+		dec	bp
+		jz	.c17
+		jmp	.c3
+
+.c17		pop	si
+		pop	dx
+		pop	cx
+		inc	dx
+		cmp	[VidActiveMode], 6
+		jnb	.c18
+		cmp	dl, 40
+		jmp	.c19
+.c18		cmp	dl, 80
+.c19		jb	.c20
+		xor_	dl, dl
+		inc	dh
+.c20		loop	.c21
+		retn
+.c21		jmp	.c11
+		ENDPROC	VidWriteCell3
+
+; ---------------------------------------------------------------------
+; VidPageCursorPos
+; Returns the cursor position for a text page.
+; On entry:
+;   BL == page index
+; On return:
+;   DX == cursor position
+; ---------------------------------------------------------------------
+VidPageCursorPos	PROC
+		push	bx
+		xor_	bh, bh
+		shl	bx, 1			; load cursor position from array
+		mov	dx, [VidCursorPos+bx]
+		pop	bx
+		retn
+		ENDPROC	VidPageCursorPos
+
+; ---------------------------------------------------------------------
+; VidIsTextMode
+; Sets CF if the current video mode is not a text mode.
+; ---------------------------------------------------------------------
+VidIsTextMode	PROC
+		; MDA is always text mode
+		cmp	[VidActiveMode], VID_MDA_MODE
+		jz	.leaveFunction
+		; Below the first graphics mode?  Must be text mode.
+		cmp	[VidActiveMode], VID_FIRST_CGA_GRAP_MODE
+		cmc
+.leaveFunction	retn
+		ENDPROC	VidIsTextMode
+
+; ---------------------------------------------------------------------
+; VidGrapPelMask
+; Prepares registers for writing to the screen in graphics mode.
+; On entry:
+;   AL == pixel colour
+;   CX == column
+;   DX == row
+; On return:
+;   ES:BX -> pixel offset in refresh buffer
+;   CL == shift for pixel data
+;   DL == mask for bits to be written (unshifted)
+;   CF set on failure
+; ---------------------------------------------------------------------
+VidGrapPelMask	PROC
+		; Determine numebr of rows for current video mode
+		mov	ah, [VidActiveMode]
+		mov	bx, 200
+		cmp	ah, VID_LAST_CGA_MODE
+		jbe	.gotRowCount			; extended graphics mode have
+		mov	bx, 400				; double vertical resolution
+
+.gotRowCount	cmp_	dx, bx				; out of range row?
+		jb	.validRow
+		jmp	.leaveFailure
+
+.validRow	mov	bx, 640				; load max column count
+		cmp	ah, VID_MODE_EXT_40
+		jnb	.extendedMode			; all extended modes have 640 cols
+		cmp	ah, VID_LAST_CGA_MODE
+		jz	.checkCol			; only one CGA mode supports 640 cols
+		ja	.leaveFailure			; MDA doesn't support graphics at all
+		cmp	ah, VID_FIRST_CGA_GRAP_MODE
+		jb	.leaveFunction			; BUG? Text modes don't set CF on return, although
+							; we shouldn't be called in text mode anyway...
+		shr	bx, 1				; all other modes have 320 cols
+
+.checkCol	cmp_	cx, bx				; out of range column?
+		jnb	.leaveFailure
+		xchg	ax, si				; save AX
+
+		mov	es, [cs:kCgaRefreshSeg]
+		xor_	bx, bx
+		ror	dx, 1				; odd row?
+		jnb	.cgaBankSet
+		mov	bh, 20h				; odd rows are offset by 2000h bytes
+
+.cgaBankSet	shl	dx, 1				; restore row with low bit cleared
+		mov_	ax, dx				; accumulate refresh buffer offset in AX
+		shl	ax, 1				; mul by 40 with shl/add combo
+		shl	ax, 1
+		add_	ax, dx
+		shl	ax, 1
+		shl	ax, 1
+		shl	ax, 1
+
+.c1		add_	bx, ax				; add to CGA bank base
+		mov_	ax, cx				; get column
+		shr	ax, 1				; div 4?
+		shr	ax, 1
+		not	cl
+		cmp	[VidActiveMode], VID_80COL_CGA_GRAP_MODE
+		jb	.not80ColMode
+		shr	ax, 1
+		mov	dl, 1
+		jmp	.c2
+.not80ColMode	shl	cl, 1
+		mov	dl, 3
+
+.c2		add_	bx, ax
+		and	cl, 7
+		xchg	ax, si
+		retn
+
+.extendedMode	cmp_	cx, bx				; out of range column?
+		jnb	.leaveFailure
+		xchg	ax, si				; save AX
+		mov	es, [cs:kCgaRefreshSeg]
+		xor_	bx, bx
+		ror	dx, 1
+		jnb	.cgaBankSet2
+		add	bh, 20h				; odd rows are offset by 2000h
+.cgaBankSet2	ror	dx, 1
+		jnb	.cgaBankSet3
+		add	bh, 40h				; two extra banks in hi-res modes
+
+.cgaBankSet3	shl	dx, 1				; restore row with low bits cleared
+		shl	dx, 1
+		mov_	ax, dx
+		shl	ax, 1				; mu by 20 using shift/add
+		shl	ax, 1
+		add_	ax, dx
+		shl	ax, 1
+		shl	ax, 1
+		jmp	.c1
+
+.leaveFailure	stc
+.leaveFunction	retn
+		ENDPROC	VidGrapPelMask
+
+; ---------------------------------------------------------------------
+; VidWriteString [TechRef 7-14]
+; TechRef incorrectly documents CS:BP as a pointer to the string to be
+; written; it should be ES:BP.
+; ---------------------------------------------------------------------
+VidWriteString	PROC
+		push	ax
+		test	al, 0FCh			; reserved bits set?
+		jnz	.leaveFunction
+		jcxz	.leaveFunction			; early-out if no data to write
+
+		mov_	si, ax				; copy AL (string type)
+		xchg	bl, bh				; move page index to lobyte, we're going to use it as an offset
+		mov_	di, bx				; copy to DX, we'll use it to double the offset
+		lea	di, [bx+di+VidCursorPos]	; load cursor location for page
+		and	di, 0FFh
+		xchg	bl, bh				; restore page to BH
+		push	[di]				; save cursor location
+
+.processChar	push	cx
+		mov	[di], dx			; update saved cursor location
+		mov	al, [es:bp+0]			; load character
+		inc	bp
+
+		test	si, 2				; caller wants to write attributes?
+		jz	.writeChar
+		; [TechRef 7-14] documents ASCII BEL, BKSP, CR, and LF are treated as commands and
+		; not as printable characters.  Apparently this means they shouldn't have an
+		; attribute byte after them in the input string.
+		cmp	al, 07h
+		jz	.writeChar
+		cmp	al, 08h
+		jz	.writeChar
+		cmp	al, 0Ah
+		jz	.writeChar
+		cmp	al, 0Dh
+		jz	.writeChar
+		mov	bl, [es:bp+0]			; load new attribute value
+		inc	bp
+
+.writeChar	mov	cl, 9				; perform write using VidWriteCel
+		call	VidTeletypeChar
+		pop	cx
+		loop	.processChar
+
+		pop	[di]				; load saved cursor location
+		test	si, 1				; caller wants cursor to move?
+		jz	.leaveFunction
+		mov	ah, 2				; set cursor position
+		int	10h
+
+.leaveFunction	jmp	UnmakeIsrStack2
+		ENDPROC	VidWriteString
+
+; ---------------------------------------------------------------------
+; ConChar
+; Writes a single character to the screen, as VidTeletype.
+; On entry:
+;   AL == character to write
+; ---------------------------------------------------------------------
+ConChar		PROC
+		push	bx				; save display window
+		mov	bl, 82h				; fixed colours for graphics mode
+		mov	ah, 0Eh				; write using VidTeletype
+		int	10h
+		pop	bx
+		retn
+		ENDPROC	ConChar
+
+; ---------------------------------------------------------------------
+; ConCrLf
+; Writes a carriage-return/line-feed pair to the screen.
+; ---------------------------------------------------------------------
+ConCrLf	PROC
+		mov	si, kCrLf
+		; fall-through into ConString
+		ENDPROC	ConCrLf
+
+; ---------------------------------------------------------------------
+; ConString
+; Writes a nul-terminated string to the screen.
+; On entry:
+;   CS:SI -> string
+; On return:
+;   CS:SI -> nul-terminator
+; ---------------------------------------------------------------------
+ConString	PROC
+		push	cx
+		call	ConString2
+		pop	cx
+		retn
+		ENDPROC	ConString
 
 ENDPROGRAM	INT10

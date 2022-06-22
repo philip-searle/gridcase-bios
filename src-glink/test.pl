@@ -176,7 +176,7 @@ sub resolve_segments {
         resolve_symbol($segment->unique_name, $write_ptr, $segment);
         if ($segment->combine ne 'COMMON') {
             $write_ptr = $aligned_write + $segment->length;
-            print "Advancing write_ptr past segment (now $write_ptr), segment length = " . $segment->length . "\n";
+            #print "Advancing write_ptr past segment (now $write_ptr), segment length = " . $segment->length . "\n";
         } else {
             #print "COMMON segment, not advancing write_ptr\n"
         }
@@ -281,7 +281,7 @@ sub process_script {
         my $action = $script->[$script_index++];
         my $params = $script->[$script_index++];
         last if $action eq 'end';
-        print "Script: $action " . Data::Dumper::Dumper($params);
+        #print "Script: $action " . Data::Dumper::Dumper($params);
 
         if ($action eq 'advance') {
             process_script_advance($params);
@@ -374,6 +374,7 @@ sub resolve_fixups {
                 $distance -= 2;
                 if ($distance < -32768 || $distance > 32768) {
                     carp "Self-relative offset fixup outside range: $distance";
+                    dump_fixup_data($fixup, $resolved_fixup_address, $resolved_target_address, $resolved_frame_address);
                     die;
                 }
                 my $original_value = unpack 'v', substr($ledata->data, $fixup->data_record_offset, 2);
@@ -423,6 +424,12 @@ sub resolve_fixups {
     return @resolved_fixups;
 }
 
+sub dump_fixup_data {
+    my ($fixup, $resolved_fixup_address, $resolved_target_address, $resolved_frame_address) = @_;
+    print sprintf("XXX: $resolved_fixup_address\n");
+    print sprintf("YYY: $resolved_target_address $resolved_frame_address\n");
+    print Data::Dumper::Dumper($fixup);
+}
 # ---------------------------------------------------------------------
 
 sub write_output {
@@ -463,6 +470,7 @@ sub write_output {
 
 sub resolve_symbol {
     my ($symbol_name, $address, $segdef) = @_;
+    print "PHILTEST: $symbol_name\n" if $symbol_name eq 'VidIsTextMode';
     my $resolved_symbol = ResolvedSymbol(segdef => $segdef, address => $address);
     die "Duplicate symbol resolved: $symbol_name" if defined $resolved_symbols{$symbol_name};
     return $resolved_symbols{$symbol_name} = $resolved_symbol;
