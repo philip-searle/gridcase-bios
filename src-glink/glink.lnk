@@ -30,6 +30,8 @@ input {
 		../src/build/fd_misc.obj
 		../src/build/int17.obj
 		../src/build/int10.obj
+		../src/build/int12.obj
+		../src/build/int11.obj
 		../src/build/sysident.obj
 		../src/build/at_compat.obj
 		../src/build/rom_trailer.obj
@@ -44,8 +46,6 @@ output {
 linker {
 	define => {
 		IntNmi_Actual			=> F000:C4F8
-		Int12_Actual			=> F000:BD3A
-		Int11_Actual			=> F000:BD43
 		Int15_Actual			=> F000:BD4C
 		Int1A_Actual			=> F000:C1C5
 		Int8_Actual				=> F000:C21C
@@ -158,6 +158,8 @@ linker {
 		link	{ input		=> fd_misc,				segment => CODE					}
 		link	{ input		=> int17,				segment => CODE					}
 		link	{ input		=> int10,				segment => CODE					}
+		link	{ input		=> int12,				segment => CODE					}
+		link	{ input		=> int11,				segment => CODE					}
 
 		fill	{ to		=> F000:DFD0,			with => 0xFF					}
 		link	{ input		=> sysident,			segment => CODE					}

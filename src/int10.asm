@@ -1,22 +1,22 @@
 
-INT10	PROGRAM	OutFile=build/int10.obj
+INT10		PROGRAM	OutFile=build/int10.obj
 
-	include	"macros.inc"
-	include	"segments/bda.inc"
-	include	"segments/ivt.inc"
-	include	"isr.inc"
-	include	"video.inc"
+		include	"macros.inc"
+		include	"segments/bda.inc"
+		include	"segments/ivt.inc"
+		include	"isr.inc"
+		include	"video.inc"
 
-	EXTERN	Beep, FuncToOffset
-	EXTERN	MakeIsrStack, UnmakeIsrStack, UnmakeIsrStack2
-	EXTERN	GridVidInitHi, GridVidInit
-	EXTERN	VidRegenLengths, VidColumns, VidModeSets
-	EXTERN	VidReadLightPen, VidWinSelect
-	EXTERN	GraphicsChars
-	EXTERN	kCrLf, ConString2
+		EXTERN	Beep, FuncToOffset
+		EXTERN	MakeIsrStack, UnmakeIsrStack, UnmakeIsrStack2
+		EXTERN	GridVidInitHi, GridVidInit
+		EXTERN	VidRegenLengths, VidColumns, VidModeSets
+		EXTERN	VidReadLightPen, VidWinSelect
+		EXTERN	GraphicsChars
+		EXTERN	kCrLf, ConString2
 
-	PUBLIC	Int10_Actual
-	PUBLIC	ConChar, ConCrLf, ConString
+		PUBLIC	Int10_Actual
+		PUBLIC	ConChar, ConCrLf, ConString
 
 ; =====================================================================
 
