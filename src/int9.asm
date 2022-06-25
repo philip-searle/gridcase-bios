@@ -134,7 +134,7 @@ Int9_Actual	PROC
 		call	KbDisable
 		in	al, PORT_KBC_DATA
 
-		; OS Hook - keyboard interrupt
+		; OS Hook - keyboard intercept
 		mov	ah, 4Fh
 		stc
 		int	15h
@@ -179,7 +179,7 @@ Int9_Actual	PROC
 		jmp	[cs:di+Int9Handlers]
 
 ; ---------------------------------------------------------------------
-; Handle insert in combination with ctrl or al specially for the GRiDCase.
+; Handle insert in combination with ctrl or alt specially for the GRiDCase.
 ; If we detect either of those, divert to GRiD-specific key tests.
 .makeIns	test	bl, KBSHIFT1_CTRL | KBSHIFT1_ALT
 		jz	.notCtrlAltIns

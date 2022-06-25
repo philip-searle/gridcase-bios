@@ -206,14 +206,7 @@ PmEnter		PROC
 		lgdt	[es:kPmGdt+dtiGdt]
 		lidt	[es:kPmGdt+dtiIdt]
 		lmsw	[kProtModeMsw]
-
-		; Can't figure out how to get EuroASM to encode a far jump
-		; with a protected-mode selector and an instruction-relative
-		; offset... hand-coding it for now.
-		;jmpf	(dtiBiosCode):.clearPrefetch
-		db	0EAh
-		dw	.clearPrefetch
-		dw	dtiBiosCode
+		PmJmp	dtiBiosCode, .clearPrefetch
 
 ; ---------------------------------------------------------------------
 ; We are now in protected mode

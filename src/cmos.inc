@@ -39,16 +39,18 @@ CMOS_GRIDFLAGS		equ	3Fh	; [TechRef 6-17] documented as 'reserved'
 
 ; ---------------------------------------------------------------------------
 ; Valid values for the CMOS_SHUTDOWN_REASON register
+; [Compat] These differ from the values used in the IBM BIOS!  The values
+;          used after return from protected-mode are swapped around.
 SD_SOFT_RESET		equ	00h	; Soft reset, skip POST
 SD_AFTER_MEMSIZE	equ	01h	; Reset after mem size determined
 SD_AFTER_MEMTEST	equ	02h	; Reset after mem tests performed
 SD_AFTER_MEMERROR	equ	03h	; Reset after parity check
 SD_BOOTLOADER_REQ	equ	04h	; Boot loader request ???
 SD_JMP_WITH_INT		equ	05h	; Reset (JMP to [0:0467h] after resetting PIC)
-SD_PM_TEST7_PASS	equ	06h	;
-SD_PM_TEST7_FAIL	equ	07h	;
+SD_UNKNOWN_6		equ	06h	;
+SD_PM_BLOCK_MOVE	equ	07h	; Reset after performing block move
 SD_PM_TEST1		equ	08h	; Reset after protected-mode test 1
-SD_BLOCK_MOVE		equ	09h	; Reset after performing block move
+SD_UNKNOWN_9		equ	09h	;
 SD_JMP_WITHOUT_INT	equ	0Ah	; Reset (JMP to [0:0467h] without resetting PIC)
 
 ; Unknown shutdown reason, checked for in POST

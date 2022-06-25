@@ -65,9 +65,17 @@ DESC_CODE       %MACRO  Base, Limit, Present=1, Dpl=0, Conforming=0, Readable=1,
 %ENDMACRO       DESC_CODE
 
 ; ---------------------------------------------------------------------
-; Macro that defiens a data segment descriptor.
+; Macro that defines a data segment descriptor.
 DESC_DATA       %Macro  Base, Limit, Present=1, Dpl=0, ExpandDown=0, Writable=1, Accessed=1
 %:              DESC_GENERIC    %Base, %Limit, \
                         (%Present<<7) | (%Dpl<<5) | 10h | (%ExpandDown<<2) | (%Writable<<1) | (%Accessed<<0)
 %ENDMACRO       DESC_DATA
 
+; ---------------------------------------------------------------------
+; Macro that defines an entry in the interrupt descriptor table.
+IDT_ENTRY	%Macro	Offset, Selector
+		dw	%Offset
+		dw	%Selector
+		dw	8700h		; flags: present, dpl=0, trap gate
+		dw	0		; reserved
+%ENDMACRO	IDT_ENTRY

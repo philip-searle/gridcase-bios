@@ -336,7 +336,6 @@ sub parse_record_modend {
     my $mod_type = unpack_fh $fh, 1 ,'C';
     die 'MODEND with mod_type != 0 not supported' unless $mod_type == 0;
     skip_record_trailer($fh);
-    #die "MMMM";
 }
 
 # ---------------------------------------------------------------------
@@ -365,8 +364,7 @@ sub parse_omf_file {
         # print "Record: " . Data::Dumper::Dumper($header);
         my $handler = $PARSE_HANDLERS{$header->type->sixcc};
         if (!defined $handler) {
-            # print "DEBUG: " . Data::Dumper::Dumper($omf_file);
-            dump_omf_file $omf_file;
+            print "XXL:".$omf_file->last_ledata->offset."\n\n";
             die "Unimplemented record type: " . $header->type->sixcc;
         }
         $handler->($fh, $header->length, $omf_file);

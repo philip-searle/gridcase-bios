@@ -146,9 +146,9 @@ Reset_Actual	PROC
 		; Was the shutdown intended to get out of protected mode?
 		; If so, skip the full POST and get back to running user code as fast as possible.
 		; This test relies on all protected mode shutdown reasons being contiguous.
-		cmp	ah, SD_BLOCK_MOVE
+		cmp	ah, SD_UNKNOWN_9
 		ja	.l2
-		cmp	ah, SD_PM_TEST7_PASS
+		cmp	ah, SD_UNKNOWN_6
 		jnb	.afterPicInit
 .l2
 ; ---------------------------------------------------------------------------
@@ -213,13 +213,13 @@ Reset_Actual	PROC
 		shl	bx, 1
 		jmp	[cs:.sdHandlers+bx]
 
-.sdHandlers	dw	SDH_00
-		dw	SDH_01
-		dw	SDH_02
-		dw	SDH_03
-		dw	SDH_04
-		dw	SDH_05
-		dw	SDH_02
+.sdHandlers	dw	SDH_00	; SD_BOOTLOADER_REQ
+		dw	SDH_01	; SD_JMP_WITH_INT
+		dw	SDH_02	; SD_UNKNOWN_6
+		dw	SDH_03	; SD_PM_BLOCK_MOVE
+		dw	SDH_04	; SD_PM_TEST1
+		dw	SDH_05	; SD_UNKNOWN_9
+		dw	SDH_02	; SD_JMP_WITHOUT_INT
 
 		ENDPROC	Reset_Actual
 

@@ -74,6 +74,10 @@ SC2_CAPLOCK		equ	3Ah
 SC2_F1			equ	3Bh
 SC2_NUMLOCK		equ	45h
 SC2_SCRLOCK		equ	46h
+SC2_HOME		equ	47h
+SC2_PGUP		equ	49h
+SC2_END			equ	4Fh
+SC2_PGDN		equ	51h
 SC2_INSERT		equ	52h
 SC2_SYSREQ		equ	54h
 SC2_F11			equ	57h

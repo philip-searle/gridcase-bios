@@ -54,6 +54,7 @@ register_record_type('LNAMES', 0x96, 'List of Names');
 register_record_type('SEGDEF', 0x98, 'Segment Definition');
 register_record_type('GRPDEF', 0x9A, 'Group Definition');
 register_record_type('FIXUPP', 0x9C, 'Fixup');
+register_record_type('FIXUPP32', 0x9D, 'Fixup32');
 register_record_type('UNUSED', 0x9E, 'Unused record type');
 register_record_type('LEDATA', 0xA0, 'Logical Enumerated Data');
 register_record_type('LIDATA', 0xA2, 'Logical Iterated Data');

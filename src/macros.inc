@@ -117,3 +117,14 @@ i		%for 2..%#
 		%endif
 		%endmacro
 
+; ---------------------------------------------------------------------
+; PmJmp Selector, Offset
+;
+; Encodes a far jump with a selector:offset pair.
+; Intended to be used where neither the selector nor offset should be
+; relocated by the linker, as a regular jmpf instruction would be.
+PmJmp		%macro Selector, Offset
+		db	0EAh
+		dw	%Offset
+		dw	%Selector
+		%endmacro

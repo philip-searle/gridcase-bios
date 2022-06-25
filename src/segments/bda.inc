@@ -264,6 +264,14 @@ KBSTAT4_RESEND		equ	20h	; Resend requested by KB
 KBSTAT4_LED_UPDATE	equ	40h	; LED update in progress
 KBSTAT4_TX_ERR		equ	80h	; Keyboard transmit error
 
+TimerNotifyPtrOffset	d w
+TimerNotifyPtrSegment	d w
+TimerValue		d d
+TimerFlags		d b
+TIMER_SET		equ	01h	; Timer value set
+TIMER_EXPIRED		equ	80h	; Timer value expired
+TIMER_RESERVED		equ	7Eh
+
 $		equ	0A6h
 Fd2DriveInfo		d b		; as FdDriveInfo, but for the external drive
 

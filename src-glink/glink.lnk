@@ -32,6 +32,7 @@ input {
 		../src/build/int10.obj
 		../src/build/int12.obj
 		../src/build/int11.obj
+		../src/build/int15.obj
 		../src/build/sysident.obj
 		../src/build/at_compat.obj
 		../src/build/rom_trailer.obj
@@ -46,7 +47,6 @@ output {
 linker {
 	define => {
 		IntNmi_Actual			=> F000:C4F8
-		Int15_Actual			=> F000:BD4C
 		Int1A_Actual			=> F000:C1C5
 		Int8_Actual				=> F000:C21C
 		EoiPic1					=> F000:F53C
@@ -56,7 +56,6 @@ linker {
 		Int75					=> F000:C655
 		EoiPic1and2				=> F000:F543
 		PrntScrn_Actual			=> F000:C789
-		SDH_03					=> F000:BE87
 		ChecksumRom				=> F000:C405
 		DetectMemController		=> F000:F63D
 		ResetNmiChecks			=> F000:C5B9
@@ -124,6 +123,14 @@ linker {
 		UnmakeIsrStack2			=> F000:C5EB
 		ConString2				=> F000:C5A5
 		kCrLf					=> F000:C5F6
+		GridCpuFast				=> F000:CF92
+		GridCpuSlow				=> F000:CF98
+		EnableNmi				=> F000:C3FC
+		VidDecColMap			=> F000:DCFE
+		VidIncColMap			=> F000:DD1D
+		Int15_Grid				=> F000:D606
+		VidToggleExt			=> F000:D508
+		kConfigTable			=> F000:E6F5
 	}
 	script => [
 		advance	{ to 		=> 0000:0000									}
@@ -160,6 +167,7 @@ linker {
 		link	{ input		=> int10,				segment => CODE					}
 		link	{ input		=> int12,				segment => CODE					}
 		link	{ input		=> int11,				segment => CODE					}
+		link	{ input		=> int15,				segment => CODE					}
 
 		fill	{ to		=> F000:DFD0,			with => 0xFF					}
 		link	{ input		=> sysident,			segment => CODE					}
