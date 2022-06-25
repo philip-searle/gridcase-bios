@@ -148,8 +148,11 @@ AdapterRomSegment	d w
 
 $		equ	006Ch
 TimerTicks		d d
+TimerOverflow		d b
+; Equivalent to (24 * 60 * 60 * (1193180.0 / 65536.0))
+; See [TechRef 6-8] for where this ratio is defined
+TIMER_TICKS_PER_DAY	equ	1_573_040
 
-$		equ	0071h
 ; Non-zero if ctrl+break entered at keyboard
 CtrlBrkFlag		d b
 

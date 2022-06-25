@@ -12,6 +12,17 @@ NMI_DISABLE            equ     80h
 
 ; ---------------------------------------------------------------------------
 ; CMOS register indexes
+CMOS_RTC_SECONDS	equ	00h
+CMOS_ALARM_SECONDS	equ	01h
+CMOS_RTC_MINUTES	equ	02h
+CMOS_ALARM_MINUTES	equ	03h
+CMOS_RTC_HOURS		equ	04h
+CMOS_ALARM_HOURS	equ	05h
+CMOS_RTC_DAY_OF_WEEK	equ	06h
+CMOS_RTC_DAY_OF_MONTH	equ	07h
+CMOS_RTC_MONTH		equ	08h
+CMOS_RTC_YEAR		equ	09h
+
 CMOS_STATUS_A		equ	0Ah
 CMOS_STATUS_B		equ	0Bh
 CMOS_STATUS_C		equ	0Ch
@@ -34,6 +45,7 @@ CMOS_CHECKSUM_LO	equ	2Eh
 CMOS_CHECKSUM_HI	equ	2Fh
 CMOS_EXPMEM2_LOBYTE	equ	30h
 CMOS_EXPMEM2_HIBYTE	equ	31h
+CMOS_CENTURY		equ	32h
 CMOS_INFORMATION	equ	33h
 CMOS_GRIDFLAGS		equ	3Fh	; [TechRef 6-17] documented as 'reserved'
 
