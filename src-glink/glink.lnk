@@ -33,7 +33,7 @@ input {
 		../src/build/int12.obj
 		../src/build/int11.obj
 		../src/build/int15.obj
-		../src/build/cmos.obj
+		../src/build/rtc.obj
 		../src/build/sysident.obj
 		../src/build/at_compat.obj
 		../src/build/rom_trailer.obj
@@ -169,7 +169,7 @@ linker {
 		link	{ input		=> int12,				segment => CODE					}
 		link	{ input		=> int11,				segment => CODE					}
 		link	{ input		=> int15,				segment => CODE					}
-		link	{ input		=> cmos,				segment => CODE					}
+		link	{ input		=> rtc,				segment => CODE					}
 
 		fill	{ to		=> F000:DFD0,			with => 0xFF					}
 		link	{ input		=> sysident,			segment => CODE					}

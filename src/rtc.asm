@@ -1,5 +1,5 @@
 
-CMOS		PROGRAM	OutFile=build/cmos.obj
+RTC		PROGRAM	OutFile=build/rtc.obj
 
 		include	"macros.inc"
 		include	"segments/bda.inc"
@@ -20,20 +20,20 @@ Int1A_Actual	PROC
 
 		; Dispatch to appropriate subfunction handler
 		sub	ah, 1
-		jb	CmosReadTod
+		jb	RtcReadTod
 		push	di
 		mov	di, .lastHandler - .handlers
 		call	FuncToOffset
 		jb	.leaveFailure
 		jmp	[cs:di+.handlers]
 
-.handlers	dw	CmosSetTod
-		dw	CmosReadTime
-		dw	CmosSetTime
-		dw	CmosReadDate
-		dw	CmosSetDate
-		dw	CmosSetAlarm
-.lastHandler	dw	CmosResetAlarm
+.handlers	dw	RtcSetTod
+		dw	RtcReadTime
+		dw	RtcSetTime
+		dw	RtcReadDate
+		dw	RtcSetDate
+		dw	RtcSetAlarm
+.lastHandler	dw	RtcResetAlarm
 
 ; ---------------------------------------------------------------------
 ; Shared function tail for int1A handlers.
@@ -64,33 +64,33 @@ Int1A_Actual	PROC
 		ENDPROC	Int1A_Actual
 
 ; =====================================================================
-; CmosSetTod [TechRef 6-8]
+; RtcSetTod [TechRef 6-8]
 ; Sets the time-of-day clock, also resetting the overflow count.
 ; =====================================================================
-CmosSetTod	PROC
+RtcSetTod	PROC
 		mov	[TimerTicks], dx
 		mov	[TimerTicks+2], cx
 		xor_	ah, ah
 		mov	[TimerOverflow], ah
 		pop	di
-.leaveFunction	; function tail shared with CmosReadTod
+.leaveFunction	; function tail shared with RtcReadTod
 		sti
 		pop	ds
 		iret
-		ENDPROC	CmosSetTod
+		ENDPROC	RtcSetTod
 
 ; =====================================================================
-; CmosReadTod [TechRef 6-8]
+; RtcReadTod [TechRef 6-8]
 ; Returns timer tick count in CX:DX and overflow flag in AH.
 ; Resets the overflow flag after reading it.
 ; =====================================================================
-CmosReadTod	PROC
+RtcReadTod	PROC
 		mov	dx, [TimerTicks]
 		mov	cx, [TimerTicks+2]
 		xor_	ax, ax
 		xchg	al, [TimerOverflow]
-		jmp	CmosSetTod.leaveFunction
-		ENDPROC	CmosReadTod
+		jmp	RtcSetTod.leaveFunction
+		ENDPROC	RtcReadTod
 
 ; =====================================================================
 ; Int8_Actual [TechRef 6-10]
@@ -149,10 +149,10 @@ Int8_Actual	PROC
 		ENDPROC	Int8_Actual
 
 ; =====================================================================
-; CmosSetTime [TechRef 6-9]
+; RtcSetTime [TechRef 6-9]
 ; =====================================================================
-CmosSetTime	PROC
-		call	CmosStopClock
+RtcSetTime	PROC
+		call	RtcStopClock
 		mov	ah, CMOS_RTC_SECONDS | NMI_ENABLE
 		mov_	al, dh
 		call	WriteCmos
@@ -173,14 +173,14 @@ CmosSetTime	PROC
 		or_	al, dl
 		pop	dx
 		jmp	Int1A_Actual.writeAndLeave
-		ENDPROC	CmosSetTime
+		ENDPROC	RtcSetTime
 
 ; =====================================================================
-; CmosReadTime [TechRef 6-9]
+; RtcReadTime [TechRef 6-9]
 ; =====================================================================
-CmosReadTime	PROC
-		call	CmosWaitUpdate
-		jc	CmosReadDate.leaveFailure
+RtcReadTime	PROC
+		call	RtcWaitUpdate
+		jc	RtcReadDate.leaveFailure
 		mov	al, CMOS_RTC_SECONDS | NMI_ENABLE
 		call	ReadCmos
 		mov_	dh, al
@@ -192,16 +192,16 @@ CmosReadTime	PROC
 		mov_	dl, al
 		and	dl, 1		; isolate daylight-savings bit
 		mov	al, CMOS_RTC_HOURS | NMI_ENABLE
-		jmp	CmosReadDate.readAndLeave
+		jmp	RtcReadDate.readAndLeave
 
 		and	al, 3		; ??? dead code
-		ENDPROC	CmosReadTime
+		ENDPROC	RtcReadTime
 
 ; =====================================================================
-; CmosReadDate [TechRef 6-9]
+; RtcReadDate [TechRef 6-9]
 ; =====================================================================
-CmosReadDate	PROC
-		call	CmosWaitUpdate
+RtcReadDate	PROC
+		call	RtcWaitUpdate
 		jc	.leaveFailure
 		mov	al, CMOS_RTC_DAY_OF_MONTH | NMI_ENABLE
 		call	ReadCmos
@@ -213,20 +213,20 @@ CmosReadDate	PROC
 		call	ReadCmos
 		mov_	cl, al
 		mov	al, CMOS_CENTURY | NMI_ENABLE
-.readAndLeave	; function tail shared with CmosReadTime
+.readAndLeave	; function tail shared with RtcReadTime
 		call	ReadCmos
 		mov_	ch, al
 		jmp	Int1A_Actual.leaveSuccess
 
-.leaveFailure	; function tail shared with CmosReadDate
+.leaveFailure	; function tail shared with RtcReadDate
 		jmp	Int1A_Actual.leaveFailure
-		ENDPROC	CmosReadDate
+		ENDPROC	RtcReadDate
 
 ; =====================================================================
-; CmosSetDate [TechRef 6-9]
+; RtcSetDate [TechRef 6-9]
 ; =====================================================================
-CmosSetDate	PROC
-		call	CmosStopClock
+RtcSetDate	PROC
+		call	RtcStopClock
 		mov	ah, CMOS_RTC_DAY_OF_MONTH | NMI_ENABLE
 		mov_	al, dl
 		call	WriteCmos
@@ -245,18 +245,18 @@ CmosSetDate	PROC
 		call	ReadCmos
 		and	al, 7Fh
 		jmp	Int1A_Actual.writeAndLeave
-		ENDPROC	CmosSetDate
+		ENDPROC	RtcSetDate
 
 ; =====================================================================
-; CmosSetAlarm [Techref 6-9]
+; RtcSetAlarm [Techref 6-9]
 ; =====================================================================
-CmosSetAlarm	PROC
+RtcSetAlarm	PROC
 		mov	al, CMOS_STATUS_B | NMI_ENABLE
 		call	ReadCmos
 		test	al, 20h		; alarm already enabled?
 		jnz	.leaveFailure
 
-		call	CmosStopClock
+		call	RtcStopClock
 		mov	ah, CMOS_ALARM_SECONDS | NMI_ENABLE
 		mov_	al, dh
 		call	WriteCmos
@@ -283,18 +283,18 @@ CmosSetAlarm	PROC
 .leaveFailure	xor_	ax, ax
 		stc
 		jmp	Int1A_Actual.leaveFailure
-		ENDPROC	CmosSetAlarm
+		ENDPROC	RtcSetAlarm
 
 ; =====================================================================
-; CmosResetAlarm [TechRef 6-9]
+; RtcResetAlarm [TechRef 6-9]
 ; =====================================================================
-CmosResetAlarm	PROC
+RtcResetAlarm	PROC
 		mov	al, CMOS_STATUS_B | NMI_ENABLE
 		mov_	ah, al
 		call	ReadCmos
 		and	al, 57h		; disable alarm interrupt (and square wave freq???)
 		jmp	Int1A_Actual.writeAndLeave
-		ENDPROC	CmosResetAlarm
+		ENDPROC	RtcResetAlarm
 
 ; =====================================================================
 ; Int70 [TechRef 6-10]
@@ -350,12 +350,12 @@ Int70		PROC
 		ENDPROC	Int70
 
 ; =====================================================================
-; CmosStopClock
+; RtcStopClock
 ; Resets RTC to default timing and disables clock updated.
 ; Returns CMOS RAM valid flag in AL bit 7.
 ; =====================================================================
-CmosStopClock	PROC
-		call	CmosWaitUpdate
+RtcStopClock	PROC
+		call	RtcWaitUpdate
 		mov	ah, CMOS_STATUS_A | NMI_ENABLE
 		mov	al, 26h			; set default timings
 		call	WriteCmos
@@ -366,16 +366,16 @@ CmosStopClock	PROC
 		call	ReadCmos		; read to clar interrupt flags
 		mov	al, CMOS_STATUS_D | NMI_ENABLE
 		jmp	ReadCmos		; read to get (and clear) CMOS valid bit
-		ENDPROC	CmosStopClock
+		ENDPROC	RtcStopClock
 
 ; =====================================================================
-; CmosWaitUpdate
+; RtcWaitUpdate
 ; Waits for the RTC to not be in the middle of an update cycle (i.e.
 ; for it to be safe to perform a clock update).
 ; Returns AX unmodified, CF clear, interrupts disabled on success.
 ; Return AX=0, CF set, interrupts enabled on failure.
 ; =====================================================================
-CmosWaitUpdate	PROC
+RtcWaitUpdate	PROC
 		push	cx
 		push	ax
 		xor_	cx, cx		; wait max loops
@@ -391,6 +391,6 @@ CmosWaitUpdate	PROC
 		stc
 .leaveFunction	pop	cx
 		retn
-		ENDPROC	CmosWaitUpdate
+		ENDPROC	RtcWaitUpdate
 
-ENDPROGRAM	CMOS
+ENDPROGRAM	RTC
