@@ -7,7 +7,7 @@ POST_VIDTEST	PROGRAM	OutFile=build/post/vidtest.obj
 		include	"video.inc"
 
 		EXTERN	Beep
-		EXTERN	TestMemData, TestMemLoAddr, ResetNmiChecks
+		EXTERN	TestMemData, TestMemLoAddr, CheckParityErr
 
 		PUBLIC	VidTestMem
 
@@ -115,7 +115,7 @@ VidTestMem	PROC
 		jb	VidTestFail
 		call	TestMemLoAddr
 		jb	VidTestFail
-		call	ResetNmiChecks
+		call	CheckParityErr
 		jnz	VidTestFail
 
 ; ---------------------------------------------------------------------

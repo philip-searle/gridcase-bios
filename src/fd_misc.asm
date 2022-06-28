@@ -19,8 +19,8 @@ FD_MISC		PROGRAM	OutFIle=build/fd_misc.obj
 		EXTERN	FdGetDriveType2
 		EXTERN	FdGetDriveInfo, FdSetDriveInfo
 		EXTERN	LoadBdaToDs
-		EXTERN	SetSoftResetFlag
-		EXTERN	WriteCharHex2, WriteString_Inline
+		EXTERN	SetCriticalErr
+		EXTERN	ConCharHex2, ConString_Inline
 
 		PUBLIC	FdCheckConfigValid
 		PUBLIC	TenthMilliDelay
@@ -153,8 +153,8 @@ FdCheckConfigValid	PROC
 		xor_	dl, dl
 		int	13h
 		jnc	.resetOk
-		Inline	WriteString,'Diskette subsystem reset failed',0Dh,0Ah,0
-		call	SetSoftResetFlag
+		Inline	ConString,'Diskette subsystem reset failed',0Dh,0Ah,0
+		call	SetCriticalErr
 		jmp	.checkCmos
 
 		; Setup IsrStackAx and extract drive info for each
@@ -219,15 +219,15 @@ FdCheckConfigValid	PROC
 		mov_	al, bh
 		mov	ah, CMOS_STATUS_DIAG | NMI_DISABLE
 		call	WriteCmos
-		Inline	WriteString,'Invalid configuration information; code ',0
+		Inline	ConString,'Invalid configuration information; code ',0
 		pop	bx
 		push	ax
 		mov_	al, bl
 		xor_	ah, ah
-		call	WriteCharHex2
-		Inline	WriteString,0Dh,0Ah,0
+		call	ConCharHex2
+		Inline	ConString,0Dh,0Ah,0
 		pop	ax
-		call	SetSoftResetFlag
+		call	SetCriticalErr
 
 .leaveFunction	retn
 		ENDPROC	FdCheckConfigValid

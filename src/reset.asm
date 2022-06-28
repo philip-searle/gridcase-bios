@@ -25,18 +25,18 @@ RESET		PROGRAM	OutFile=build/reset.obj
 		EXTERN	VidInit, VidInitBacklite
 		EXTERN	VidTestMem, TestAllMem, TestMemData, TestMemLoAddr
 		EXTERN	DetectMemController, DetectMemSize, MemSetXmsEms
-		EXTERN	ChecksumRom, ChecksumOptRom, InitOptionRoms, ResetNmiChecks
+		EXTERN	ChecksumBios, ChecksumRom, InitOptionRoms, CheckParityErr
 		EXTERN	SerDetectPort, ParDetectPort
 		EXTERN	TestDmaRegs, TestPicMaskReg
 		EXTERN	KbWaitReady, KbWaitResponse, KbWaitEmpty
 		EXTERN	ReadCmos, WriteCmos
-		EXTERN	SetSoftResetFlag, InitTimerTicks
+		EXTERN	SetCriticalErr, InitTimerTicks
 		EXTERN	GridAutodetect, FdCheckConfigValid, IdeAutodetect_70, HdcTestDriveReady, HdcHookIvt
 		EXTERN	A20Disable, PmClearTraces
 		EXTERN	PwEnabled, PwStartInput, PwPrompt, PwProcessInput, PwEndInput
 		EXTERN	PwCompareStored, PwBackdoor2, PwIncorrect, PwClearBuffer
-		EXTERN	WriteString, WriteString_Inline, WriteCharHex2, WriteCharHex4
-		EXTERN	WriteChecksumFailMsg, WriteBiosBanner
+		EXTERN	ConString, ConString_Inline, ConCharHex2, ConCharHex4
+		EXTERN	ConBadCsumMsg, ConBiosBanner
 		EXTERN	PromptF1Cont
 		EXTERN	SDH_03, SDH_04
 
@@ -330,7 +330,7 @@ SDH_POST	PROC
 		include "post/16_vidinit.asm"
 
 		; Enough hardware is initialized that we can safely ID ourselves
-		call	WriteBiosBanner
+		call	ConBiosBanner
 
 		include "post/17_protmode.asm"
 		include "post/18_timer2.asm"
@@ -338,7 +338,7 @@ SDH_POST	PROC
 
 		; Comprehensive memory test only on cold boots
 		mov	ax, [SoftResetFlag]
-		and	ax, 0FFFEh
+		and	ax, ~CRITICAL_ERR_FLAG
 		cmp	ax, SOFT_RESET_FLAG
 		jz	.warmBoot
 		call	HdcTestDriveReady
@@ -413,8 +413,8 @@ SDH_POST	PROC
 		jnz	.pastTodInit		; skip time-of-day init if not
 		call	InitTimerTicks
 		jb	.pastTodInit
-		Inline	WriteString,'Time-of-day not set - please set current time',0Dh,0Ah,0
-		call	SetSoftResetFlag
+		Inline	ConString,'Time-of-day not set - please set current time',0Dh,0Ah,0
+		call	SetCriticalErr
 
 .pastTodInit	sti				; re-enable interrupts after ReadCmos
 
@@ -427,13 +427,13 @@ SDH_POST	PROC
 		in	al, PORT_KBC_STATUS
 		test	al, 10h			; KB inhibit bit == 1?
 		jnz	.pastKbLock		; if so, skip warning
-		Inline	WriteString,'Keyboard is locked - please unlock',0Dh,0Ah,0
-		call	SetSoftResetFlag
+		Inline	ConString,'Keyboard is locked - please unlock',0Dh,0Ah,0
+		call	SetCriticalErr
 
 ; ---------------------------------------------------------------------------
 ; If POST checks resulted in a critically important message, prompt the user
 ; to
-.pastKbLock	test	[SoftResetFlag], 1,DATA=BYTE	; lowest bit set (important message)?
+.pastKbLock	test	[SoftResetFlag], CRITICAL_ERR_FLAG,DATA=BYTE	; lowest bit set (important message)?
 		jz	.pastF1Prompt
 		call	PromptF1Cont		; make sure user has read POST messages
 		jmp	.pastF1Prompt		; ??? useless jmp
@@ -513,7 +513,7 @@ SDH_POST	PROC
 		cmp	[0], 0AA55h,DATA=WORD	; check for option ROM signature
 		jnz	.afterSysRom
 		xor_	cx, cx			; sys rom always 64KB in size
-		call	ChecksumOptRom
+		call	ChecksumRom
 		jnz	.sysRomBad
 		mov	es, [cs:kBdaSegment]
 		mov	[es:AdapterRomOffset], 3
@@ -523,10 +523,10 @@ SDH_POST	PROC
 		callf	[es:AdapterRomOffset]
 		jmp	.afterSysRom
 
-.sysRomBad	call	WriteCharHex4
-		Inline	WriteString,'0h Optional ',0
+.sysRomBad	call	ConCharHex4
+		Inline	ConString,'0h Optional ',0
 		mov	si, kRomBadChecksum
-		call	WriteChecksumFailMsg
+		call	ConBadCsumMsg
 
 .afterSysRom	mov	ds, [cs:kBdaSegment]	; reset DS -> BDA after sys opt ROM init
 

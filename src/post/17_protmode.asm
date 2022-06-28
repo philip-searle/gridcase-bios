@@ -33,8 +33,8 @@ POST17_ProtMode	PROC
 		jnz	.haveDisplay
 		mov	al, BEEP_TIMER_INT
 		jmp	FatalBeeps
-.haveDisplay	Inline	WriteString,'No timer tick interrupt',0Dh,0Ah,0
-		call	SetSoftResetFlag
+.haveDisplay	Inline	ConString,'No timer tick interrupt',0Dh,0Ah,0
+		call	SetCriticalErr
 		jmp	.skipShutdown
 
 		; This is our temporary handler for the timer tick.  There's
@@ -74,8 +74,8 @@ POST17_ProtMode	PROC
 		jnz	.haveDisplay2
 		mov	al, BEEP_SHUTDOWN
 		jmp	FatalBeeps
-.haveDisplay2	Inline	WriteString,'Shutdown failure',0Dh,0Ah,0
-		mov	[SoftResetFlag], 1235h	; ???
+.haveDisplay2	Inline	ConString,'Shutdown failure',0Dh,0Ah,0
+		mov	[SoftResetFlag], SOFT_RESET_FLAG | CRITICAL_ERR_FLAG
 		mov	[es:IvtInt08], Int8_Compat,DATA=WORD
 		; If the KBC can't reset the CPU then we must skip all
 		; tests that use protected mode since we won't be able
@@ -163,7 +163,7 @@ POST17_ProtMode	PROC
 		Delay	2
 		inc	dx		; ??? increment to 0FFEh
 		shr	al, 1
-		out	dx, al		; ??? 0-1 
+		out	dx, al		; ??? 0-1
 
 .pastPmodeTests	; Exit via fall-through to next POST procedure
 		ENDPROC POST17_ProtMode

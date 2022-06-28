@@ -100,14 +100,14 @@ xor_		%macro
 		%endmacro
 
 ; ---------------------------------------------------------------------
-; Inline WriteString,'StringConstant',0
+; Inline ConString,'StringConstant',0
 ;
-; Encodes a call to WriteString_Inline with subroutine parameters encoded
+; Encodes a call to ConString_Inline with subroutine parameters encoded
 ; as literals immediately following the call instruction.  Used for one-off
 ; string literals that don't need individual names.
 Inline		%macro
-		%if "%1" == "WriteString"
-		call	WriteString_Inline
+		%if "%1" == "ConString"
+		call	ConString_Inline
 i		%for 2..%#
 		db	%2
 		%shift

@@ -8,7 +8,7 @@ INT19		PROGRAM	OutFile=build/int19.obj
 		include	"parallel.inc"
 
 		EXTERN	kBdaSegment, kBootSegOffset
-		EXTERN	WriteString
+		EXTERN	ConString
 		EXTERN	GridBootRom
 		EXTERN	TenthMilliDelay
 		EXTERN	DisketteParams
@@ -112,9 +112,9 @@ Int19_Actual	PROC
 		; If we returned from LoadBootSector then the boot failed
 		pop	si
 		push	si
-		call	WriteString
+		call	ConString
 		mov	si, Int19_kDiskBootError
-		call	WriteString
+		call	ConString
 		pop	si
 		pop	dx
 
@@ -160,7 +160,7 @@ Int19_Actual	PROC
 
 		; All boot methods failed, report error
 		mov	si, Int19_kDiskBootError
-		call	WriteString
+		call	ConString
 
 		; Delay before retrying bootloader loop
 		push	cx

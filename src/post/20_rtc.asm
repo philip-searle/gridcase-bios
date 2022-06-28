@@ -43,8 +43,8 @@ POST20_RTC	PROC
 		jnz	.l1		; will always be taken, flag is checked at proc start
 		mov	al, BEEP_RTC
 		jmp	FatalBeeps
-.l1		Inline	WriteString,'Time-of-day clock stopped - please set current time',0Dh,0Ah,0
-		call	SetSoftResetFlag
+.l1		Inline	ConString,'Time-of-day clock stopped - please set current time',0Dh,0Ah,0
+		call	SetCriticalErr
 		mov	ah, CMOS_STATUS_DIAG | NMI_DISABLE
 		mov_	al, bh		; restore original diagnostic byte
 		call	WriteCmos	; (why? it's not been modified)

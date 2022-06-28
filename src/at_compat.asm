@@ -19,11 +19,7 @@ AT_COMPAT	PROGRAM	OutFile=build/at_compat.obj
 		PUBLIC	DelayFactor, BeepFactor
 		PUBLIC	VidRegenLengths, VidColumns, VidModeSets
 		PUBLIC	GraphicsChars
-
-		; Symbols that are exposed as part of the public API but which
-		; are otherwise unreferenced
-		Unused	Copyr_Phoenix
-		Unused	Copyr_Phoenix2
+		PUBLIC	Copyr_Phoenix, Copyr_Phoenix2
 
 		; Symbols that are currently unused because the codebase is
 		; not yet complete.

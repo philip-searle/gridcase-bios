@@ -29,8 +29,16 @@ InterruptFlag		d b
 
 MemorySizeKb		d w
 
-; TODO: document what this is
-ErrorCodes		d w
+; The speaker in the 1500-series computer doesn't have an adjustable volume,
+; so we emulate it by using KbClickVol to control the duration of the beeps
+; used by the key click feature.  Note that although it's a word value,
+; initialized to 100h the code that implements the key click only uses the
+; first byte and clamps it's value to the 0-127 range.
+; [Compat] The IBM BIOS refers to these two bytes as MFG_ERR_FLAG and
+; documents them as "SCRATCHPAD FOR MANUFACTURING ERROR CODES".  The Compaq
+; 286 BIOS has a keyclick feature that matches our usage here.
+KbClickVol		d w
+DEFAULT_KBCLICK_VOL	equ	100h
 
 KB_BUFFER_LENGTH	equ	20h
 
@@ -157,7 +165,8 @@ TIMER_TICKS_PER_DAY	equ	1_573_040
 CtrlBrkFlag		d b
 
 SoftResetFlag		d w
-SOFT_RESET_FLAG	equ	1234h	; Set in SoftResetFlag to mark software-initiated reset via JMP to F000:FFF0
+SOFT_RESET_FLAG		equ	1234h	; Set in SoftResetFlag to mark software-initiated reset via JMP to F000:FFF0
+CRITICAL_ERR_FLAG	equ	0001h	; Set in SoftResetFlag to indicate user must acknowledge error during POST
 
 ;XXX: CompatAddress	74h
 HdLastOpStatus		d b

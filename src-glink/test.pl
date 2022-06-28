@@ -229,6 +229,7 @@ sub process_script_fill {
 # ---------------------------------------------------------------------
 
 sub dump_resolved_symbols {
+    my $fh = shift;
     sub by_address {
         # Use a hacky fallback comparison so items at the same address are sorted
         # alphabetically unless they contain an exclamation mark, which forces them
@@ -237,22 +238,23 @@ sub dump_resolved_symbols {
             or ($b =~ /!/) <=> ($a =~ /!/)
             or $a cmp $b
     };
-    print "Resolved symbols:\n" .
+    print $fh "Resolved symbols:\n" .
         "\tResolved Address\tSymbol Name";
     for my $symbol_name (sort by_address keys %resolved_symbols) {
-        print "\n\t" . $resolved_symbols{$symbol_name}->address . "\t$symbol_name";
+        print $fh "\n\t" . $resolved_symbols{$symbol_name}->address . "\t$symbol_name";
     }
-    print "\n";
+    print $fh "\n";
 }
 
 # ---------------------------------------------------------------------
 
 sub dump_segments_to_write {
-    print "Segments to write:";
+    my $fh = shift;
+    print $fh "Segments to write:";
     for my $segment (@segments_to_write) {
-        print "\n\t" . $segment->unique_name;
+        print $fh "\n\t" . $segment->unique_name;
     }
-    print "\n";
+    print $fh "\n";
 }
 
 # ---------------------------------------------------------------------
@@ -294,8 +296,6 @@ sub process_script {
         }
     }
     resolve_xrefs;
-    dump_resolved_symbols;
-    dump_segments_to_write;
 }
 
 # ---------------------------------------------------------------------
@@ -439,6 +439,10 @@ sub write_output {
     open my $map_file, '>', $map_path or die "Cannot open $map_path for writing: $!";
     binmode $output_file, ':raw';
     $output_file->autoflush;
+
+    dump_resolved_symbols($map_file);
+    dump_segments_to_write($map_file);
+    close $map_file;
 
     for my $segment (@segments_to_write) {
         #print "Writing segment " . $segment->unique_name . "\n";

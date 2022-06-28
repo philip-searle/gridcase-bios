@@ -47,8 +47,8 @@ POST18_Timer2	PROC
 		jnz	.l1
 		mov	al, BEEP_TIMER2_FAIL
 		jmp	FatalBeeps
-.l1		Inline	WriteString,'Timer chip counter 2 failed',0Dh,0Ah,0
-		call	SetSoftResetFlag
+.l1		Inline	ConString,'Timer chip counter 2 failed',0Dh,0Ah,0
+		call	SetCriticalErr
 
 .timer2Checked	pop	ax		; restore original port value
 		pop	dx		; restore port number

@@ -11,11 +11,11 @@ POST_PROTMODE	PROGRAM	OutFile=build/post/protmode.obj
 		EXTERN	A20Disable, A20Enable
 		EXTERN	ReadCmos, WriteCmos
 		EXTERN	FatalBeeps
-		EXTERN	WriteString_Inline, WriteString, WriteCrLf
-		EXTERN	WriteChar, WriteCharHex2, WriteCharHex4
+		EXTERN	ConString_Inline, ConString, ConCrLf
+		EXTERN	ConChar, ConCharHex2, ConCharHex4
 		EXTERN	kBdaSegment
-		EXTERN	SetSoftResetFlag
-		EXTERN	ResetNmiChecks, ResetCpu
+		EXTERN	SetCriticalErr
+		EXTERN	CheckParityErr, ResetCpu
 
 		PUBLIC	kAddressLine
 		PUBLIC	kOddEvenLogic
@@ -151,8 +151,8 @@ PmEnter		PROC
 		mov	al, BEEP_A20_FAIL
 		jmp	FatalBeeps
 .l1		pop	ds
-		Inline	WriteString,'Gate A20 failure',0Dh,0Ah,0
-		call	SetSoftResetFlag
+		Inline	ConString,'Gate A20 failure',0Dh,0Ah,0
+		call	SetCriticalErr
 		stc
 		retn
 
@@ -278,8 +278,8 @@ SDH_04		PROC
 		jnz	.l1
 		mov	al, BEEP_PM_IRET
 		jmp	FatalBeeps
-.l1		Inline	WriteString,'Unexpected interrupt in protected mode',0Dh,0Ah,0
-		call	SetSoftResetFlag
+.l1		Inline	ConString,'Unexpected interrupt in protected mode',0Dh,0Ah,0
+		call	SetCriticalErr
 
 .leaveProc	popa
 		retn
@@ -366,7 +366,7 @@ DetectMemSize	PROC
 
 		; Leave protected mode
 		call	PmLeaveTest1
-		call	ResetNmiChecks
+		call	CheckParityErr
 
 .leaveProc	pop	ds
 		retn
@@ -446,7 +446,7 @@ TestAllMem	PROC
 
 		; Display initial message.  We know the first 64K is good
 		; because the POST calls FatalBeep if it isn't.
-		Inline	WriteString,'064K Base Memory, ',0
+		Inline	ConString,'064K Base Memory, ',0
 
 		; Display placeholder for memory past 640K
 		mov	ah, 3
@@ -463,10 +463,10 @@ TestAllMem	PROC
 		test	al, GF_EMS
 		pop	ax
 		jz	.memExtended
-		Inline	WriteString,'00000K EMS Memory',0Dh,0Ah,0
+		Inline	ConString,'00000K EMS Memory',0Dh,0Ah,0
 		jmp	.startMemTest
 		FillerNop
-.memExtended	Inline	WriteString,'00000K Extended',0Dh,0Ah,0
+.memExtended	Inline	ConString,'00000K Extended',0Dh,0Ah,0
 
 .startMemTest	mov	si, 1		; start memtest offset at 1
 					; high bit is data/address test flag
@@ -494,7 +494,7 @@ TestAllMem	PROC
 		jmp	FatalBeeps
 .l2		push	si
 		mov	si, kDecreasingMem
-		call	WriteString
+		call	ConString
 		pop	si
 		mov	bh, 0		; reset max segment to end memtest early
 		shl	bx, SEG_SIZE_SHIFT
@@ -530,7 +530,7 @@ TestAllMem	PROC
 		; Report error and reduce memory size accordingly.
 		push	si
 		mov	si, kDecreasingMem
-		call	WriteString
+		call	ConString
 		pop	si
 		sub	bl, 10h		; account for 1MB start segment
 
@@ -568,7 +568,7 @@ TestAllMem	PROC
 		mov	ah, 2
 		mov	bh, 0
 		int	10h
-		Inline	WriteString,'Memory tests terminated by keystroke  ',0
+		Inline	ConString,'Memory tests terminated by keystroke  ',0
 
 		pop	dx		; restore cursor position
 		mov	ah, 2
@@ -629,12 +629,12 @@ TestMemSegments	PROC
 		jnb	.memOk
 
 		; Memory failure detected if we reach here
-		call	ResetNmiChecks
+		call	CheckParityErr
 		call	ReportMemError
 		jmp	.leaveFailure2
 
 .memOk		; Memory was OK, did we detect any parity errors?
-		call	ResetNmiChecks
+		call	CheckParityErr
 		jz	.updateProgress	; continue if we didn't
 
 		; Parity error detected if we reach here
@@ -935,36 +935,36 @@ kWriteRead	db	'write/read',0
 ; =====================================================================
 ReportMemError	PROC
 		push	si
-		Inline	WriteString,'Memory ',0
+		Inline	ConString,'Memory ',0
 		mov_	si, dx
-		call	WriteString
-		Inline	WriteString,' failure at ',0
+		call	ConString
+		Inline	ConString,' failure at ',0
 		cmp	dx, kAddressLine
 		jb	.segmentOnly
 
 		; Report failing address and expected/actual values
 		push	ax
 		mov_	al, bl
-		call	WriteCharHex2		; output segment
+		call	ConCharHex2		; output segment
 		mov_	ax, di
-		call	WriteCharHex4		; output offset
-		Inline	WriteString,', read ',0
+		call	ConCharHex4		; output offset
+		Inline	ConString,', read ',0
 		mov_	ax, cx
-		call	WriteCharHex4		; output actual value
-		Inline	WriteString,' expecting ',0
+		call	ConCharHex4		; output actual value
+		Inline	ConString,' expecting ',0
 		pop	ax
-		call	WriteCharHex4		; output expected value
-		call	WriteCrLf
+		call	ConCharHex4		; output expected value
+		call	ConCrLf
 		pop	si
 		retn				; early return
 
 		; Report failing segment only
 .segmentOnly	mov_	al, bl
-		call	WriteCharHex2		; output segment start
-		Inline	WriteString,'0000-',0
+		call	ConCharHex2		; output segment start
+		Inline	ConString,'0000-',0
 		mov_	al, bl
-		call	WriteCharHex2		; output segment end
-		Inline	WriteString,'FFFF',0Dh,0Ah,0
+		call	ConCharHex2		; output segment end
+		Inline	ConString,'FFFF',0Dh,0Ah,0
 		pop	si
 		retn
 		ENDPROC	ReportMemError
@@ -988,7 +988,7 @@ WriteMemSize	PROC
 		; ??? operand is offset backwards by 2, error by original programmer?
 		div	[cs:.divisors-2+si]	; extract digit
 		add	al, '0'
-		call	WriteChar
+		call	ConChar
 		mov_	ax, dx			; retrieve remainder
 		dec	si
 		dec	si

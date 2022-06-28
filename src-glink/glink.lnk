@@ -34,6 +34,8 @@ input {
 		../src/build/int11.obj
 		../src/build/int15.obj
 		../src/build/rtc.obj
+		../src/build/misc.obj
+		../src/build/kb_extra.obj
 		../src/build/sysident.obj
 		../src/build/at_compat.obj
 		../src/build/rom_trailer.obj
@@ -47,9 +49,6 @@ output {
 
 linker {
 	define => {
-		IntNmi_Actual			=> F000:C4F8
-		Int1A_Actual			=> F000:C1C5
-		Int8_Actual				=> F000:C21C
 		EoiPic1					=> F000:F53C
 		DummyIsr				=> F000:C66D
 		Int70					=> F000:C351
@@ -57,32 +56,19 @@ linker {
 		Int75					=> F000:C655
 		EoiPic1and2				=> F000:F543
 		PrntScrn_Actual			=> F000:C789
-		ChecksumRom				=> F000:C405
 		DetectMemController		=> F000:F63D
-		ResetNmiChecks			=> F000:C5B9
 		kBdaSegment				=> F000:C5E6
-		kBootSegOffset			=> F000:C5E7
-		kIvtSegment				=> F000:C5E9
 		ParDetectPort			=> F000:C5CE
 		ReadCmos				=> F000:C762
 		WriteCmos				=> F000:C773
 		GridAutodetect			=> F000:CFA3
-		SetSoftResetFlag		=> F000:C5F9
-		WriteString_Inline		=> F000:C4B3
-		WriteString				=> F000:BD34
 		VidInit					=> F000:D541
 		VidInitBacklite			=> F000:D160
-		WriteBiosBanner			=> F000:C458
 		HdcTestDriveReady		=> F000:CEBB
 		IdeAutodetect_70		=> F000:D09C
-		Beep					=> F000:C3D3
-		WriteCharHex2			=> F000:C4CB
 		MemSetXmsEms			=> F000:D13C
 		CheckFdConfigValid		=> F000:B27F
 		HdcHookIvt				=> F000:C822
-		ChecksumOptRom			=> F000:C409
-		WriteCharHex4			=> F000:C4C4
-		WriteChecksumFailMsg	=> F000:C4A4
 		PwEnabled				=> F000:F180
 		PwStartInput			=> F000:F1F2
 		PwPrompt				=> F000:F422
@@ -92,18 +78,9 @@ linker {
 		PwBackdoor2				=> F000:F291
 		PwIncorrect				=> F000:F2D8
 		PwClearBuffer			=> F000:F27A
-		WriteBadCsumMsg			=> F000:C4A4
-		WriteCrLf				=> F000:BD31
-		WriteChar				=> F000:BD28
 		GridBootRom				=> F000:D88A
 		WaitKey					=> F000:C4E7
 		DriveIdentify			=> F000:F56F
-		MakeIsrStack			=> F000:C415
-		UnmakeIsrStack			=> F000:C5EC
-		FuncToOffset			=> F000:C444
-		KbKeyClick				=> F000:C60F
-		LoadBdaToDs				=> F000:C452
-		CheckBiosChords			=> F000:C632
 		FdGetMediaState			=> F000:D17B
 		FdGetMediaState2		=> F000:D18A
 		FdSetMediaState			=> F000:D192
@@ -121,25 +98,22 @@ linker {
 		GridVidInit				=> F000:D4DF
 		GridVidInitHi			=> F000:D4B9
 		VidGrapPelMask			=> F000:BC37
-		UnmakeIsrStack2			=> F000:C5EB
-		ConString2				=> F000:C5A5
-		kCrLf					=> F000:C5F6
 		GridCpuFast				=> F000:CF92
 		GridCpuSlow				=> F000:CF98
-		EnableNmi				=> F000:C3FC
 		VidDecColMap			=> F000:DCFE
 		VidIncColMap			=> F000:DD1D
 		Int15_Grid				=> F000:D606
 		VidToggleExt			=> F000:D508
 		kConfigTable			=> F000:E6F5
+		kRebootPrompt2			=> F000:C6B5
 	}
 	script => [
-		advance	{ to 		=> 0000:0000									}
+		advance	{ to 		=> 0000:0000											}
 		link	{ input		=> .*,					segment	=> IVT,	virtual	=> true	}
-		advance	{ to		=> 0040:0000									}
+		advance	{ to		=> 0040:0000											}
 		link	{ input		=> .*,					segment	=> BDA,	virtual => true	}
 
-		advance	{ to		=> F000:8000									}
+		advance	{ to		=> F000:8000											}
 		link	{ input		=> rom_header,			segment => CODE					}
 		link	{ input		=> reset,				segment => CODE					}
 		link	{ input		=> post_reset_util,		segment => CODE					}
@@ -169,7 +143,9 @@ linker {
 		link	{ input		=> int12,				segment => CODE					}
 		link	{ input		=> int11,				segment => CODE					}
 		link	{ input		=> int15,				segment => CODE					}
-		link	{ input		=> rtc,				segment => CODE					}
+		link	{ input		=> rtc,					segment => CODE					}
+		link	{ input		=> misc,				segment => CODE					}
+		link	{ input		=> kb_extra,			segment => CODE					}
 
 		fill	{ to		=> F000:DFD0,			with => 0xFF					}
 		link	{ input		=> sysident,			segment => CODE					}

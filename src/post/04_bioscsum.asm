@@ -7,7 +7,7 @@ POST04_BiosCsum	PROC
 		mov	al, CHECKPOINT_BIOS_CSUM
 		out	PORT_DIAGNOSTICS, al
 
-		; ChecksumRom routine expects a near call, so simulate one
+		; ChecksumBios routine expects a near call, so simulate one
 		; with a hardcoded return stack in ROM and a JMP (SS:SP is
 		; set but we haven't yet run the RAM test or started the DMA
 		; controller refreshing DRAM yet, so we can't use a real stack).
@@ -15,7 +15,7 @@ POST04_BiosCsum	PROC
 		mov	ax, cs
 		mov	ss, ax
 		mov	sp, .returnStack
-		jmp	ChecksumRom
+		jmp	ChecksumBios
 
 .returnStack	dw	.checksumDone
 

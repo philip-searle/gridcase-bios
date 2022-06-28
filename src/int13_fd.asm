@@ -10,7 +10,7 @@ INT13_FD	PROGRAM	OutFile=build/int13_fd.obj
 		EXTERN	FdChangeLine, FdReset, FdStatus
 		EXTERN	FdPerformOp, FdFormat, FdUnsupported
 		EXTERN	FdDiskParms, FdDasdType, FdSetDasdType, FdSetMediaType
-		EXTERN	WriteString_Inline
+		EXTERN	ConString_Inline
 
 		PUBLIC	Int13Fd_Actual
 
@@ -31,7 +31,7 @@ Int13Fd_Actual	PROC
 		; In this version of the BIOS it hardlocks the machine.
 		cmp	ah, 0D4h
 		jnz	.notFunctionD4
-		Inline	WriteString, 0Dh, 0Ah, 0Ah, \
+		Inline	ConString, 0Dh, 0Ah, 0Ah, \
 			'A newer version of this software is required on this machine.', \
 			07h, 00h
 		jmp	$

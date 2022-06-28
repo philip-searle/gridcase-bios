@@ -89,9 +89,9 @@ POST19_Keyboard	PROC
 		jnz	.reportFailure		; if so, just report failure
 		mov	di, .kbIfTest2		; if no, ???
 
-.reportFailure	Inline	WriteString,'Keyboard ',0
-		call	WriteString		; write failed component (in SI)
-		Inline	WriteString,' failure',0Dh,0Ah,0
+.reportFailure	Inline	ConString,'Keyboard ',0
+		call	ConString		; write failed component (in SI)
+		Inline	ConString,' failure',0Dh,0Ah,0
 		jmp	di			; ???
 
 ; ---------------------------------------------------------------------------
@@ -117,7 +117,7 @@ POST19_Keyboard	PROC
 ; ---------------------------------------------------------------------------
 ; After reporting failure, this section attempts to get more details about
 ; the exact error.
-.kbIfTest1	call	SetSoftResetFlag	; ???
+.kbIfTest1	call	SetCriticalErr
 .kbIfTest2	mov	di, .kbIfTested		; just continue after reporting these errors
 		mov	si, .kPartKbc
 		call	KbWaitReady
@@ -138,7 +138,7 @@ POST19_Keyboard	PROC
 
 ; ---------------------------------------------------------------------------
 ; We end up here after running the KB interface test above.
-.kbIfTested	call	SetSoftResetFlag
+.kbIfTested	call	SetCriticalErr
 		; fall through into .noStuckKeys outcome
 
 ; ---------------------------------------------------------------------------

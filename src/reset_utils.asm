@@ -6,10 +6,10 @@ POST_RESET_UTIL	PROGRAM	OutFile=build/reset_utils.obj
 		include	"pic.inc"
 
 		EXTERN	kBdaSegment
-		EXTERN	ChecksumOptRom
-		EXTERN	WriteCharHex4, WriteCrLf, WriteString_Inline
-		EXTERN	WriteBadCsumMsg
-		EXTERN	SetSoftResetFlag
+		EXTERN	ChecksumRom
+		EXTERN	ConCharHex4, ConCrLf, ConString_Inline
+		EXTERN	ConBadCsumMsg
+		EXTERN	SetCriticalErr
 
 		PUBLIC	kRomBadChecksum
 		PUBLIC	InitOptionRoms
@@ -55,7 +55,7 @@ InitOptionRoms	PROC
 		push	si		; save segment address of next potential ROM
 		shl	cx, 1		; multiply by two to get back original byte count
 					;
-		call	ChecksumOptRom
+		call	ChecksumRom
 		jnz	.badChecksum
 
 		; Option ROM checksum/size correct, call entrypoint
@@ -75,11 +75,11 @@ InitOptionRoms	PROC
 
 .badChecksum	push	ax
 		mov	ax, ds
-		call	WriteCharHex4
-		Inline	WriteString,'0h Optional ',0
+		call	ConCharHex4
+		Inline	ConString,'0h Optional ',0
 		pop	ax
 		mov	si, kRomBadChecksum
-		call	WriteBadCsumMsg
+		call	ConBadCsumMsg
 
 .afterRomFound	pop	si		; pop current ROM candiate location
 
@@ -92,13 +92,13 @@ InitOptionRoms	PROC
 		; Completed ROM search, print a CRLF if we found any ROMs
 		; just in case they printed anything without a newline.
 		; If any option ROM entrypoint set BP to non-zero, then
-		; set the soft reset flag on the ROMs behalf.
+		; require the user to acknowledge whatever message the ROM displayed.
 		test	dl, 2		; found a ROM?
 		jz	.leaveProc
-		call	WriteCrLf
+		call	ConCrLf
 		or_	bp, bp
 		jz	.leaveProc
-		call	SetSoftResetFlag
+		call	SetCriticalErr
 
 .leaveProc	retn
 		ENDPROC	InitOptionRoms

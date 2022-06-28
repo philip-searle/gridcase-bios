@@ -91,8 +91,8 @@ POST14_VidInit	PROC
 		call	VidTestMem
 		jb	.vidInitFail
 
-		Inline	WriteString,'Display adapter failed; using alternate',0Dh,0Ah,0
-		call	SetSoftResetFlag
+		Inline	ConString,'Display adapter failed; using alternate',0Dh,0Ah,0
+		call	SetCriticalErr
 		jmp	.vidInitDone
 
 .vidInitFail	xor_	ax, ax

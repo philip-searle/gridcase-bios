@@ -28,7 +28,7 @@ POST13_CmosDiag	PROC
 		; Some diagnostic bits can be cleared on soft reset
 .rtcPwrChecked	sti
 		mov	bx, [SoftResetFlag]
-		and	bl, 0FEh		; ignore lower bit (TODO: what is it used for?)
+		and	bl, ~CRITICAL_ERR_FLAG	; mask off unrelated flag
 		cmp	bx, SOFT_RESET_FLAG
 		jz	.rtcNotSoft		; soft reset?
 		and	al, 0EFh		; clear mem size OK flag on soft reset (we autodetected the new memsize)

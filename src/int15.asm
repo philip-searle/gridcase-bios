@@ -16,7 +16,7 @@ INT15		PROGRAM	OutFile=build/int15.obj
 		EXTERN	ReadCmos, WriteCmos
 		EXTERN	Int15_Grid
 		EXTERN	A20Enable, A20Disable
-		EXTERN	ResetNmiChecks, EnableNmi
+		EXTERN	CheckParityErr, EnableNmi
 		EXTERN	ResetCpu
 		EXTERN	GridCpuFast, GridCpuSlow
 		EXTERN	VidToggleExt
@@ -244,7 +244,7 @@ SysBlockMove	PROC
 		sub	si, 2			; why read and store this?
 		mov	ax, [si]
 		mov	[si], ax
-		call	ResetNmiChecks
+		call	CheckParityErr
 
 ; ---------------------------------------------------------------------
 ; Return to real mode by resetting the CPU (it's the only way on an 80286)

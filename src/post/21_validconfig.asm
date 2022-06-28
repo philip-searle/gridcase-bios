@@ -71,12 +71,12 @@ POST21_ConfigOk	PROC
 		call	WriteCmos
 		sti
 
-		Inline	WriteString,'Invalid configuration information; code ',0
+		Inline	ConString,'Invalid configuration information; code ',0
 		mov_	al, cl
 		xor_	ah, ah
-		call	WriteCharHex2
-		Inline	WriteString,0Dh,0Ah,0
-		call	SetSoftResetFlag
+		call	ConCharHex2
+		Inline	ConString,0Dh,0Ah,0
+		call	SetCriticalErr
 		; fall-through into .configOk path
 
 .configOk	sti			; make sure all paths that get here re-enable interrupts

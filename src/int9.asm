@@ -10,7 +10,7 @@ INT9		PROGRAM	OutFile=build/int9.obj
 		EXTERN	LoadBdaToDs
 		EXTERN	MakeIsrStack, UnmakeIsrStack
 		EXTERN	KbDisable, KbEnable
-		EXTERN	CheckBiosChords
+		EXTERN	KbCtrlAltCheck
 		EXTERN	Reset_Compat
 		EXTERN	KbXlat, KbXlatExtended, KbXlatScancode
 		EXTERN	KbXlatShift, KbXlatCtrl, KbXlatAlt
@@ -221,16 +221,16 @@ Int9_Actual	PROC
 		test	bl, KBSHIFT1_ALT
 		jz	.altNotDown
 		test	bl, KBSHIFT1_CTRL
-		jz	.notBiosChord
-		call	CheckBiosChords		; both keys pressed, check third one
-		jnz	.notBiosChord		; zero flag set indicates reboot wanted
+		jz	.checkExtended
+		call	KbCtrlAltCheck		; both keys pressed, check third one
+		jnz	.checkExtended		; zero flag set indicates reboot wanted
 		mov	[SoftResetFlag], SOFT_RESET_FLAG
 		jmpf	Reset_Compat
 
 ; ---------------------------------------------------------------------
 ; Extended key codes introduced with the PC/AT keyboard have their own
 ; special prefix (for grey keys in the numeric keypad cluster).
-.notBiosChord	test	ch, KBSTAT3_LASTE0	; extended key from AT kb layout?
+.checkExtended	test	ch, KBSTAT3_LASTE0	; extended key from AT kb layout?
 		jz	.lastNotE0
 		mov	di, KbXlatExtended
 		sub	al, SC2_SCRLOCK		; adjust for xlat table base

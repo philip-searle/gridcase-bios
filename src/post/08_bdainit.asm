@@ -17,7 +17,7 @@ POST08_BdaInit	PROC
 		add	ax, KB_BUFFER_LENGTH
 		mov	[KbBufEnd], ax
 
-		mov	[ErrorCodes], 100h	; what does this value mean?
+		mov	[KbClickVol], DEFAULT_KBCLICK_VOL
 
 		; Initialize comms port timeouts, two at a time
 		mov	ax, (DEFAULT_PARALLEL_TIMEOUT << 8) | DEFAULT_PARALLEL_TIMEOUT

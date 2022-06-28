@@ -7,7 +7,7 @@ INT18		PROGRAM	OutFile=build/int18.obj
 
 		EXTERN	Beep, BeepFactor
 		EXTERN	WaitKey
-		EXTERN	WriteString_Inline
+		EXTERN	ConString_Inline
 
 		PUBLIC	Int18
 		PUBLIC	PromptF1Cont
@@ -20,7 +20,7 @@ INT18		PROGRAM	OutFile=build/int18.obj
 ; an error and wait for the user to acknowledge it.
 ; ===========================================================================
 Int18		PROC
-		Inline	WriteString,0Dh,0Ah,' strike F1 to retry boot',0Dh,0Ah,0
+		Inline	ConString,0Dh,0Ah,' strike F1 to retry boot',0Dh,0Ah,0
 		call	BeepBeepWaitF1
 		iret
 		ENDPROC	Int18
@@ -30,7 +30,7 @@ Int18		PROC
 ; Prompts the user to press the F1 key with a double beep.
 ; ===========================================================================
 PromptF1Cont	PROC
-		Inline	WriteString,' Strike the F1 key to continue',0Dh,0Ah,0
+		Inline	ConString,' Strike the F1 key to continue',0Dh,0Ah,0
 		; Fallthough into BeepBeepWaitF1
 		ENDPROC	PromptF1Cont
 

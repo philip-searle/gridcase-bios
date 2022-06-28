@@ -76,6 +76,8 @@ SC2_NUMLOCK		equ	45h
 SC2_SCRLOCK		equ	46h
 SC2_HOME		equ	47h
 SC2_PGUP		equ	49h
+SC2_KP_MINUS		equ	4Ah
+SC2_KP_PLUS		equ	4Eh
 SC2_END			equ	4Fh
 SC2_PGDN		equ	51h
 SC2_INSERT		equ	52h

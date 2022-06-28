@@ -29,6 +29,8 @@ OBJECTS	:=	build/rom_header.obj \
 			build/int11.obj \
 			build/int15.obj \
 			build/rtc.obj \
+			build/misc.obj \
+			build/kb_extra.obj \
 			build/sysident.obj \
 			build/at_compat.obj \
 			build/rom_trailer.obj

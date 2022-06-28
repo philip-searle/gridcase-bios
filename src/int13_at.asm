@@ -11,9 +11,9 @@ INT13_AT	PROGRAM	OutFile=build/int13_at.obj
 
 		EXTERN	kBdaSegment
 		EXTERN	ReadCmos, WriteCmos
-		EXTERN	SetSoftResetFlag
+		EXTERN	SetCriticalErr
 		EXTERN	FixedDiskParams
-		EXTERN	WriteString_Inline
+		EXTERN	ConString_Inline
 
 		PUBLIC	HdcAtInt13
 		PUBLIC	HdDecideError
@@ -74,8 +74,8 @@ GetCmosFdsPtr	PROC
 
 .leaveFunction	retn
 
-.diskConfigErr	Inline	WriteString,'Hard disk configuration error',0Dh,0Ah,0
-		call	SetSoftResetFlag
+.diskConfigErr	Inline	ConString,'Hard disk configuration error',0Dh,0Ah,0
+		call	SetCriticalErr
 		xor_	al, al
 		retn
 		ENDPROC	GetCmosFdsPtr
@@ -157,8 +157,8 @@ HdcAtInit	PROC
 		mov	ah, 14h		; fixed disk diagnostics
 		int	13h
 		jnb	.hdcDiagOk
-		Inline	WriteString,'Hard disk controller failure',0Dh,0Ah,0
-		call	SetSoftResetFlag
+		Inline	ConString,'Hard disk controller failure',0Dh,0Ah,0
+		call	SetCriticalErr
 		jmp	.updateCmosDiag
 
 .hdcDiagOk	; Loop over all hard disks and intialize them
@@ -170,7 +170,7 @@ HdcAtInit	PROC
 		add	dl, 80h			; convert to int13 drive number
 
 		SEGES	mov	ax, [es:SoftResetFlag]
-		and	al, 0FEh		; mask off 'important' flag
+		and	al, ~CRITICAL_ERR_FLAG	; mask off 'critical error' flag
 		cmp	ax, SOFT_RESET_FLAG	; soft reset?
 		jz	.initDriveType		; skip waiting for drive to become ready if so
 
@@ -211,8 +211,8 @@ HdcAtInit	PROC
 		jbe	.driveOk		; errors up to this one are bad sector data but track OK
 						; errors above this are fatal
 
-.diskFailure	Inline	WriteString,'Hard disk failure',0Dh,0Ah,0
-		call	SetSoftResetFlag
+.diskFailure	Inline	ConString,'Hard disk failure',0Dh,0Ah,0
+		call	SetCriticalErr
 		jmp	.nextDrive
 
 .driveOk	and	bl, 0F7h		; clear init failed bit
