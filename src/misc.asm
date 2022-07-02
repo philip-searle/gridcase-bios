@@ -10,7 +10,6 @@ MISC		PROGRAM	OutFile=build/misc.obj
 
 		EXTERN	BeepFactor
 		EXTERN	Copyr_Phoenix, Copyr_Phoenix2
-		EXTERN	kRebootPrompt2
 		EXTERN	ConString, ConCrLf, ConChar
 		EXTERN	Reset_Compat
 
@@ -549,5 +548,14 @@ SetCriticalErr	PROC
 		pop	ds
 		retn
 		ENDPROC	SetCriticalErr
+
+; For some reason the parity error prompt text is split from the NMI handler
+; by the kb_extra code.  Rather than have an entirely separate object file for
+; it, we'll just stick it in a new segment and let the linker handle placing
+; it in the correct place.
+[CODE2]	SEGMENT WIDTH=16, ALIGN=1, CLASS=CODE, PURPOSE=DATA|CODE, COMBINE=PUBLIC
+kRebootPrompt1	db	'.  Type'
+kRebootPrompt2	db	' (R)eboot, other keys to continue', 0
+		Unused	kRebootPrompt1
 
 ENDPROGRAM	MISC

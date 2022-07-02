@@ -105,7 +105,6 @@ linker {
 		Int15_Grid				=> F000:D606
 		VidToggleExt			=> F000:D508
 		kConfigTable			=> F000:E6F5
-		kRebootPrompt2			=> F000:C6B5
 	}
 	script => [
 		advance	{ to 		=> 0000:0000											}
@@ -149,6 +148,7 @@ linker {
 		link	{ input		=> int75,				segment => CODE					}
 		link	{ input		=> int71,				segment => CODE					}
 		link	{ input		=> isr,					segment => CODE					}
+		link	{ input		=> misc,				segment => CODE2				}
 
 		fill	{ to		=> F000:DFD0,			with => 0xFF					}
 		link	{ input		=> sysident,			segment => CODE					}

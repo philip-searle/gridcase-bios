@@ -445,10 +445,10 @@ sub write_output {
     close $map_file;
 
     for my $segment (@segments_to_write) {
-        #print "Writing segment " . $segment->unique_name . "\n";
+        print "Writing segment " . $segment->unique_name . "\n";
         my $offset = 0;
         for my $ledata (@{ $segment->ledata }) {
-            die "Gap in ledata records between $offset and " . $ledata->offset unless $ledata->offset == $offset;
+            #die "Gap in ledata records between $offset and " . $ledata->offset unless $ledata->offset == $offset;
             #print "Writing " . $ledata->length . " bytes at offset " . $ledata->offset . "\n";
             my $data_record_origin = tell $output_file;
             my $resolved_ledata_origin = $resolved_symbols{$segment->unique_name}->address + $ledata->offset;
