@@ -5,6 +5,7 @@ PORT_MDA_CRTC_ADDR	equ	3B4h
 PORT_MDA_CRTC_DATA	equ	3B5h
 PORT_MDA_MODE_CTRL	equ	3B8h
 PORT_MDA_STATUS		equ	3BAh
+PORT_MDA_CLEAR_LIGHTPEN	equ	3BBh
 
 ; ---------------------------------------------------------------------------
 ; Colour graphics adapter ports
@@ -17,6 +18,7 @@ PORT_CGA_CRTC_DATA	equ	3D5h
 PORT_CGA_MODE_CTRL	equ	3D8h
 PORT_CGA_COLOR_CTRL	equ	3D9h
 PORT_CGA_STATUS		equ	3DAh
+PORT_CGA_CLEAR_LIGHTPEN	equ	3DBh
 
 ; ---------------------------------------------------------------------------
 ; Video controller ports
@@ -105,3 +107,5 @@ VID_CCR_PORT_OFFSET	equ	5
 ; Offset from MDA/CGA register index port to status port
 VID_STATUS_PORT_OFFSET	equ	6
 
+; Offset from MDA/CGA register index port to lightpen port
+VID_LPEN_PORT_OFFSET	equ	7

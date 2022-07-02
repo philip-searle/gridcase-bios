@@ -17,6 +17,7 @@ INT10		PROGRAM	OutFile=build/int10.obj
 
 		PUBLIC	Int10_Actual
 		PUBLIC	ConChar, ConCrLf, ConString
+		PUBLIC	VidIsTextMode
 
 ; =====================================================================
 

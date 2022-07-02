@@ -39,6 +39,7 @@ input {
 		../src/build/int75.obj
 		../src/build/int71.obj
 		../src/build/isr.obj
+		../src/build/lightpen.obj
 		../src/build/sysident.obj
 		../src/build/at_compat.obj
 		../src/build/rom_trailer.obj
@@ -149,6 +150,7 @@ linker {
 		link	{ input		=> int71,				segment => CODE					}
 		link	{ input		=> isr,					segment => CODE					}
 		link	{ input		=> misc,				segment => CODE2				}
+		link	{ input		=> lightpen,			segment => CODE					}
 
 		fill	{ to		=> F000:DFD0,			with => 0xFF					}
 		link	{ input		=> sysident,			segment => CODE					}
