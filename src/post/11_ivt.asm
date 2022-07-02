@@ -11,10 +11,10 @@ POST11_LoadIvt	PROC
 		mov	es, di
 		mov	bx, cs			; BX is BIOS code segment
 		mov	ds, bx
-		mov	dx, DummyIsr
+		mov	dx, UnexpectedInt
 		push	dx			; why save DX here?
 
-		; Set int 00h - 78h to DummyIsr
+		; Set int 00h - 78h to UnexpectedInt
 		mov	cx, 78h
 .clearIvt	mov_	ax, dx
 		stosw				; store ISR offset
@@ -34,7 +34,7 @@ POST11_LoadIvt	PROC
 		mov	cx, (IvtInt14 - IvtInt08) / 2
 		pop	dx			; why pop an unmodified value?
 .loadIvt1	lodsw				; load ISR offset
-		cmp_	ax, dx			; ISR offset is DummyIsr?
+		cmp_	ax, dx			; ISR offset is UnexpectedInt?
 		jnz	.loadIvtEntry1
 		add	di, 4			; skip if so
 		jmp	.loadIvtLoop1
@@ -52,7 +52,7 @@ POST11_LoadIvt	PROC
 		mov	di, IvtInt70		; start filling in from int 70h
 		mov	cx, 78h - 70h
 .loadIvt2	lodsw				; load ISR offset
-		cmp_	ax, dx			; ISR offset is DummyIsr?
+		cmp_	ax, dx			; ISR offset is UnexpectedInt?
 		jnz	.loadIvtEntry2
 		add	di, 4			; skip if so
 		jmp	.loadIvtLoop2

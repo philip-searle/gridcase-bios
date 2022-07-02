@@ -10,7 +10,7 @@ AT_COMPAT	PROGRAM	OutFile=build/at_compat.obj
 		EXTERN	Int14_Actual, Int16_Actual, Int9_Actual, Int13Fd_Actual
 		EXTERN	IntE_Actual, Int17_Actual, Int12_Actual, Int11_Actual
 		EXTERN	Int15_Actual, Int1A_Actual, Int8_Actual, EoiPic1
-		EXTERN	DummyIsr, Int18, Int70, Int71, Int75, Int10_Actual
+		EXTERN	UnexpectedInt, Int18, Int70, Int71, Int75, Int10_Actual
 		EXTERN	EoiPic1and2, PrntScrn_Actual
 
 		PUBLIC	Reset_Compat, IntNmi_Compat, Int13Hd_Compat
@@ -286,9 +286,9 @@ InitialIvt:	; PIC1 hardware interrupts
 		dw	Int8_Compat	; Int8: timer
 		dw	Int9_Compat	; Int9: keyboard
 		dw	EoiPic1		; IntA: slave input
-		dw	DummyIsr	; IntB: unused
-		dw	DummyIsr	; IntC: unused
-		dw	DummyIsr	; IntD: unused
+		dw	UnexpectedInt	; IntB: unused
+		dw	UnexpectedInt	; IntC: unused
+		dw	UnexpectedInt	; IntD: unused
 		dw	IntE_Compat	; IntE: diskette
 		dw	EoiPic1		; IntF: unused?
 		; Software interrupts
@@ -311,11 +311,11 @@ InitialIvt:	; PIC1 hardware interrupts
 		; PIC2 hardware interrupts
 		dw	Int70		; Int70: RTC
 		dw	Int71		; Int71: redirect to IntA
-		dw	DummyIsr	; Int72: unused
-		dw	DummyIsr	; Int73: unused
-		dw	DummyIsr	; Int74: unused
+		dw	UnexpectedInt	; Int72: unused
+		dw	UnexpectedInt	; Int73: unused
+		dw	UnexpectedInt	; Int74: unused
 		dw	Int75		; Int75: NPU/FPU
-		dw	DummyIsr	; Int76: unused
+		dw	UnexpectedInt	; Int76: unused
 		dw	EoiPic1and2	; Int77: ???
 
 ; ---------------------------------------------------------------------------

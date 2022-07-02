@@ -38,6 +38,7 @@ input {
 		../src/build/kb_extra.obj
 		../src/build/int75.obj
 		../src/build/int71.obj
+		../src/build/isr.obj
 		../src/build/sysident.obj
 		../src/build/at_compat.obj
 		../src/build/rom_trailer.obj
@@ -52,7 +53,6 @@ output {
 linker {
 	define => {
 		EoiPic1					=> F000:F53C
-		DummyIsr				=> F000:C66D
 		Int70					=> F000:C351
 		EoiPic1and2				=> F000:F543
 		PrntScrn_Actual			=> F000:C789
@@ -148,6 +148,7 @@ linker {
 		link	{ input		=> kb_extra,			segment => CODE					}
 		link	{ input		=> int75,				segment => CODE					}
 		link	{ input		=> int71,				segment => CODE					}
+		link	{ input		=> isr,					segment => CODE					}
 
 		fill	{ to		=> F000:DFD0,			with => 0xFF					}
 		link	{ input		=> sysident,			segment => CODE					}

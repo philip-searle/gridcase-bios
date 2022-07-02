@@ -21,7 +21,7 @@ RESET		PROGRAM	OutFile=build/reset.obj
 		EXTERN	Beep, BeepFactor
 		EXTERN	kIvtSegment, kBdaSegment, InitialIvt
 		EXTERN	kAddressLine, kOddEvenLogic, kRomBadChecksum
-		EXTERN	DummyIsr, IntNmi_Compat, PrntScrn_Compat, SoftwareIret, Int8_Compat
+		EXTERN	UnexpectedInt, IntNmi_Compat, PrntScrn_Compat, SoftwareIret, Int8_Compat
 		EXTERN	VidInit, VidInitBacklite
 		EXTERN	VidTestMem, TestAllMem, TestMemData, TestMemLoAddr
 		EXTERN	DetectMemController, DetectMemSize, MemSetXmsEms

@@ -154,6 +154,8 @@ $		equ	0067h
 AdapterRomOffset	d w
 AdapterRomSegment	d w
 
+LastInterrupt		d b
+
 $		equ	006Ch
 TimerTicks		d d
 TimerOverflow		d b

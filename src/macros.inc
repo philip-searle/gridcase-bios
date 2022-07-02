@@ -74,6 +74,9 @@ Unused_%.:	equ	%1
 ; Underscore-suffixed opcodes are actually macros that specify an alternate
 ; instruction coding.  Used to match the encoding used by GRiD's original
 ; assembler, which preferred the numerically higher of ambiguous encodings.
+adc_		%macro
+		adc	%*,CODE=LONG
+		%endmacro
 add_		%macro
 		add	%*,CODE=LONG
 		%endmacro
