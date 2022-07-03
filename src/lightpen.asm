@@ -9,6 +9,8 @@ LIGHTPEN	PROGRAM	OutFile=build/lightpen.obj
 		EXTERN	VidIsTextMode
 		EXTERN	UnmakeIsrStack2
 
+		PUBLIC	VidReadLightpen
+
 ; Horizontal adjustment for lightpen x-coordinates per video mode
 ; BUG: no support for extended modes > 7
 LightpenAdjX	db	3	; CGA Text 40x25

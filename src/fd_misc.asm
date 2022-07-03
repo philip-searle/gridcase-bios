@@ -136,8 +136,8 @@ FdCheckConfigValid	PROC
 		; Reset the floppy disk controller
 		; BUG: code uses the AT-compatible hard disk controller
 		;      port instead of the floppy disk one?!
-		mov	dx, PORT_HDC_DIGOUT
-		mov	al, HDC_DIGOUT_SRST
+		mov	dx, PORT_HD_AT_DIGOUT
+		mov	al, HD_AT_DIGOUT_SRST
 		out	dx, al
 
 		; Give the FDC enough time to reset properly

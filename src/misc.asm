@@ -18,11 +18,13 @@ MISC		PROGRAM	OutFile=build/misc.obj
 		PUBLIC	ChecksumBios, ChecksumRom
 		PUBLIC	CheckParityErr, EnableNmi, IntNmi_Actual
 		PUBLIC	SetCriticalErr
+		PUBLIC	ParDetectPort
 		PUBLIC	MakeIsrStack, UnmakeIsrStack, UnmakeIsrStack2
-		PUBLIC	kBootSegOffset, kIvtSegment, kCrLf
+		PUBLIC	kBdaSegment, kBootSegOffset, kIvtSegment, kCrLf
 		PUBLIC	ConBiosBanner, ConBadCsumMsg
 		PUBLIC	ConString2, ConString_Inline
 		PUBLIC	ConCharHex4, ConCharHex2
+		PUBLIC	WaitKey
 
 BEEP_LENGTH	equ	450
 

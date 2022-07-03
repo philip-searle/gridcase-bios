@@ -6,7 +6,7 @@ AT_COMPAT	PROGRAM	OutFile=build/at_compat.obj
 		include	"int13.inc"
 
 		EXTERN	Reset_Actual
-		EXTERN	IntNmi_Actual, HdcAtInt13, Int19_Actual
+		EXTERN	IntNmi_Actual, HdAtInt13, Int19_Actual
 		EXTERN	Int14_Actual, Int16_Actual, Int9_Actual, Int13Fd_Actual
 		EXTERN	IntE_Actual, Int17_Actual, Int12_Actual, Int11_Actual
 		EXTERN	Int15_Actual, Int1A_Actual, Int8_Actual, EoiPic1
@@ -75,7 +75,7 @@ IntNmi_Compat	jmpn	IntNmi_Actual
 
 ; [Compat] Int13 fixed disk entrypoint must be the same as the XT BIOS.
 		FillRom 0E3FEh,0FFh
-Int13Hd_Compat	jmpn	HdcAtInt13
+Int13Hd_Compat	jmpn	HdAtInt13
 
 ; ---------------------------------------------------------------------------
 

@@ -92,8 +92,8 @@ FDMOTOR_MOTOR0	equ	01h
 FdMotorTimeout		d b
 
 ; A 'packet' of values to send to the disk controller's registers.
-; Used by BuildAtRegPacket/SendAtRegPacket.
-HDC_REG_PACKET	struc
+; Used by HdAtBuildRegPack/HdAtSendRegPack.
+HD_AT_REG_PACKET	struc
 		db	0	; dummy byte because we share storage
 				; with an FdScratch instance
 .writePrecomp	db	0
@@ -108,7 +108,7 @@ HDC_REG_PACKET	struc
 ; Scratch space used by floppy disk int13 handlers to pass return values
 ; back to the main int13 handler and store command results read from the
 ; floppy disk controller.  Overlaid onto the same storage space as
-; HDC_REG_PACKET since the floppy and hard disk routines will not be
+; HD_AT_REG_PACKET since the floppy and hard disk routines will not be
 ; accessed simultaneously.
 FDC_SCRATCH	struc
 .returnAh	db	0	; return value to be placed in AH
@@ -125,7 +125,7 @@ FDC_SCRATCH	struc
 $		equ	41h
 ; int13 hard disk and floppy disk handlers do not execute simultaneously
 ; so they share temporary storage space in the BDA
-HdRegPacket		ds	HDC_REG_PACKET
+HdRegPacket		ds	HD_AT_REG_PACKET
 $		equ	HdRegPacket
 FdScratch		ds	FDC_SCRATCH
 

@@ -15,11 +15,11 @@ INT13_AT	PROGRAM	OutFile=build/int13_at.obj
 		EXTERN	FixedDiskParams
 		EXTERN	ConString_Inline
 
-		PUBLIC	HdcAtInt13
-		PUBLIC	HdDecideError
-		PUBLIC	HdWaitTask
-		PUBLIC	MakeAtRegPacket
-		PUBLIC	SendAtRegPacket
+		PUBLIC	HdAtInt13
+		PUBLIC	HdAtDecideError
+		PUBLIC	HdAtWaitTask
+		PUBLIC	HdAtMakeRegPack
+		PUBLIC	HdAtSendRegPack
 
 ; Constant used to locate the interrupt vector table.
 ; The int13 code has its own copy of this constant, probably because it was
@@ -92,10 +92,10 @@ FDS_E0		DS FIXED_DISK_PARMS,	\
 		.sectorsPerTrk=33
 
 ; ===========================================================================
-; HdcAtInit
+; HdAtInit
 ; Initializes the int13 hard disk system for an AT-compatible controller.
 ; ===========================================================================
-HdcAtInit	PROC
+HdAtInit	PROC
 		; Determine hard disk type and get drive parameter table pointer
 		; BL contains the diagnostic byte throughout this proc, updated as the init proceeds
 		mov	al, CMOS_STATUS_DIAG | NMI_DISABLE
@@ -122,9 +122,9 @@ HdcAtInit	PROC
 		mov	ax, [IvtInt13+2]
 		mov	[IvtInt40+2], ax
 
-		mov	[IvtInt13], HdcAtInt13,DATA=WORD		; install int13 handler
+		mov	[IvtInt13], HdAtInt13,DATA=WORD		; install int13 handler
 		mov	[IvtInt13+2], cs
-		mov	[IvtInt76], HdcOpComplete,DATA=WORD	; install disk controller callback handler
+		mov	[IvtInt76], HdAtOpComplete,DATA=WORD	; install disk controller callback handler
 		mov	[IvtInt76+2], cs
 		mov	[IvtHd0Parms+2], cs		; set segment for hd0 parameter table (offset set later)
 		mov	[IvtHd1Parms], FixedDiskParams,DATA=WORD	; set hd1 param table to dummy value
@@ -169,7 +169,7 @@ HdcAtInit	PROC
 
 		add	dl, 80h			; convert to int13 drive number
 
-		SEGES	mov	ax, [es:SoftResetFlag]
+		SEGES	mov ax, [es:SoftResetFlag]
 		and	al, ~CRITICAL_ERR_FLAG	; mask off 'critical error' flag
 		cmp	ax, SOFT_RESET_FLAG	; soft reset?
 		jz	.initDriveType		; skip waiting for drive to become ready if so
@@ -228,15 +228,15 @@ HdcAtInit	PROC
 
 .leaveFunction	sti
 		retn
-		ENDPROC	HdcAtInit
+		ENDPROC	HdAtInit
 
 ; ===========================================================================
-; HdcOpComplete
+; HdAtOpComplete
 ; Interrupt handler called by hard disk controller when it has processed a
-; request and wants us to give it some attention.  Sets the HdcTaskComplete
+; request and wants us to give it some attention.  Sets the HdTaskComplete
 ; flag in the BDA and clears the interrupt before calling the int15 OS hook.
 ; ===========================================================================
-HdcOpComplete	PROC
+HdAtOpComplete	PROC
 		push	ds
 		mov	ds, [cs:kBdaSegment]
 		mov	[HdTaskComplete], 0FFh	; flag task as complete
@@ -252,13 +252,13 @@ HdcOpComplete	PROC
 		pop	ax
 
 		iret
-		ENDPROC	HdcOpComplete
+		ENDPROC	HdAtOpComplete
 
 ; ===========================================================================
-; HdcAtInt13
+; HdAtInt13
 ; Provides int13 hard disk services using an AT-compatible disk controller.
 ; ===========================================================================
-HdcAtInt13	PROC
+HdAtInt13	PROC
 
 		sti			; need interrupts for hard disk controller
 		cmp	dl, 80h		; 80h is first hard disk drive
@@ -323,45 +323,45 @@ JumpTableEntry	%macro
 		EUROASM	POP
 		%endmacro
 
-.int13Handlers	JumpTableEntry	HdcAtReset
+.int13Handlers	JumpTableEntry	HdAtReset
 		dw		.invalidCommand
-		JumpTableEntry	HdcAtRead
-		JumpTableEntry	HdcAtWrite
-		JumpTableEntry	HdcAtVerify
-		JumpTableEntry	HdcAtFormat
-		dw		.invalidCommand
-		dw		.invalidCommand
-		JumpTableEntry	HdcAtDiskParms
-		JumpTableEntry	HdcAtInitPair
-		JumpTableEntry	HdcAtReadLong
-		JumpTableEntry	HdcAtWriteLong
-		JumpTableEntry	HdcAtSeek
-		JumpTableEntry	HdcAtReset2
+		JumpTableEntry	HdAtRead
+		JumpTableEntry	HdAtWrite
+		JumpTableEntry	HdAtVerify
+		JumpTableEntry	HdAtFormat
 		dw		.invalidCommand
 		dw		.invalidCommand
-		JumpTableEntry	HdcAtTestReady
-		JumpTableEntry	HdcAtCalibrate
+		JumpTableEntry	HdAtDiskParms
+		JumpTableEntry	HdAtInitPair
+		JumpTableEntry	HdAtReadLong
+		JumpTableEntry	HdAtWriteLong
+		JumpTableEntry	HdAtSeek
+		JumpTableEntry	HdAtReset2
 		dw		.invalidCommand
 		dw		.invalidCommand
-		JumpTableEntry	HdcAtDiagnostic
-		JumpTableEntry	HdcAtReadDasd
+		JumpTableEntry	HdAtTestReady
+		JumpTableEntry	HdAtCalibrate
+		dw		.invalidCommand
+		dw		.invalidCommand
+		JumpTableEntry	HdAtDiagnostic
+		JumpTableEntry	HdAtReadDasd
 .int13HandlersEnd
 
 .invalidCommand	mov	ah, INT13STAT_BADCMD
-		; fall-through into HdcAtCmdDone
-		ENDPROC	HdcAtInt13
+		; fall-through into HdAtCmdDone
+		ENDPROC	HdAtInt13
 
 ; ===========================================================================
-; HdcAtCmdDone
-; Shared function tail for HdcAtInt13 and most Int13 command handlers.
+; HdAtCmdDone
+; Shared function tail for HdAtInt13 and most Int13 command handlers.
 ; Updates HdLastOpStatus (if it's not already an error code) and cleans up
-; the stack frame setup by HdcAtInt13.
+; the stack frame setup by HdAtInt13.
 ;
 ; On return:
 ; 	AH == HdLastOpStatus
 ;	CF set on error
 ; ===========================================================================
-HdcAtCmdDone	PROC
+HdAtCmdDone	PROC
 		sti			; command handler may have disabled interrupts
 		cmp	[HdLastOpStatus], INT13STAT_OK
 		jnz	.L1
@@ -377,10 +377,10 @@ HdcAtCmdDone	PROC
 
 		pop	ds
 		retf	2			; retf instead of iret to preserve flags
-		ENDPROC	HdcAtCmdDone
+		ENDPROC	HdAtCmdDone
 
 ; ===========================================================================
-; HdcAtReadDasd [TechRef 10-9]
+; HdAtReadDasd [TechRef 10-9]
 ; Int13 command handler that returns details about direct attached storage
 ; devices (DASD -- disk drives).  Unlike other int13 command handlers, this
 ; has a non-standard return: AH is not a status/error code.
@@ -390,7 +390,7 @@ HdcAtCmdDone	PROC
 ;	AH == 03 if hard drive present
 ;	         CX:DX == number of 512 byte blocks drive supports
 ; ===========================================================================
-HdcAtReadDasd	PROC
+HdAtReadDasd	PROC
 		jnb	.badDrive	; reuse flags from caller
 		call	GetIvtFdsPtr
 		mov	al, [es:si+FIXED_DISK_PARMS.sectorsPerTrk]
@@ -418,26 +418,26 @@ HdcAtReadDasd	PROC
 		and_	dx, ax
 		pop	ds
 		retf	2
-		ENDPROC	HdcAtReadDasd
+		ENDPROC	HdAtReadDasd
 
 ; ===========================================================================
-; HdcAtReset2 [TechRef 10-8], [TechRef 10-9]
-; Variant of HdcAtReset that does not reset the floppy disk subsystem.
+; HdAtReset2 [TechRef 10-8], [TechRef 10-9]
+; Variant of HdAtReset that does not reset the floppy disk subsystem.
 ; ===========================================================================
-HdcAtReset2	PROC
+HdAtReset2	PROC
 		; Reuse flags from caller
-		jb	HdcAtReset.performReset
+		jb	HdAtReset.performReset
 
 		; If drive number not valid, return an error
 		mov	ah, INT13STAT_BADCMD
-		jmp	HdcAtCmdDone
-		ENDPROC	HdcAtReset2
+		jmp	HdAtCmdDone
+		ENDPROC	HdAtReset2
 
 ; ===========================================================================
-; HdcAtReset [TechRef 10-8], [TechRef 10-9]
+; HdAtReset [TechRef 10-8], [TechRef 10-9]
 ; Resets the disk drive subsystem.
 ; ===========================================================================
-HdcAtReset	PROC
+HdAtReset	PROC
 		; Call the relocated int13 handler so it can reset floppy subsystem
 		int	40h
 
@@ -445,11 +445,11 @@ HdcAtReset	PROC
 		cmp	dl, [HdCount]
 		jnb	.resetDone
 
-.performReset	; Alternate function entrypoint used by HdcAtReset2
+.performReset	; Alternate function entrypoint used by HdAtReset2
 
 		; Place controller in reset until next command is issued
 		mov	al, 4		; set reset bit in digital output register
-		mov	dx, PORT_HDC_DIGOUT
+		mov	dx, PORT_HD_AT_DIGOUT
 		out	dx, al
 
 		; Reset all drives
@@ -465,13 +465,13 @@ HdcAtReset	PROC
 		mov	ah, INT13CMD_INITPAIR
 		push	ax
 		push	cs
-		calln	HdcAtInt13
+		calln	HdAtInt13
 
 		; Another simulated int13 to recalibrate
 		mov	ah, INT13CMD_RECALIBRATE
 		push	ax
 		push	cs
-		calln	HdcAtInt13
+		calln	HdAtInt13
 
 		; Restore DL to a 0-based index, incremented for the next iteration
 		sub	dl, 7Fh
@@ -480,100 +480,100 @@ HdcAtReset	PROC
 
 .resetSuccess	mov	ah, INT13STAT_OK
 		mov	[HdLastOpStatus], ah
-.resetDone	jmp	HdcAtCmdDone
-		ENDPROC	HdcAtReset
+.resetDone	jmp	HdAtCmdDone
+		ENDPROC	HdAtReset
 
 ; ===========================================================================
-; HdcAtReadLong [TechRef 10-7]
-; As HdcAtRead but additionally reads four bytes of ECC data per sector.
+; HdAtReadLong [TechRef 10-7]
+; As HdAtRead but additionally reads four bytes of ECC data per sector.
 ; ===========================================================================
-HdcAtReadLong	PROC
+HdAtReadLong	PROC
 		mov	ah, 22h		; [TechRef 10-17] Read sectors (long)
-		jmp	HdcAtRead.performRead
-		ENDPROC	HdcAtReadLong
+		jmp	HdAtRead.performRead
+		ENDPROC	HdAtReadLong
 
 ; ===========================================================================
-; HdcAtRead [TechRef 10-6]
+; HdAtRead [TechRef 10-6]
 ; Reads sectors from disk.
 ; ===========================================================================
-HdcAtRead	PROC
+HdAtRead		PROC
 		mov	ah, 20h		; [TechRef 10-17] Read sectors
 
-.performRead	; Alternate function entrypoint used by HdcAtReadLong
+.performRead	; Alternate function entrypoint used by HdAtReadLong
 
 		call	ValidHdXferBuf
 		jb	.readDone
-		call	MakeAtRegPacket
+		call	HdAtMakeRegPack
 		jb	.readDone
 		jz	.L1		; do we want retries disabled?
-		or	[HdRegPacket+HDC_REG_PACKET.command], 1,DATA=BYTE
-.L1		call	SendAtRegPacket
+		or	[HdRegPacket+HD_AT_REG_PACKET.command], 1,DATA=BYTE
+.L1		call	HdAtSendRegPack
 		jb	.readDone
 
 .copySector	; Wait for the disk controller to have data for us and
 		; copy it all into the user's buffer
-		call	HdWaitTask
+		call	HdAtWaitTask
 		jb	.readDone
-		call	HdWaitData
+		call	HdAtWaitData
 		jb	.readDone
-		mov	dx, PORT_HDC_DATA
-		mov	cx, HDC_DATA_SECTOR_SIZE / 2
+		mov	dx, PORT_HD_AT_DATA
+		mov	cx, HD_AT_DATA_SECTOR_SIZE / 2
 		rep insw
 
 		; Was this a long read?  Copy ECC bytes if so.
 		; They must be transferred individually in 8-bit transfers.
-		cmp	bp, HdcAtReadLong_tableOffset
+		cmp	bp, HdAtReadLong_tableOffset
 		jnz	.readDataDone
-		mov	cx, HDC_DATA_ECC_SIZE
-.readEccBytes	call	HdWaitData
+		mov	cx, HD_AT_DATA_ECC_SIZE
+.readEccBytes	call	HdAtWaitData
 		jb	.readDone
-		mov	dx, PORT_HDC_DATA
+		mov	dx, PORT_HD_AT_DATA
 		insb
 		loop	.readEccBytes
 
-.readDataDone	call	HdDecideError
+.readDataDone	call	HdAtDecideError
 		jb	.readDone
 		call	DecSectorCount
 		jb	.readDone
 		jnz	.copySector		; go again if we've got multiple sectors to transfer
 		mov	ah, INT13STAT_OK	; otherwise declare success and move on
 
-.readDone	jmp	HdcAtCmdDone
-		ENDPROC	HdcAtRead
+.readDone	jmp	HdAtCmdDone
+		ENDPROC	HdAtRead
 
 ; ===========================================================================
-; HdcAtWriteLong [TechRef 10-8]
-; As HdcAtWrite but additionally writes four bytes of ECC data per sector.
+; HdAtWriteLong [TechRef 10-8]
+; As HdAtWrite but additionally writes four bytes of ECC data per sector.
 ; ===========================================================================
-HdcAtWriteLong	PROC
+HdAtWriteLong	PROC
 		mov	ah, 32h		; [TechRef 10-17] Write sectors (long)
-		jmp	HdcAtWrite.performWrite
-		ENDPROC	HdcAtWriteLong
+		jmp	HdAtWrite.performWrite
+		ENDPROC	HdAtWriteLong
 
 ; ===========================================================================
-; HdcAtWrite [TechRef 10-6]
+; HdAtWrite [TechRef 10-6]
 ; Writes sectors to disk.
 ; ===========================================================================
-HdcAtWrite	PROC
+HdAtWrite	PROC
 		mov	ah, 30h		; [TechRef 10-17] Write sectors
 
-.performWrite	; Alternate function entrypoint used by HdcAtWriteLong
+.performWrite	; Alternate function entrypoint used by HdAtWriteLong
 
 		call	ValidHdXferBuf
 		jb	.writeDone
-		call	MakeAtRegPacket
+		call	HdAtMakeRegPack
 		jb	.writeDone
 		jz	.L1		; Do we want retries disabled?
-		or	[HdRegPacket+HDC_REG_PACKET.command], 1,DATA=BYTE
-.L1		call	SendAtRegPacket
+		or	[HdRegPacket+HD_AT_REG_PACKET.command], 1,DATA=BYTE
+.L1		call	HdAtSendRegPack
 		jb	.writeDone
 
 .copySector	; Wait for the disk controller to be ready to accept data
 		; and then send the sector data from the user's buffer.
-		call	HdWaitData
+		call	HdAtWaitData
 		jb	.writeDone
-		mov	dx, PORT_HDC_DATA
-		mov	cx, HDC_DATA_SECTOR_SIZE / 2
+		mov	dx, PORT_HD_AT_DATA
+		mov	cx, HD_AT_DATA_SECTOR_SIZE / 2
 		push	ds
 		mov	si, es		; need ES:SI for outsw to work
 		mov	ds, si
@@ -583,56 +583,56 @@ HdcAtWrite	PROC
 
 		; Was this a long write?  Copy ECC bytes if so.
 		; Must be done individually in 8-bit transfers.
-		cmp	bp, HdcAtWriteLong_tableOffset
+		cmp	bp, HdAtWriteLong_tableOffset
 		jnz	.writeDataDone
-		mov	cx, HDC_DATA_ECC_SIZE
-.writeEccBytes	call	HdWaitData
+		mov	cx, HD_AT_DATA_ECC_SIZE
+.writeEccBytes	call	HdAtWaitData
 		jb	.writeDone
-		mov	dx, PORT_HDC_DATA
+		mov	dx, PORT_HD_AT_DATA
 		outs	dx, [es:si],DATA=BYTE
 		loop	.writeEccBytes
 
 .writeDataDone	mov_	di, si		; update sector pointer
-		call	HdWaitTask
+		call	HdAtWaitTask
 		jb	.writeDone
-		call	HdDecideError
+		call	HdAtDecideError
 		jb	.writeDone
 		call	DecSectorCount
 		jb	.writeDone
 		jnz	.copySector		; go again if it's a multi-sector write
 		mov	ah, INT13STAT_OK	; otherwise declare success and continue
 
-.writeDone	jmp	HdcAtCmdDone
-		ENDPROC	HdcAtWrite
+.writeDone	jmp	HdAtCmdDone
+		ENDPROC	HdAtWrite
 
 ; ===========================================================================
-; HdcAtVerify [TechRef 10-6]
+; HdAtVerify [TechRef 10-6]
 ; Verifies that disk sectors are valid
 ; ===========================================================================
-HdcAtVerify	PROC
+HdAtVerify	PROC
 		mov	ah, 40h		; [TechRef 10-17] Read verify sectors
-		call	MakeAtRegPacket
+		call	HdAtMakeRegPack
 		jb	.verifyDone
 		jz	.L1		; do we want retries disabled?
-		or	[HdRegPacket+HDC_REG_PACKET.command], 1,DATA=BYTE
-.L1		call	SendAtRegPacket
+		or	[HdRegPacket+HD_AT_REG_PACKET.command], 1,DATA=BYTE
+.L1		call	HdAtSendRegPack
 		jb	.verifyDone
-		call	HdWaitTask
+		call	HdAtWaitTask
 		jb	.verifyDone
-		call	HdDecideError
+		call	HdAtDecideError
 		jb	.verifyDone
 
 		; If we made it through all that then we succeeded
 		mov	ah, INT13STAT_OK
 
-.verifyDone	jmp	HdcAtCmdDone
-		ENDPROC	HdcAtVerify
+.verifyDone	jmp	HdAtCmdDone
+		ENDPROC	HdAtVerify
 
 ; ===========================================================================
-; HdcAtFormat [TechRef 10-7]
+; HdAtFormat [TechRef 10-7]
 ; Formats a single track
 ; ===========================================================================
-HdcAtFormat	PROC
+HdAtFormat	PROC
 		call	ValidHdXferBuf
 
 		; Force number of sectors to match the disk parameter table
@@ -647,37 +647,37 @@ HdcAtFormat	PROC
 		inc	cl		; force sector number to one
 
 		mov	ah, 50h		; [TechRef 10-17] Format track
-		call	MakeAtRegPacket
+		call	HdAtMakeRegPack
 		jb	.formatDone
-		call	SendAtRegPacket
+		call	HdAtSendRegPack
 		jb	.formatDone
 
 		; Wait for disk controller to be ready for the sector buffer
 		; (which contains sector IDs and good/bad/assign-spare status,
 		; see [TechRef 10-24] for details).
-		call	HdWaitData
+		call	HdAtWaitData
 		jb	.formatDone
-		mov	cx, HDC_DATA_SECTOR_SIZE / 2
+		mov	cx, HD_AT_DATA_SECTOR_SIZE / 2
 		push	ds
 		mov	si, es		; need DS:SI for outsw to work
 		mov	ds, si
 		mov_	si, di
-		mov	dx, PORT_HDC_DATA
+		mov	dx, PORT_HD_AT_DATA
 		rep outsw
 		pop	ds
 
-		call	HdWaitTask
+		call	HdAtWaitTask
 		jb	.formatDone
-		call	HdDecideError
+		call	HdAtDecideError
 
-.formatDone	jmp	HdcAtCmdDone
-		ENDPROC	HdcAtFormat
+.formatDone	jmp	HdAtCmdDone
+		ENDPROC	HdAtFormat
 
 ; ===========================================================================
-; HdcAtDiskParms [TechRef 10-7]
+; HdAtDiskParms [TechRef 10-7]
 ; Returns disk drive parameters from the current fixed disk parameter table.
 ; ===========================================================================
-HdcAtDiskParms	PROC
+HdAtDiskParms	PROC
 		mov_	bp, sp		; access parent stack frame
 		cmp	dl, 2
 		jb	.validDrive	; first two hard disks?
@@ -687,7 +687,7 @@ HdcAtDiskParms	PROC
 		mov	[ss:bp+Int13HdStack.cx], 0,DATA=WORD
 		mov	[ss:bp+Int13HdStack.ax], 0,DATA=BYTE
 		mov	ah, INT13STAT_BADPARAMTBL
-		jmp	HdcAtCmdDone
+		jmp	HdAtCmdDone
 
 .validDrive	call	GetIvtFdsPtr
 
@@ -711,100 +711,100 @@ HdcAtDiskParms	PROC
 		popa
 		pop	ds
 		retf	2
-		ENDPROC	HdcAtDiskParms
+		ENDPROC	HdAtDiskParms
 
 ; ===========================================================================
-; HdcAtInitPair [TechRef 10-7], [TechRef 10-10]
+; HdAtInitPair [TechRef 10-7], [TechRef 10-10]
 ; Initializes the disk controller using the contents of the current fixed
 ; disk parameter table
 ; ===========================================================================
-HdcAtInitPair	PROC
+HdAtInitPair	PROC
 		jb	.validDrive	; reuse caller's flags
 		mov	ah, INT13STAT_BADCMD
-		jmp	HdcAtCmdDone
+		jmp	HdAtCmdDone
 
 .validDrive	call	GetIvtFdsPtr
 		mov	dh, [es:si+FIXED_DISK_PARMS.heads]
 		dec	dh
 		mov	al, [es:si+FIXED_DISK_PARMS.sectorsPerTrk]
 		mov	ah, 91h		; [TechRef 10-26] Initialise drive parameters
-		call	MakeAtRegPacket
+		call	HdAtMakeRegPack
 		jb	.initDone
-		call	SendAtRegPacket
+		call	HdAtSendRegPack
 		jb	.initDone
-		call	HdWaitTask
+		call	HdAtWaitTask
 		jb	.initDone
-		call	HdDecideError
+		call	HdAtDecideError
 
-.initDone	jmp	HdcAtCmdDone
-		ENDPROC	HdcAtInitPair
+.initDone	jmp	HdAtCmdDone
+		ENDPROC	HdAtInitPair
 
 ; ===========================================================================
-; HdcAtCalibrate [TechRef 10-8]
+; HdAtCalibrate [TechRef 10-8]
 ; Seeks to track 0
 ; ===========================================================================
-HdcAtCalibrate	PROC
+HdAtCalibrate	PROC
 		mov	ah, 10h		; [TechRef 10-21] Recalibrate
-		jmp	HdcAtSeek.performSeek
-		ENDPROC	HdcAtCalibrate
+		jmp	HdAtSeek.performSeek
+		ENDPROC	HdAtCalibrate
 
 ; ===========================================================================
-; HdcAtSeek [TechRef 10-8]
+; HdAtSeek [TechRef 10-8]
 ; Seeks to any track
 ; ===========================================================================
-HdcAtSeek	PROC
+HdAtSeek	PROC
 		mov	ah, 70h		; [TechRef 10-25] Seek
 
-.performSeek	; Alternate function entrypoint used by HdcAtCalibrate
+.performSeek	; Alternate function entrypoint used by HdAtCalibrate
 
 		; Force sector number to one (it's not used) but
 		; preserve the upper two bits of the cylinder number
 		and	cl, 0C0h
 		inc	cl
 
-		call	MakeAtRegPacket
+		call	HdAtMakeRegPack
 		jb	.seekDone
-		call	SendAtRegPacket
+		call	HdAtSendRegPack
 		jb	.seekDone
-		call	HdWaitTask
+		call	HdAtWaitTask
 		jb	.seekDone
-		call	HdDecideError
+		call	HdAtDecideError
 
-.seekDone	jmp	HdcAtCmdDone
-		ENDPROC	HdcAtSeek
+.seekDone	jmp	HdAtCmdDone
+		ENDPROC	HdAtSeek
 
 ; ===========================================================================
-; HdcAtTestReady [TechRef 10-8]
+; HdAtTestReady [TechRef 10-8]
 ; Checks whether a drive is ready for use
 ; ===========================================================================
-HdcAtTestReady	PROC
+HdAtTestReady	PROC
 		mov	ah, 0		; Not a valid controller command, will be ignored
-		call	MakeAtRegPacket
+		call	HdAtMakeRegPack
 		jb	.testReadyDone
-		call	SendAtRegPacket
+		call	HdAtSendRegPack
 		jb	.testReadyDone
 
 		; If we made it through that without any errors then drive must be ready
 		mov	ah, INT13STAT_OK
 
-.testReadyDone	jmp	HdcAtCmdDone
-		ENDPROC	HdcAtTestReady
+.testReadyDone	jmp	HdAtCmdDone
+		ENDPROC	HdAtTestReady
 
 ; ===========================================================================
-; HdcAtDiagnostic [TechRef 10-8]
+; HdAtDiagnostic [TechRef 10-8]
 ; Triggers disk controller internal diagnostics
 ; ===========================================================================
-HdcAtDiagnostic	PROC
+HdAtDiagnostic	PROC
 		jb	.validDrive	; reuse caller's flags
 		mov	ah, INT13STAT_BADCMD
-		jmp	HdcAtCmdDone
+		jmp	HdAtCmdDone
 
 .validDrive	; Disable interrupts while we trigger the diagnostics.
 		; The controller will signal an interrupt as part of it's
 		; internal tests which we want to ignore.
 		cli
 		mov	al, 90h		; [TechRef 10-26] Execute drive diagnostics
-		mov	dx, PORT_HDC_COMMAND
+		mov	dx, PORT_HD_AT_COMMAND
 		out	dx, al
 
 		; Delay while the disk controller starts it's diagnostics.
@@ -818,12 +818,12 @@ HdcAtDiagnostic	PROC
 		; assume it's broken since diagnostics shouldn't complete so fast.
 		in	al, dx
 		mov	[HdStatus], al
-		test	al, HDC_STATUS_BSY
+		test	al, HD_AT_STATUS_BSY
 		mov	ah, INT13STAT_BADCONTROLLER
 		jb	.diagDone		; BUG? Should be jz since test doesn't set CF?
 
 		; Wait for controller to complete diagnostics
-		call	HdWaitTask
+		call	HdAtWaitTask
 		jb	.diagDone
 
 		; Reread status register to find out result.
@@ -831,21 +831,21 @@ HdcAtDiagnostic	PROC
 		mov	[HdStatus], al
 		mov	ah, INT13STAT_OK
 
-		test	al, HDC_STATUS_ERR
+		test	al, HD_AT_STATUS_ERR
 		jz	.diagDone		; Success if ERR clear
 
 		; If ERR flag was set then read the error register.
 		; After diagnostics it doesn't have the usual bitfield,
 		; it's just a result byte:
 		;   01 = OK, 03 = Sector buffer error, 8x = reserved
-		mov	dx, PORT_HDC_ERROR
+		mov	dx, PORT_HD_AT_ERROR
 		in	al, dx
 		mov	[HdError], al
 		mov	ah, INT13STAT_BADCONTROLLER
 		stc
 
-.diagDone	jmp	HdcAtCmdDone
-		ENDPROC	HdcAtDiagnostic
+.diagDone	jmp	HdAtCmdDone
+		ENDPROC	HdAtDiagnostic
 
 ; ===========================================================================
 ; GetIvtFdsPtr
@@ -928,7 +928,7 @@ ValidHdXferBuf	PROC
 		db	81h, 0E2h, 10h, 00h
 
 		shr	dx, 2
-		add	dx, HDC_DATA_SECTOR_SIZE
+		add	dx, HD_AT_DATA_SECTOR_SIZE
 
 		; AX is now count of sectors
 		; DX is now sector transfer size
@@ -960,7 +960,7 @@ ValidHdXferBuf	PROC
 		ENDPROC	ValidHdXferBuf
 
 ; ===========================================================================
-; HdWaitTask
+; HdAtWaitTask
 ; Waits for the disk controller to signal an interrupt by checking the
 ; HdTaskComplete flag in the BDA.
 ;
@@ -968,7 +968,7 @@ ValidHdXferBuf	PROC
 ; 	CF set on timeout
 ; 	CF clear on interrupt before timeout
 ; ===========================================================================
-HdWaitTask	PROC
+HdAtWaitTask	PROC
 		mov	[HdTaskComplete], 0
 
 		in	al, PORT_PIC2_MASK
@@ -1001,10 +1001,10 @@ HdWaitTask	PROC
 .leave1		retn
 .leave2		pop	cx
 		retn
-		ENDPROC	HdWaitTask
+		ENDPROC	HdAtWaitTask
 
 ; ===========================================================================
-; MakeAtRegPacket
+; HdAtMakeRegPack
 ; Converts a sector address from int13 input format to a block of memory
 ; suitable for sending to the AT hard disk controller registers.  Register
 ; values are stored in ascending order by port number.
@@ -1028,21 +1028,21 @@ HdWaitTask	PROC
 ; 	CF set
 ; 	AH == int13 error code
 ; ===========================================================================
-MakeAtRegPacket	PROC
+HdAtMakeRegPack	PROC
 		push	es
 
 		mov	bx, HdRegPacket
-		mov	[bx+HDC_REG_PACKET.command], ah
-		mov	[bx+HDC_REG_PACKET.sectorCount], al
+		mov	[bx+HD_AT_REG_PACKET.command], ah
+		mov	[bx+HD_AT_REG_PACKET.sectorCount], al
 
 		call	GetIvtFdsPtr
 		mov_	al, cl
 		and	al, 3Fh
-		mov	[bx+HDC_REG_PACKET.sectorNumber], al
+		mov	[bx+HD_AT_REG_PACKET.sectorNumber], al
 
 		shr	cl, 6
 		xchg	ch, cl
-		mov	[bx+HDC_REG_PACKET.cylinderLo], cx
+		mov	[bx+HD_AT_REG_PACKET.cylinderLo], cx
 
 		cmp	dl, [HdCount]
 		jb	.validDrive		; odd to check this so late...
@@ -1057,43 +1057,43 @@ MakeAtRegPacket	PROC
 		and	dh, 0Fh
 		add_	dl, dh
 		or	dl, 0A0h		; ??? sets two reserved bits
-		mov	[bx+HDC_REG_PACKET.driveHead], dl
+		mov	[bx+HD_AT_REG_PACKET.driveHead], dl
 
 		mov	ax, [es:si+FIXED_DISK_PARMS.writePreComp]
 		shr	ax, 2			; ??? why shift here
-		mov	[bx+HDC_REG_PACKET.writePrecomp], al
+		mov	[bx+HD_AT_REG_PACKET.writePrecomp], al
 
 		mov	al, [es:si+FIXED_DISK_PARMS.control]
 		mov	[HdControl], al
 		test	al, 0C0h		; check 'disable retries on errors' bits
 						; do not change ZF flag after this instruction, we need to return it!
-		mov	bh, [bx+HDC_REG_PACKET.sectorCount]
+		mov	bh, [bx+HD_AT_REG_PACKET.sectorCount]
 
 		clc
 		pop	es
 		retn
-		ENDPROC	MakeAtRegPacket
+		ENDPROC	HdAtMakeRegPack
 
 ; ===========================================================================
-; SendAtRegPacket
-; Sends the register packet previously assembled by MakeAtRegPacket to the AT
+; HdAtSendRegPack
+; Sends the register packet previously assembled by HdAtMakeRegPack to the AT
 ; hard disk controller.
 ;
 ; On return:
 ; 	CF set on error, AH = error code
 ; ===========================================================================
-SendAtRegPacket	PROC
+HdAtSendRegPack	PROC
 		mov	al, [HdControl]
-		mov	dx, PORT_HDC_DIGOUT
+		mov	dx, PORT_HD_AT_DIGOUT
 		out	dx, al			; ensure disk controller is out of reset
 
 		mov	bl, 2			; retry seek twice if error occurs
-.attemptSeek	call	HdWaitNotBusy
+.attemptSeek	call	HdAtWaitNotBusy
 		jb	.returnBad
 
 		; Start loading HDC registers from the packet (skip the padding byte at the start)
-		lea	si, [HdRegPacket+HDC_REG_PACKET.writePrecomp]
-		mov	dx, PORT_HDC_WRPRECOMP
+		lea	si, [HdRegPacket+HD_AT_REG_PACKET.writePrecomp]
+		mov	dx, PORT_HD_AT_WRPRECOMP
 		mov	cx, 6
 .writeRegister	lodsb
 		out	dx, al
@@ -1101,10 +1101,10 @@ SendAtRegPacket	PROC
 		loop	.writeRegister
 
 		mov	ah, 6			; wait for 6x0FFFFh loops for seek to complete
-.waitSeek	in	al, dx			; dx == PORT_HDC_STATUS
+.waitSeek	in	al, dx			; dx == PORT_HD_AT_STATUS
 		mov	[HdStatus], al
-		and	al, HDC_STATUS_DSC | HDC_STATUS_DWF | HDC_STATUS_DRDY
-		cmp	al, HDC_STATUS_DSC | HDC_STATUS_DRDY
+		and	al, HD_AT_STATUS_DSC | HD_AT_STATUS_DWF | HD_AT_STATUS_DRDY
+		cmp	al, HD_AT_STATUS_DSC | HD_AT_STATUS_DRDY
 		jz	.seekComplete
 		loop	.waitSeek
 		dec	ah
@@ -1115,7 +1115,7 @@ SendAtRegPacket	PROC
 		lodsb
 		cmp	al, 0
 		jz	.returnOk		; command==0 meant the seek was what we really wanted
-		out	dx, al			; dx == PORT_HDC_COMMAND
+		out	dx, al			; dx == PORT_HD_AT_COMMAND
 
 		; Clear the interrupt flag.  The disk controller will issue
 		; an interrupt when the command is complete but we want to
@@ -1132,7 +1132,7 @@ SendAtRegPacket	PROC
 		mov	ah, INT13STAT_NOTREADY
 		stc
 .returnBad	retn
-		ENDPROC	SendAtRegPacket
+		ENDPROC	HdAtSendRegPack
 
 ; ===========================================================================
 ; DecSectorCount
@@ -1145,13 +1145,13 @@ SendAtRegPacket	PROC
 ; 	CF clear on success, ZF set according to new BH value
 ; ===========================================================================
 DecSectorCount	PROC
-		mov	dx, PORT_HDC_STATUS
+		mov	dx, PORT_HD_AT_STATUS
 		in	al, dx
 		mov	[HdStatus], al
 
 		; Different behaviour depending on drive being busy/waiting on data transfer.
 		; TODO: figure this out...
-		test	al, HDC_STATUS_DRQ | HDC_STATUS_BSY
+		test	al, HD_AT_STATUS_DRQ | HD_AT_STATUS_BSY
 		jnz	.bsyOrDrq
 
 		dec	bh
@@ -1161,7 +1161,7 @@ DecSectorCount	PROC
 .bsyOrDrq	dec	bh
 		jnz	.leaveFunction
 
-.checkError	call	HdDecideError
+.checkError	call	HdAtDecideError
 		jb	.leaveFunction
 		mov	ah, INT13STAT_BADCONTROLLER
 		stc
@@ -1170,7 +1170,7 @@ DecSectorCount	PROC
 		ENDPROC	DecSectorCount
 
 ; ===========================================================================
-; HdWaitNotBusy
+; HdAtWaitNotBusy
 ; Waits for the AT hard disk controller to not be busy, updating the
 ; controller status byte in the BDA.
 ;
@@ -1178,13 +1178,13 @@ DecSectorCount	PROC
 ; 	CF clear on success
 ; 	AH = int13 error code, CF set if controller still busy after timeout
 ; ===========================================================================
-HdWaitNotBusy	PROC
+HdAtWaitNotBusy	PROC
 		mov	ah, 40		; 40x0FFFFh timeout loops
 		mov	cx, 0
-		mov	dx, PORT_HDC_STATUS
+		mov	dx, PORT_HD_AT_STATUS
 .checkNotBusy	in	al, dx
 		mov	[HdStatus], al
-		test	al, HDC_STATUS_BSY
+		test	al, HD_AT_STATUS_BSY
 		jz	.done
 		loop	.checkNotBusy
 		sub	ah, 1
@@ -1194,10 +1194,10 @@ HdWaitNotBusy	PROC
 		mov	ah, INT13STAT_BADCONTROLLER
 
 .done		retn
-		ENDPROC	HdWaitNotBusy
+		ENDPROC	HdAtWaitNotBusy
 
 ; ===========================================================================
-; HdWaitData
+; HdAtWaitData
 ; Waits for the AT hard disk controller to report that it is ready for a data
 ; transfer to take place.
 ;
@@ -1206,17 +1206,17 @@ HdWaitNotBusy	PROC
 ; 	CF set on failure, AH = error code
 ; 	Interrupts disabled
 ; ===========================================================================
-HdWaitData	PROC
+HdAtWaitData	PROC
 		push	cx
-		mov	dx, PORT_HDC_STATUS
+		mov	dx, PORT_HD_AT_STATUS
 		mov	cx, 200			; 200 loops before we declare failure
 .waitForData	in	al, dx
 		mov	[HdStatus], al
-		test	al, HDC_STATUS_DRQ	; ready for data?
+		test	al, HD_AT_STATUS_DRQ	; ready for data?
 		loope	.waitForData
 
 		jnz	.done
-		call	HdDecideError		; if timed out then find out why
+		call	HdAtDecideError		; if timed out then find out why
 		jb	.done
 		mov	ah, INT13STAT_BADCONTROLLER
 		stc
@@ -1224,10 +1224,10 @@ HdWaitData	PROC
 .done		pop	cx
 		cli
 		retn
-		ENDPROC	HdWaitData
+		ENDPROC	HdAtWaitData
 
 ; ===========================================================================
-; HdDecideError
+; HdAtDecideError
 ; Examines the AT hard disk controller and updates the status and error bytes
 ; in the BDA.
 ;
@@ -1239,77 +1239,77 @@ HdWaitData	PROC
 ; 	  CF clear
 ; 	  AH = BDA HD error byte if error, zero otherwise
 ; ===========================================================================
-HdDecideError	PROC
+HdAtDecideError	PROC
 		; Default error code if we can't find a more specific one
 		mov	ah, INT13STAT_BADCONTROLLER
 
 		; Update BDA hard disk status
-		mov	dx, PORT_HDC_STATUS
+		mov	dx, PORT_HD_AT_STATUS
 		in	al, dx
 		mov	[HdStatus], al
 
 		; Busy or waiting for data transfer, no more specific error
-		test	al, HDC_STATUS_BSY | HDC_STATUS_DRQ
+		test	al, HD_AT_STATUS_BSY | HD_AT_STATUS_DRQ
 		jnz	.returnOk
 
 		; Previous command didn't report an error?
-		test	al, HDC_STATUS_ERR
+		test	al, HD_AT_STATUS_ERR
 		jz	.prevCmdOk
 
 		; Update BDA hard disk error code
-		mov	dx, PORT_HDC_ERROR
+		mov	dx, PORT_HD_AT_ERROR
 		in	al, dx
 		mov	[HdError], al
 
 		; Bad block mark in sector ID?
 		mov	ah, INT13STAT_BADSECTOR
-		test	al, HDC_ERROR_BBK
+		test	al, HD_AT_ERROR_BBK
 		jnz	.returnError
 
 		; Sector not found?
 		mov	ah, INT13STAT_NOSECTOR
-		test	al, HDC_ERROR_IDNF
+		test	al, HD_AT_ERROR_IDNF
 		jnz	.returnError
 
 		; Data address mark not found?
 		mov	ah, INT13STAT_BADADDRMARK
-		test	al, HDC_ERROR_DAMNF
+		test	al, HD_AT_ERROR_DAMNF
 		jnz	.returnError
 
 		; Uncorrectable data error?
 		mov	ah, INT13STAT_BADECC
-		test	al, HDC_ERROR_UNC
+		test	al, HD_AT_ERROR_UNC
 		jnz	.returnError
 
 		; Track 0 not found?
 		mov	ah, INT13STAT_RESETFAIL
-		test	al, HDC_ERROR_TK0
+		test	al, HD_AT_ERROR_TK0
 		jnz	.returnError
 
 		; Command completed OK?  Undefined error, if so
 		mov	ah, INT13STAT_UNDEFINED
-		test	al, HDC_ERROR_ABRT
+		test	al, HD_AT_ERROR_ABRT
 		jz	.returnError
 
 		; Command did not complete successfully so examine the
 		; status register to figure out why
-		mov	dx, PORT_HDC_STATUS
+		mov	dx, PORT_HD_AT_STATUS
 		in	al, dx
 		mov	[HdStatus], al
 
 		; Drive not ready?
 		mov	ah, INT13STAT_NOTREADY
-		test	al, HDC_STATUS_DRDY
+		test	al, HD_AT_STATUS_DRDY
 		jz	.returnError
 
 		; Drive write fault?
 		mov	ah, INT13STAT_WRITEFAULT
-		test	al, HDC_STATUS_DWF
+		test	al, HD_AT_STATUS_DWF
 		jnz	.returnError
 
 		; Seek not complete?
 		mov	ah, INT13STAT_BADSEEK
-		test	al, HDC_STATUS_DSC
+		test	al, HD_AT_STATUS_DSC
 		jz	.returnError
 
 		; If we make it here we have no idea what the error was!
@@ -1317,7 +1317,7 @@ HdDecideError	PROC
 		jmp	.returnError
 
 .prevCmdOk	; ECC corrected data?
-		test	al, HDC_STATUS_CORR
+		test	al, HD_AT_STATUS_CORR
 		jz	.prevCmdSuccess
 		mov	ah, INT13STAT_DATACORRECTED
 
@@ -1327,6 +1327,6 @@ HdDecideError	PROC
 .prevCmdSuccess	mov	ah, INT13STAT_OK
 
 .returnOk	retn
-		ENDPROC	HdDecideError
+		ENDPROC	HdAtDecideError
 
 ENDPROGRAM	INT13_AT

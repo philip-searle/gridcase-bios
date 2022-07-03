@@ -31,7 +31,7 @@ RESET		PROGRAM	OutFile=build/reset.obj
 		EXTERN	KbWaitReady, KbWaitResponse, KbWaitEmpty
 		EXTERN	ReadCmos, WriteCmos
 		EXTERN	SetCriticalErr, InitTimerTicks
-		EXTERN	GridAutodetect, FdCheckConfigValid, IdeAutodetect_70, HdcTestDriveReady, HdcHookIvt
+		EXTERN	GridAutodetect, FdCheckConfigValid, IdeAutodetect_70, HdAtTestDriveReady, HdAtHookIvt
 		EXTERN	A20Disable, PmClearTraces
 		EXTERN	PwEnabled, PwStartInput, PwPrompt, PwProcessInput, PwEndInput
 		EXTERN	PwCompareStored, PwBackdoor2, PwIncorrect, PwClearBuffer
@@ -341,7 +341,7 @@ SDH_POST	PROC
 		and	ax, ~CRITICAL_ERR_FLAG
 		cmp	ax, SOFT_RESET_FLAG
 		jz	.warmBoot
-		call	HdcTestDriveReady
+		call	HdAtTestDriveReady
 		mov	al, CHECKPOINT_RAM_ALL
 		out	PORT_DIAGNOSTICS, al
 		call	TestAllMem
@@ -395,7 +395,7 @@ SDH_POST	PROC
 
 ; ---------------------------------------------------------------------------
 ; Get hard drive controller hooked into the IVT
-.updatedFdCount	call	HdcHookIvt
+.updatedFdCount	call	HdAtHookIvt
 
 ; ---------------------------------------------------------------------------
 ; Detect and init option ROMs outside the the hard disk controller range

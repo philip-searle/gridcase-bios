@@ -9,15 +9,15 @@ INT13_GRID	PROGRAM	OutFile=build/int13_grid.obj
 
 		EXTERN	DriveIdentify
 		EXTERN	kBdaSegment
-		EXTERN	MakeAtRegPacket, SendAtRegPacket
-		EXTERN	HdDecideError
-		EXTERN	HdWaitTask
+		EXTERN	HdAtMakeRegPack, HdAtSendRegPack
+		EXTERN	HdAtDecideError
+		EXTERN	HdAtWaitTask
 
 ; ===========================================================================
-; HdSpinDown [TechRef 3-25]
+; HdAtSpinDown [TechRef 3-25]
 ; GRiD-specific BIOS call that controls hard disk spin down behaviour.
 ; ===========================================================================
-HdSpinDown	PROC
+HdAtSpinDown	PROC
 		call	DriveIdentify
 		cmp	ax, GRID_HD_5
 		jz	.supportedDrive
@@ -72,11 +72,11 @@ HdSpinDown	PROC
 					; none of the power commands need it...
 .sendHdCmd	mov	dx, 0
 		mov	ds, [cs:kBdaSegment]
-		call	MakeAtRegPacket
+		call	HdAtMakeRegPack
 		jb	.leaveFunction
-		call	SendAtRegPacket
+		call	HdAtSendRegPack
 		jb	.leaveFunction
-		call	HdDecideError
+		call	HdAtDecideError
 		jb	.leaveFunction
 		xor_	ah, ah		; report success
 
@@ -100,13 +100,13 @@ HdSpinDown	PROC
 		mov	dx, 12		; minimum number of 5-second intervals supported for timeout
 		xor_	ax, ax		; report success
 		retn
-		ENDPROC	HdSpinDown
+		ENDPROC	HdAtSpinDown
 
 ; ===========================================================================
-; HdIdentify
+; HdAtIdentify
 ; Requests identifying information from the hard disk drive.
 ; ===========================================================================
-HdIdentify	PROC
+HdAtIdentify	PROC
 		; Allocate buffer for drive identity (in BP)
 		push	bp
 		mov_	bp, sp
@@ -139,9 +139,9 @@ HdIdentify	PROC
 		; Wait for the disk controller to not be busy
 		mov	ah, 200	; retry count for HDC to not be busy
 		mov	cx, 0	; maximum loop count for inner timeout loop
-		mov	dx, PORT_HDC_STATUS
+		mov	dx, PORT_HD_AT_STATUS
 .waitNotBusy	in	al, dx
-		test	al, HDC_STATUS_BSY
+		test	al, HD_AT_STATUS_BSY
 		jz	.notBusy
 		loop	.waitNotBusy
 		sub	ah, 1
@@ -150,17 +150,17 @@ HdIdentify	PROC
 .notBusy	jb	.failure
 
 		; Send 'identify drive' command
-		mov	dx, PORT_HDC_COMMAND
+		mov	dx, PORT_HD_AT_COMMAND
 		mov	al, 0ECh		; [TechRef 10-30] Identify drive
 		out	dx, al
-		call	HdWaitTask
+		call	HdAtWaitTask
 		jb	.failure
 
 		; Wait for drive to have data for us
-		mov	dx, PORT_HDC_STATUS
+		mov	dx, PORT_HD_AT_STATUS
 		mov	cx, 200	; retry count for drive to have data
 .waitForData	in	al, dx
-		test	al, HDC_STATUS_DRQ
+		test	al, HD_AT_STATUS_DRQ
 		loope	.waitForData
 		jnz	.haveData
 		; If no data available in time, set error code and carry
@@ -172,7 +172,7 @@ HdIdentify	PROC
 		jb	.failure
 
 		; Read (and ignore) the first 1Bh words
-		mov	dx, PORT_HDC_DATA
+		mov	dx, PORT_HD_AT_DATA
 		mov	cx, 1Bh
 .readLoop1	in	ax, dx
 		loop	.readLoop1
@@ -190,12 +190,12 @@ HdIdentify	PROC
 		loop	.readLoop3
 
 		; Was the read successful?
-		call	HdDecideError
+		call	HdAtDecideError
 		jnb	.leaveFunction
 
 .failure	; Reset the disk controller and report an error
-		mov	al, HDC_DIGOUT_SRST
-		mov	dx, PORT_HDC_DIGOUT
+		mov	al, HD_AT_DIGOUT_SRST
+		mov	dx, PORT_HD_AT_DIGOUT
 		out	dx, al	; place in reset
 		Delay	2	; wait a bit
 		xor_	al, al	; take out of reset
@@ -213,6 +213,6 @@ HdIdentify	PROC
 		pop	sp
 		pop	bp
 		retn
-		ENDPROC	HdIdentify
+		ENDPROC	HdAtIdentify
 
 ENDPROGRAM	INT13_GRID
