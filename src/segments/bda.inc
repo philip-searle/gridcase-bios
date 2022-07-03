@@ -289,4 +289,13 @@ TIMER_RESERVED		equ	7Eh
 $		equ	0A6h
 Fd2DriveInfo		d b		; as FdDriveInfo, but for the external drive
 
+; 0040:0100 is equivalent to 0050:0000
+; Technically outside the BDA, but segment 50 seems to have always been
+; intended as an extended BDA/BASIC/DOS data segment.
+$		equ	100h
+PrtScrStatus		d b
+PRNTSCRN_OK		equ	0
+PRNTSCRN_INPROGRESS	equ	1
+PRNTSCRN_ERROR		equ	0FFh
+
 [CODE]

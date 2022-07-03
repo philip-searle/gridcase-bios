@@ -40,6 +40,8 @@ input {
 		../src/build/int71.obj
 		../src/build/isr.obj
 		../src/build/lightpen.obj
+		../src/build/cmos.obj
+		../src/build/prntscrn.obj
 		../src/build/sysident.obj
 		../src/build/at_compat.obj
 		../src/build/rom_trailer.obj
@@ -56,12 +58,9 @@ linker {
 		EoiPic1					=> F000:F53C
 		Int70					=> F000:C351
 		EoiPic1and2				=> F000:F543
-		PrntScrn_Actual			=> F000:C789
 		DetectMemController		=> F000:F63D
 		kBdaSegment				=> F000:C5E6
 		ParDetectPort			=> F000:C5CE
-		ReadCmos				=> F000:C762
-		WriteCmos				=> F000:C773
 		GridAutodetect			=> F000:CFA3
 		VidInit					=> F000:D541
 		VidInitBacklite			=> F000:D160
@@ -151,6 +150,8 @@ linker {
 		link	{ input		=> isr,					segment => CODE					}
 		link	{ input		=> misc,				segment => CODE2				}
 		link	{ input		=> lightpen,			segment => CODE					}
+		link	{ input		=> cmos,				segment => CODE					}
+		link	{ input		=> prntscrn,			segment => CODE					}
 
 		fill	{ to		=> F000:DFD0,			with => 0xFF					}
 		link	{ input		=> sysident,			segment => CODE					}
