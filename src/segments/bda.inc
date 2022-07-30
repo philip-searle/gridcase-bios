@@ -91,9 +91,24 @@ FDMOTOR_MOTOR0	equ	01h
 ;XXX: CompatAddress		40h
 FdMotorTimeout		d b
 
-; A 'packet' of values to send to the disk controller's registers.
-; Used by HdAtBuildRegPack/HdAtSendRegPack.
-HD_AT_REG_PACKET	struc
+; A 'packet' of values to send to the XT-compatible disk controller's
+; registers.  The IBM Fixed Disk Drive Adapter BIOS refers to this as
+; the Device Control Block (DCB).  [TechRef 9-43] refers to it as a
+; 6-byte command block.  Field layouts given below are taken from the
+; IBM Fixed Disk Drive Adapter manual, so may not quite match what
+; the JVC disk controller calls them.
+HD_XT_REG_PACK	struc
+.command	db	0	; Command (determines interpretation of subsequent bytes)
+.driveHead	db	0	; 00dhhhhh (d=drive, h=head)
+.chSector	db	0	; ccssssss (c=cylinder high bits, s=sector)
+.cylinderLo	db	0	; Cylinder low bits
+.blockCount	db	0	; Block count or interleave factor
+.controlByte	db	0	; ra000sss (r=retry, a=retry on ECC, s=step option)
+		endstruc
+
+; A 'packet' of values to send to the AT-compatible disk controller's
+; registers.  Used by HdAtBuildRegPack/HdAtSendRegPack.
+HD_AT_REG_PACK	struc
 		db	0	; dummy byte because we share storage
 				; with an FdScratch instance
 .writePrecomp	db	0
@@ -108,7 +123,7 @@ HD_AT_REG_PACKET	struc
 ; Scratch space used by floppy disk int13 handlers to pass return values
 ; back to the main int13 handler and store command results read from the
 ; floppy disk controller.  Overlaid onto the same storage space as
-; HD_AT_REG_PACKET since the floppy and hard disk routines will not be
+; HD_AT_REG_PACK since the floppy and hard disk routines will not be
 ; accessed simultaneously.
 FDC_SCRATCH	struc
 .returnAh	db	0	; return value to be placed in AH
@@ -125,8 +140,16 @@ FDC_SCRATCH	struc
 $		equ	41h
 ; int13 hard disk and floppy disk handlers do not execute simultaneously
 ; so they share temporary storage space in the BDA
-HdRegPacket		ds	HD_AT_REG_PACKET
-$		equ	HdRegPacket
+; in the same way, AT and XT hard disk controllers aren't installed at
+; the same time so they use the same storage space
+Int13Scratch		d 8 * b
+$		equ	Int13Scratch
+			db	0	; dummy byte because we share storage
+					; with an FdScratch instance
+HdXtRegPacket		ds	HD_XT_REG_PACK
+$		equ	Int13Scratch
+HdAtRegPacket		ds	HD_AT_REG_PACK
+$		equ	Int13Scratch
 FdScratch		ds	FDC_SCRATCH
 
 $		equ	49h

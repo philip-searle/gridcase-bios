@@ -83,53 +83,53 @@ Int13Hd_Compat	jmpn	HdAtInt13
 ; entrypoint.  The GRiD BIOS doesn't have it in the exact same address, but
 ; maybe it's important to keep it in the same segment?
 ; 				  cyl  hd     wpc ctl  land  spt
-FixedDiskParams	FDS_INSTANCE	0132h,  4,    80h, 0h, 131h, 11h	; Type 01 10MB
-		FDS_INSTANCE	0267h,  4,   12Ch, 0h, 267h, 11h	; Type 02 20MB
-		FDS_INSTANCE	0267h,  6,   12Ch, 0h, 267h, 11h	; Type 03 31MB
-		FDS_INSTANCE	03ACh,  8,   200h, 0h, 3ACh, 11h	; Type 04 62MB
-		FDS_INSTANCE	03ACh,  6,   200h, 0h, 3ACh, 11h	; Type 05 47MB
-		FDS_INSTANCE	0267h,  4, 0FFFFh, 0h, 267h, 11h	; Type 06 20MB
-		FDS_INSTANCE	01CEh,  8,   100h, 0h, 1FFh, 11h	; Type 07 31MB
-		FDS_INSTANCE	02DDh,  5, 0FFFFh, 0h, 2DDh, 11h	; Type 08 30MB
-		FDS_INSTANCE	0384h, 15, 0FFFFh, 8h, 385h, 11h	; Type 09 112MB
-		FDS_INSTANCE	0334h,  3, 0FFFFh, 0h, 334h, 11h	; Type 10 20MB
-		FDS_INSTANCE	0357h,  5, 0FFFFh, 0h, 357h, 11h	; Type 11 35MB
-		FDS_INSTANCE	0357h,  7, 0FFFFh, 0h, 357h, 11h	; Type 12 50MB
-		FDS_INSTANCE	0132h,  8,    80h, 0h, 13Fh, 11h	; Type 13 20MB
-		FDS_INSTANCE	02DDh,  7, 0FFFFh, 0h, 2DDh, 11h	; Type 14 43MB
-		FDS_INSTANCE	0000h,  0,     0h, 0h,   0h,  0h	; Type 15 RESERVED
-		FDS_INSTANCE	0264h,  4,     0h, 0h, 297h, 11h	; Type 16 20MB GRiD supported [TechRef 6-18]
-		FDS_INSTANCE	03D1h,  5,   12Ch, 0h, 3D1h, 11h	; Type 17 41MB GRiD supported [TechRef 6-18]
-		FDS_INSTANCE	03D1h,  7, 0FFFFh, 0h, 3D1h, 11h	; Type 18 57MB GRiD supported [TechRef 6-18]
-		FDS_INSTANCE	0400h,  7,   200h, 0h, 3FFh, 11h	; Type 19 60MB GRiD supported [TechRef 6-18]
-		FDS_INSTANCE	02DDh,  5,   12Ch, 0h, 2DCh, 11h	; Type 20 30MB GRiD supported [TechRef 6-18]
-		FDS_INSTANCE	02DDh,  7,   12Ch, 0h, 2DCh, 11h	; Type 21 43MB GRiD supported [TechRef 6-18]
-		FDS_INSTANCE	02DDh,  5,   12Ch, 0h, 2DDh, 11h	; Type 22 30MB GRiD supported [TechRef 6-18]
-		FDS_INSTANCE	0132h,  4,     0h, 0h, 150h, 11h	; Type 23 10MB GRiD supported [TechRef 6-18]
-		FDS_INSTANCE	0000h,  0,     0h, 0h,   0h,  0h	; Type 24 UNUSED
-		FDS_INSTANCE	0267h,  4,     0h, 0h, 267h, 11h	; Type 25 20MB
-		FDS_INSTANCE	0400h,  4, 0FFFFh, 0h, 3FFh, 11h	; Type 26 34MB
-		FDS_INSTANCE	0400h,  5, 0FFFFh, 0h, 3FFh, 11h	; Type 27 43MB
-		FDS_INSTANCE	0400h,  8, 0FFFFh, 0h, 3FFh, 11h	; Type 28 68MB
-		FDS_INSTANCE	0200h,  8,   100h, 0h, 200h, 11h	; Type 29 34MB
-		FDS_INSTANCE	0267h,  2,   267h, 0h, 267h, 11h	; Type 30 10MB
-		FDS_INSTANCE	0000h,  0,     0h, 0h,   0h,  0h	; Type 31 UNUSED
-		FDS_INSTANCE	0000h,  0,     0h, 0h,   0h,  0h	; Type 32 UNUSED
-		FDS_INSTANCE	0000h,  0,     0h, 0h,   0h,  0h	; Type 33 UNUSED
-		FDS_INSTANCE	0000h,  0,     0h, 0h,   0h,  0h	; Type 34 UNUSED
-		FDS_INSTANCE	0400h,  9,   400h, 8h, 400h, 11h	; Type 35 77MB
-		FDS_INSTANCE	0400h,  5,   200h, 0h, 400h, 11h	; Type 36 43MB
-		FDS_INSTANCE	033Eh, 10, 0FFFFh, 8h, 33Eh, 11h	; Type 37 69MB
-		FDS_INSTANCE	0337h, 10,   100h, 8h, 338h, 11h	; Type 38 68MB
-		FDS_INSTANCE	0267h,  4,    80h, 0h, 298h, 11h	; Type 39 20MB
-		FDS_INSTANCE	0267h,  8,    80h, 0h, 298h, 11h	; Type 40 41MB
-		FDS_INSTANCE	0395h, 15, 0FFFFh, 8h, 396h, 11h	; Type 41 114MB
-		FDS_INSTANCE	03FFh, 15, 0FFFFh, 8h, 400h, 11h	; Type 42 127MB
-		FDS_INSTANCE	0337h, 10,   200h, 8h, 337h, 11h	; Type 43 102MB
-		FDS_INSTANCE	0334h,  6, 0FFFFh, 0h, 334h, 11h	; Type 44 41MB
-		FDS_INSTANCE	0400h,  8, 0FFFFh, 0h, 400h, 11h	; Type 45 68MB
-		FDS_INSTANCE	039Dh,  9, 0FFFFh, 8h, 39Dh, 11h	; Type 46 69MB
-		FDS_INSTANCE	02BBh,  7,   100h, 0h, 2BCh, 11h	; Type 47 41MB
+FixedDiskParams	FDS_AT_INSTANCE	0132h,  4,    80h, 0h, 131h, 11h	; Type 01 10MB
+		FDS_AT_INSTANCE	0267h,  4,   12Ch, 0h, 267h, 11h	; Type 02 20MB
+		FDS_AT_INSTANCE	0267h,  6,   12Ch, 0h, 267h, 11h	; Type 03 31MB
+		FDS_AT_INSTANCE	03ACh,  8,   200h, 0h, 3ACh, 11h	; Type 04 62MB
+		FDS_AT_INSTANCE	03ACh,  6,   200h, 0h, 3ACh, 11h	; Type 05 47MB
+		FDS_AT_INSTANCE	0267h,  4, 0FFFFh, 0h, 267h, 11h	; Type 06 20MB
+		FDS_AT_INSTANCE	01CEh,  8,   100h, 0h, 1FFh, 11h	; Type 07 31MB
+		FDS_AT_INSTANCE	02DDh,  5, 0FFFFh, 0h, 2DDh, 11h	; Type 08 30MB
+		FDS_AT_INSTANCE	0384h, 15, 0FFFFh, 8h, 385h, 11h	; Type 09 112MB
+		FDS_AT_INSTANCE	0334h,  3, 0FFFFh, 0h, 334h, 11h	; Type 10 20MB
+		FDS_AT_INSTANCE	0357h,  5, 0FFFFh, 0h, 357h, 11h	; Type 11 35MB
+		FDS_AT_INSTANCE	0357h,  7, 0FFFFh, 0h, 357h, 11h	; Type 12 50MB
+		FDS_AT_INSTANCE	0132h,  8,    80h, 0h, 13Fh, 11h	; Type 13 20MB
+		FDS_AT_INSTANCE	02DDh,  7, 0FFFFh, 0h, 2DDh, 11h	; Type 14 43MB
+		FDS_AT_INSTANCE	0000h,  0,     0h, 0h,   0h,  0h	; Type 15 RESERVED
+		FDS_AT_INSTANCE	0264h,  4,     0h, 0h, 297h, 11h	; Type 16 20MB GRiD supported [TechRef 6-18]
+		FDS_AT_INSTANCE	03D1h,  5,   12Ch, 0h, 3D1h, 11h	; Type 17 41MB GRiD supported [TechRef 6-18]
+		FDS_AT_INSTANCE	03D1h,  7, 0FFFFh, 0h, 3D1h, 11h	; Type 18 57MB GRiD supported [TechRef 6-18]
+		FDS_AT_INSTANCE	0400h,  7,   200h, 0h, 3FFh, 11h	; Type 19 60MB GRiD supported [TechRef 6-18]
+		FDS_AT_INSTANCE	02DDh,  5,   12Ch, 0h, 2DCh, 11h	; Type 20 30MB GRiD supported [TechRef 6-18]
+		FDS_AT_INSTANCE	02DDh,  7,   12Ch, 0h, 2DCh, 11h	; Type 21 43MB GRiD supported [TechRef 6-18]
+		FDS_AT_INSTANCE	02DDh,  5,   12Ch, 0h, 2DDh, 11h	; Type 22 30MB GRiD supported [TechRef 6-18]
+		FDS_AT_INSTANCE	0132h,  4,     0h, 0h, 150h, 11h	; Type 23 10MB GRiD supported [TechRef 6-18]
+		FDS_AT_INSTANCE	0000h,  0,     0h, 0h,   0h,  0h	; Type 24 UNUSED
+		FDS_AT_INSTANCE	0267h,  4,     0h, 0h, 267h, 11h	; Type 25 20MB
+		FDS_AT_INSTANCE	0400h,  4, 0FFFFh, 0h, 3FFh, 11h	; Type 26 34MB
+		FDS_AT_INSTANCE	0400h,  5, 0FFFFh, 0h, 3FFh, 11h	; Type 27 43MB
+		FDS_AT_INSTANCE	0400h,  8, 0FFFFh, 0h, 3FFh, 11h	; Type 28 68MB
+		FDS_AT_INSTANCE	0200h,  8,   100h, 0h, 200h, 11h	; Type 29 34MB
+		FDS_AT_INSTANCE	0267h,  2,   267h, 0h, 267h, 11h	; Type 30 10MB
+		FDS_AT_INSTANCE	0000h,  0,     0h, 0h,   0h,  0h	; Type 31 UNUSED
+		FDS_AT_INSTANCE	0000h,  0,     0h, 0h,   0h,  0h	; Type 32 UNUSED
+		FDS_AT_INSTANCE	0000h,  0,     0h, 0h,   0h,  0h	; Type 33 UNUSED
+		FDS_AT_INSTANCE	0000h,  0,     0h, 0h,   0h,  0h	; Type 34 UNUSED
+		FDS_AT_INSTANCE	0400h,  9,   400h, 8h, 400h, 11h	; Type 35 77MB
+		FDS_AT_INSTANCE	0400h,  5,   200h, 0h, 400h, 11h	; Type 36 43MB
+		FDS_AT_INSTANCE	033Eh, 10, 0FFFFh, 8h, 33Eh, 11h	; Type 37 69MB
+		FDS_AT_INSTANCE	0337h, 10,   100h, 8h, 338h, 11h	; Type 38 68MB
+		FDS_AT_INSTANCE	0267h,  4,    80h, 0h, 298h, 11h	; Type 39 20MB
+		FDS_AT_INSTANCE	0267h,  8,    80h, 0h, 298h, 11h	; Type 40 41MB
+		FDS_AT_INSTANCE	0395h, 15, 0FFFFh, 8h, 396h, 11h	; Type 41 114MB
+		FDS_AT_INSTANCE	03FFh, 15, 0FFFFh, 8h, 400h, 11h	; Type 42 127MB
+		FDS_AT_INSTANCE	0337h, 10,   200h, 8h, 337h, 11h	; Type 43 102MB
+		FDS_AT_INSTANCE	0334h,  6, 0FFFFh, 0h, 334h, 11h	; Type 44 41MB
+		FDS_AT_INSTANCE	0400h,  8, 0FFFFh, 0h, 400h, 11h	; Type 45 68MB
+		FDS_AT_INSTANCE	039Dh,  9, 0FFFFh, 8h, 39Dh, 11h	; Type 46 69MB
+		FDS_AT_INSTANCE	02BBh,  7,   100h, 0h, 2BCh, 11h	; Type 47 41MB
 
 ; ---------------------------------------------------------------------------
 

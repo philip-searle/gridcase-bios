@@ -42,6 +42,7 @@ input {
 		../src/build/lightpen.obj
 		../src/build/cmos.obj
 		../src/build/prntscrn.obj
+		../src/build/int13_xt.obj
 		../src/build/sysident.obj
 		../src/build/at_compat.obj
 		../src/build/rom_trailer.obj
@@ -65,7 +66,6 @@ linker {
 		HdAtTestDriveReady		=> F000:CEBB
 		IdeAutodetect_70		=> F000:D09C
 		MemSetXmsEms			=> F000:D13C
-		HdAtHookIvt				=> F000:C822
 		PwEnabled				=> F000:F180
 		PwStartInput			=> F000:F1F2
 		PwPrompt				=> F000:F422
@@ -98,6 +98,8 @@ linker {
 		Int15_Grid				=> F000:D606
 		VidToggleExt			=> F000:D508
 		kConfigTable			=> F000:E6F5
+		HdXtInt13				=> F000:C94C
+		HdXtOpComplete			=> F000:CE8E
 	}
 	script => [
 		advance	{ to 		=> 0000:0000											}
@@ -145,6 +147,7 @@ linker {
 		link	{ input		=> lightpen,			segment => CODE					}
 		link	{ input		=> cmos,				segment => CODE					}
 		link	{ input		=> prntscrn,			segment => CODE					}
+		link	{ input		=> int13_xt,			segment => CODE					}
 
 		fill	{ to		=> F000:DFD0,			with => 0xFF					}
 		link	{ input		=> sysident,			segment => CODE					}

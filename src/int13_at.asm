@@ -15,6 +15,7 @@ INT13_AT	PROGRAM	OutFile=build/int13_at.obj
 		EXTERN	FixedDiskParams
 		EXTERN	ConString_Inline
 
+		PUBLIC	HdAtInit
 		PUBLIC	HdAtInt13
 		PUBLIC	HdAtDecideError
 		PUBLIC	HdAtWaitTask
@@ -62,7 +63,7 @@ GetCmosFdsPtr	PROC
 		ja	.diskConfigErr
 
 .haveDriveType	xor_	ah, ah
-		shl	ax, 4		; multiply by sizeof(FDS_INSTANCE)
+		shl	ax, 4		; multiply by sizeof(FDS_AT_INSTANCE)
 		jz	.diskConfigErr
 		mov_	bp, ax		; need indexed addressing mode
 		; index into table offset by one entry because the drive type
@@ -83,7 +84,7 @@ GetCmosFdsPtr	PROC
 ; ===========================================================================
 ; Special fixed disk parameter table entry for drive type E0
 ; ===========================================================================
-FDS_E0		DS FIXED_DISK_PARMS,	\
+FDS_E0		DS FIXED_DISK_PARMS_AT,	\
 		.cylinders=771,		\
 		.heads=8,		\
 		.writePreComp=0,	\
@@ -393,16 +394,16 @@ HdAtCmdDone	PROC
 HdAtReadDasd	PROC
 		jnb	.badDrive	; reuse flags from caller
 		call	GetIvtFdsPtr
-		mov	al, [es:si+FIXED_DISK_PARMS.sectorsPerTrk]
-		mul	[es:si+FIXED_DISK_PARMS.heads]
-		mov	dx, [es:si+FIXED_DISK_PARMS.cylinders]
+		mov	al, [es:si+FIXED_DISK_PARMS_AT.sectorsPerTrk]
+		mul	[es:si+FIXED_DISK_PARMS_AT.heads]
+		mov	dx, [es:si+FIXED_DISK_PARMS_AT.cylinders]
 		dec	dx
 		mul	dx
 
 		mov_	bp, sp
-		mov	[ss:bp+Int13HdStack.cx], dx
-		mov	[ss:bp+Int13HdStack.dx], ax
-		mov	[ss:bp+Int13HdStack.ax], (DASD_HD << 8) + 00h
+		mov	[ss:bp+Int13HdAtStack.cx], dx
+		mov	[ss:bp+Int13HdAtStack.dx], ax
+		mov	[ss:bp+Int13HdAtStack.ax], (DASD_HD << 8) + 00h
 
 		popf
 		pop	es
@@ -506,7 +507,7 @@ HdAtRead		PROC
 		call	HdAtMakeRegPack
 		jb	.readDone
 		jz	.L1		; do we want retries disabled?
-		or	[HdRegPacket+HD_AT_REG_PACKET.command], 1,DATA=BYTE
+		or	[HdAtRegPacket+HD_AT_REG_PACK.command], 1,DATA=BYTE
 .L1		call	HdAtSendRegPack
 		jb	.readDone
 
@@ -564,7 +565,7 @@ HdAtWrite	PROC
 		call	HdAtMakeRegPack
 		jb	.writeDone
 		jz	.L1		; Do we want retries disabled?
-		or	[HdRegPacket+HD_AT_REG_PACKET.command], 1,DATA=BYTE
+		or	[HdAtRegPacket+HD_AT_REG_PACK.command], 1,DATA=BYTE
 .L1		call	HdAtSendRegPack
 		jb	.writeDone
 
@@ -614,7 +615,7 @@ HdAtVerify	PROC
 		call	HdAtMakeRegPack
 		jb	.verifyDone
 		jz	.L1		; do we want retries disabled?
-		or	[HdRegPacket+HD_AT_REG_PACKET.command], 1,DATA=BYTE
+		or	[HdAtRegPacket+HD_AT_REG_PACK.command], 1,DATA=BYTE
 .L1		call	HdAtSendRegPack
 		jb	.verifyDone
 		call	HdAtWaitTask
@@ -638,7 +639,7 @@ HdAtFormat	PROC
 		; Force number of sectors to match the disk parameter table
 		push	es
 		call	GetIvtFdsPtr
-		mov	al, [es:si+FIXED_DISK_PARMS.sectorsPerTrk]
+		mov	al, [es:si+FIXED_DISK_PARMS_AT.sectorsPerTrk]
 		pop	es
 
 		; Sector number isn't used by the disk controller for this
@@ -683,28 +684,28 @@ HdAtDiskParms	PROC
 		jb	.validDrive	; first two hard disks?
 
 		; Invalid drive number, return empty result
-		mov	[ss:bp+Int13HdStack.dx], 0,DATA=WORD
-		mov	[ss:bp+Int13HdStack.cx], 0,DATA=WORD
-		mov	[ss:bp+Int13HdStack.ax], 0,DATA=BYTE
+		mov	[ss:bp+Int13HdAtStack.dx], 0,DATA=WORD
+		mov	[ss:bp+Int13HdAtStack.cx], 0,DATA=WORD
+		mov	[ss:bp+Int13HdAtStack.ax], 0,DATA=BYTE
 		mov	ah, INT13STAT_BADPARAMTBL
 		jmp	HdAtCmdDone
 
 .validDrive	call	GetIvtFdsPtr
 
-		mov	dh, [es:si+FIXED_DISK_PARMS.heads]
+		mov	dh, [es:si+FIXED_DISK_PARMS_AT.heads]
 		dec	dh
 		mov	dl, [HdCount]
-		mov	[ss:bp+Int13HdStack.dx], dx
+		mov	[ss:bp+Int13HdAtStack.dx], dx
 
-		mov	cx, [es:si+FIXED_DISK_PARMS.cylinders]
+		mov	cx, [es:si+FIXED_DISK_PARMS_AT.cylinders]
 		dec	cx
 		dec	cx
 		xchg	ch, cl
 		shl	cl, 6
-		add	cl, [es:si+FIXED_DISK_PARMS.sectorsPerTrk]
-		mov	[ss:bp+Int13HdStack.cx], cx
+		add	cl, [es:si+FIXED_DISK_PARMS_AT.sectorsPerTrk]
+		mov	[ss:bp+Int13HdAtStack.cx], cx
 
-		mov	[ss:bp+Int13HdStack.ax], 0
+		mov	[ss:bp+Int13HdAtStack.ax], 0
 
 		popf
 		pop	es
@@ -724,9 +725,9 @@ HdAtInitPair	PROC
 		jmp	HdAtCmdDone
 
 .validDrive	call	GetIvtFdsPtr
-		mov	dh, [es:si+FIXED_DISK_PARMS.heads]
+		mov	dh, [es:si+FIXED_DISK_PARMS_AT.heads]
 		dec	dh
-		mov	al, [es:si+FIXED_DISK_PARMS.sectorsPerTrk]
+		mov	al, [es:si+FIXED_DISK_PARMS_AT.sectorsPerTrk]
 		mov	ah, 91h		; [TechRef 10-26] Initialise drive parameters
 		call	HdAtMakeRegPack
 		jb	.initDone
@@ -1022,7 +1023,7 @@ HdAtWaitTask	PROC
 ; 	CF clear
 ; 	ZF set if retry-on-disk-error wanted
 ; 	BH == count of sectors
-; 	Register packer assembled at BDA:HdRegPacket for SendAtRegPacket to use
+; 	Register packet assembled at BDA:HdRAtegPacket for SendAtRegPack to use
 ;
 ; On failure:
 ; 	CF set
@@ -1031,18 +1032,18 @@ HdAtWaitTask	PROC
 HdAtMakeRegPack	PROC
 		push	es
 
-		mov	bx, HdRegPacket
-		mov	[bx+HD_AT_REG_PACKET.command], ah
-		mov	[bx+HD_AT_REG_PACKET.sectorCount], al
+		mov	bx, HdAtRegPacket
+		mov	[bx+HD_AT_REG_PACK.command], ah
+		mov	[bx+HD_AT_REG_PACK.sectorCount], al
 
 		call	GetIvtFdsPtr
 		mov_	al, cl
 		and	al, 3Fh
-		mov	[bx+HD_AT_REG_PACKET.sectorNumber], al
+		mov	[bx+HD_AT_REG_PACK.sectorNumber], al
 
 		shr	cl, 6
 		xchg	ch, cl
-		mov	[bx+HD_AT_REG_PACKET.cylinderLo], cx
+		mov	[bx+HD_AT_REG_PACK.cylinderLo], cx
 
 		cmp	dl, [HdCount]
 		jb	.validDrive		; odd to check this so late...
@@ -1057,17 +1058,17 @@ HdAtMakeRegPack	PROC
 		and	dh, 0Fh
 		add_	dl, dh
 		or	dl, 0A0h		; ??? sets two reserved bits
-		mov	[bx+HD_AT_REG_PACKET.driveHead], dl
+		mov	[bx+HD_AT_REG_PACK.driveHead], dl
 
-		mov	ax, [es:si+FIXED_DISK_PARMS.writePreComp]
+		mov	ax, [es:si+FIXED_DISK_PARMS_AT.writePreComp]
 		shr	ax, 2			; ??? why shift here
-		mov	[bx+HD_AT_REG_PACKET.writePrecomp], al
+		mov	[bx+HD_AT_REG_PACK.writePrecomp], al
 
-		mov	al, [es:si+FIXED_DISK_PARMS.control]
+		mov	al, [es:si+FIXED_DISK_PARMS_AT.control]
 		mov	[HdControl], al
 		test	al, 0C0h		; check 'disable retries on errors' bits
 						; do not change ZF flag after this instruction, we need to return it!
-		mov	bh, [bx+HD_AT_REG_PACKET.sectorCount]
+		mov	bh, [bx+HD_AT_REG_PACK.sectorCount]
 
 		clc
 		pop	es
@@ -1092,7 +1093,7 @@ HdAtSendRegPack	PROC
 		jb	.returnBad
 
 		; Start loading HDC registers from the packet (skip the padding byte at the start)
-		lea	si, [HdRegPacket+HD_AT_REG_PACKET.writePrecomp]
+		lea	si, [HdAtRegPacket+HD_AT_REG_PACK.writePrecomp]
 		mov	dx, PORT_HD_AT_WRPRECOMP
 		mov	cx, 6
 .writeRegister	lodsb

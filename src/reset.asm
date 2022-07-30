@@ -31,7 +31,7 @@ RESET		PROGRAM	OutFile=build/reset.obj
 		EXTERN	KbWaitReady, KbWaitResponse, KbWaitEmpty
 		EXTERN	ReadCmos, WriteCmos
 		EXTERN	SetCriticalErr, InitTimerTicks
-		EXTERN	GridAutodetect, FdCheckConfigValid, IdeAutodetect_70, HdAtTestDriveReady, HdAtHookIvt
+		EXTERN	GridAutodetect, FdCheckConfigValid, IdeAutodetect_70, HdAtTestDriveReady, HdInit
 		EXTERN	A20Disable, PmClearTraces
 		EXTERN	PwEnabled, PwStartInput, PwPrompt, PwProcessInput, PwEndInput
 		EXTERN	PwCompareStored, PwBackdoor2, PwIncorrect, PwClearBuffer
@@ -394,8 +394,8 @@ SDH_POST	PROC
 		add	[EquipmentWord], 40h,DATA=BYTE
 
 ; ---------------------------------------------------------------------------
-; Get hard drive controller hooked into the IVT
-.updatedFdCount	call	HdAtHookIvt
+; Get hard drive controller initialized and hooked into the IVT
+.updatedFdCount	call	HdInit
 
 ; ---------------------------------------------------------------------------
 ; Detect and init option ROMs outside the the hard disk controller range

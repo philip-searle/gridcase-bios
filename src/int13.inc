@@ -3,7 +3,20 @@
 ; Fixed disk parameter table entry
 ; ---------------------------------------------------------------------------
 
-FIXED_DISK_PARMS	struc
+FIXED_DISK_PARAMS_XT	struc
+.cylinders	dw	0
+.heads		db	0
+.rwcCylinder	dw	0	; reduced write current start cylinder
+.writePreComp	dw	0	; write precompensation start cylinder
+.eccBurstLength	db	0
+.controlByte	db	0
+.stdTimeout	db	0
+.formatTimeout	db	0
+.checkTimeout	db	0
+.reserved	db	0
+		endstruc
+
+FIXED_DISK_PARMS_AT	struc
 .cylinders	dw	0
 .heads		db	0
 .unused1	dw	0
@@ -16,7 +29,7 @@ FIXED_DISK_PARMS	struc
 .reserved	db	0
 		endstruc
 
-FDS_INSTANCE	%macro	; (cylinders, heads, writePreComp, control, landingZone, sectorsPerTrack)
+FDS_AT_INSTANCE	%macro	; (cylinders, heads, writePreComp, control, landingZone, sectorsPerTrack)
 	dw	%1	; cylinders
 	db	%2	; heads
 	dw	0	; unused1
@@ -77,7 +90,7 @@ INT13CMD_RESETHD	equ	0Dh	; Reset hard disk system only
 ;				0Fh	  Unused
 INT13CMD_TESTREADY	equ	10h	; Test drive ready
 INT13CMD_RECALIBRATE	equ	11h	; Recalibrate back to track zero
-;				12h	  Unused
+INT13CMD_RAMDIAG	equ	12h	; Controller RAM diagnostic
 ;				13h	  Unused
 INT13CMD_CONTROLLERDIAG	equ	14h	; Controller internal diagnostic
 INT13CMD_READDASDTYPE	equ	15h	; Read direct attached storage device (DASD) type
@@ -121,10 +134,10 @@ INT13STAT_WRITEFAULT	equ	0CCh	; Write fault on selected drive
 INT13STAT_NOERROR	equ	0E0h	; "Status error/Error Register-0"
 ;				0E1h-0FFh	Omitted from TechRef
 
-; Int13 hard-disk command handlers can rely on this stack layout to be in
-; place when they are called and can poke data into it to return values to
-; our caller.
-Int13HdStack	struc
+; Int13 AT-compatible hard-disk command handlers can rely on this stack layout
+; to be in place when they are called and can poke data into it to return
+; values to our caller.
+Int13HdAtStack	struc
 .flags		dw	0
 .es		dw	0
 .di		dw	0
@@ -135,6 +148,25 @@ Int13HdStack	struc
 .dx		dw	0
 .cx		dw	0
 .ax		dw	0
+		endstruc
+
+; As Int13HdAtStack, but for the XT-compatible hard disk command handlers.
+Int13HdXtStack	struc
+.ax		dw	0
+.bx		dw	0
+.cx		dw	0
+.dx		dw	0
+.es		dw	0
+.si		dw	0
+.di		dw	0
+.ds		dw	0
+.originalAx	dw	0
+.bp		dw	0
+
+; Add aliases for byte registers
+$		equ	.ax
+.al		db	0
+.ah		db	0
 		endstruc
 
 ; Return values from int13/15h (read DASD type)

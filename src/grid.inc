@@ -30,11 +30,11 @@ GRID_SLED_NONE	equ	00h	; 0  =	None	None	None
 GRID_SLED_10	equ	10h	; 1  =	1.44MB	None	None
 GRID_SLED_20	equ	20h	; 2  =	1.44MB	1.44MB	None
 GRID_SLED_30	equ	30h	; 3  =	1.44MB	None	XT-compatible (subtypes 1/2/3)
-GRID_SLED_40	equ	40h	; 4  =	None	None	None - not used?
+GRID_SLED_40	equ	40h	; 4  =	None	None	XT-compatible (unknown)
 GRID_SLED_50	equ	50h	; 5  =	None	None	AT-compatible (subtype 4)
 GRID_SLED_60	equ	60h	; 6  =	None	None	None - not used?
 GRID_SLED_70	equ	70h	; 7  =	None	None	AT-compatible (subtypes 5/6/7/9 identified by model number)
-GRID_SLED_80	equ	80h	; 8  =	None	None	None - not used?
+GRID_SLED_80	equ	80h	; 8  =	None	None	XT-compatible (unknown)
 GRID_SLED_90	equ	90h	; 9  =	1.44MB	None	AT-compatible (subtypes 5/6/7/8 identified by model number)
 ; Sled IDs A-F not used?
 
