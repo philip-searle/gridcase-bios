@@ -430,7 +430,7 @@ SysSetTimer	PROC
 
 		; Configure PIC to allow RTC interrupt through
 		in	al, PORT_PIC2_MASK
-		and	al, 0FEh		; unmask RTC (IRQ8/int70)
+		and	al, ~IRQ_RTC		; unmask RTC (IRQ8/int70)
 		out	PORT_PIC2_MASK, al
 
 .leaveFunction	sti
@@ -470,7 +470,7 @@ SysWait		PROC
 
 		; Configure PIC to allow RTC interrupt through
 		in	al, PORT_PIC2_MASK
-		and	al, 0FEh		; unmask RTC (IRQ8/int70)
+		and	al, ~IRQ_RTC		; unmask RTC (IRQ8/int70)
 		out	PORT_PIC2_MASK, al
 		sti
 

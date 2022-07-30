@@ -71,15 +71,7 @@ POST11_LoadIvt	PROC
 
 		; Enable interrupts
 		mov	ds, [kBdaSegment]
-		mov	al, 0FAh		; PIC1: set interrupt mask:
-						;   IRQ0 - timer (disabled)
-						;   IRQ1 - keyboard
-						;   IRQ2 - cascade (disabled)
-						;   IRQ3 - serial port, COM2
-						;   IRQ4 - modem, COM1
-						;   IRQ5 - reserved
-						;   IRQ6 - floppy drive
-						;   IRQ7 - parallel port
+		mov	al, ~(IRQ_TIMER | IRQ_CASCADE)
 		out	PORT_PIC1_MASK, al
 		sti
 

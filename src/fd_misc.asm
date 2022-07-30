@@ -126,10 +126,10 @@ FdCheckConfigValid	PROC
 		mov	[FdDriveInfo], 66h, DATA=BYTE
 		mov	[Fd2DriveInfo], 6, DATA=BYTE
 
-		; Turn on (unmask) floppy disk DMA channel
+		; Turn on (unmask) floppy disk interrupts
 		mov	dx, PORT_PIC1_MASK
 		in	al, dx
-		and	al, 0BEh
+		and	al, ~(IRQ_FDC | IRQ_TIMER)
 		Delay	2
 		out	dx, al
 

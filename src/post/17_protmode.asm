@@ -15,7 +15,7 @@ POST17_ProtMode	PROC
 		out	PORT_DIAGNOSTICS, al
 
 		cli			; disable all interrupts
-		mov	al, 0FEh	; unmask PIC timer input
+		mov	al, ~IRQ_TIMER	; unmask PIC timer input
 		out	PORT_PIC1_MASK, al
 		mov	cx, 0		; set timer IVT entry to test success handler
 		mov	es, cx

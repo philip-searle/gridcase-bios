@@ -350,7 +350,7 @@ SDH_POST	PROC
 
 ; ---------------------------------------------------------------------------
 ; We're ready for the timer and keyboard to be processed normally via interrupts
-		mov	al, 0F8h		; unmask IRQ0/1/2 (timer, keyboard, cascade)
+		mov	al, ~(IRQ_TIMER | IRQ_KEYBOARD | IRQ_CASCADE)
 		out	PORT_PIC1_MASK, al
 		sti
 
@@ -498,7 +498,11 @@ SDH_POST	PROC
 		; the same register we pushed from because we need to preserve
 		; the PIC2 mask value in AL.
 		pop	bx
-		and	al, 0FDh		; unmask redirect cascade IRQ
+		; Unmask the NPU's IRQ line
+		; BUG: This unmasks bit 2 (mask value of 0FDh) which actually
+		;      corresponds to IRQ9.  The original author almost certainly
+		;      meant to use a mask value of 0DFh to unmask IRQ13.
+		and	al, ~IRQ_NPU_BUG
 		out	PORT_PIC2_MASK, al
 		sti
 

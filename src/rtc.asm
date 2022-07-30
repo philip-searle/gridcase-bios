@@ -277,7 +277,7 @@ RtcSetAlarm	PROC
 		or	al, 20h		; enable alarm interrupt
 		call	WriteCmos
 		in	al, PORT_PIC2_MASK
-		and	al, 0FEh	; unmask rtc interrupt
+		and	al, ~IRQ_RTC	; unmask rtc interrupt
 		Delay	2
 		out	PORT_PIC2_MASK, al
 		jmp	Int1A_Actual.leaveSuccess

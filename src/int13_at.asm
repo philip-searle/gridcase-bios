@@ -973,12 +973,12 @@ HdAtWaitTask	PROC
 		mov	[HdTaskComplete], 0
 
 		in	al, PORT_PIC2_MASK
-		and	al, 0BFh		; unmask fixed disk interrupt
+		and	al, ~IRQ_HDC		; unmask fixed disk interrupt
 		Delay	1
 		out	PORT_PIC2_MASK, al
 
 		in	al, PORT_PIC1_MASK
-		and	al, 0FBh		; unmask slave PIC IRQ
+		and	al, ~IRQ_CASCADE	; unmask slave PIC IRQ
 		Delay	1
 		out	PORT_PIC1_MASK, al
 
