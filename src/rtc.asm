@@ -10,7 +10,7 @@ RTC		PROGRAM	OutFile=build/rtc.obj
 		EXTERN	LoadBdaToDs, FuncToOffset
 		EXTERN	ReadCmos, WriteCmos
 
-		PUBLIC	Int8_Actual, Int1A_Actual
+		PUBLIC	Int8_Actual, Int1A_Actual, Int70
 
 ; =====================================================================
 ; Int1A_Actual [TechRef 6-8]

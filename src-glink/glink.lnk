@@ -57,13 +57,11 @@ output {
 linker {
 	define => {
 		EoiPic1					=> F000:F53C
-		Int70					=> F000:C351
 		EoiPic1and2				=> F000:F543
 		DetectMemController		=> F000:F63D
 		GridAutodetect			=> F000:CFA3
 		VidInit					=> F000:D541
 		VidInitBacklite			=> F000:D160
-		HdAtTestDriveReady		=> F000:CEBB
 		IdeAutodetect_70		=> F000:D09C
 		MemSetXmsEms			=> F000:D13C
 		PwEnabled				=> F000:F180
@@ -98,8 +96,6 @@ linker {
 		Int15_Grid				=> F000:D606
 		VidToggleExt			=> F000:D508
 		kConfigTable			=> F000:E6F5
-		HdXtInt13				=> F000:C94C
-		HdXtOpComplete			=> F000:CE8E
 	}
 	script => [
 		advance	{ to 		=> 0000:0000											}

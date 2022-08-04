@@ -71,6 +71,13 @@ Unused_%.:	equ	%1
 		%endmacro
 
 ; ---------------------------------------------------------------------
+; Macro to convert word literal into big-endian format
+dw_b	%macro
+	db	(%1 >> 8) & 0FFh
+	db	(%1 >> 0) & 0FFh
+	%endmacro
+
+; ---------------------------------------------------------------------
 ; Underscore-suffixed opcodes are actually macros that specify an alternate
 ; instruction coding.  Used to match the encoding used by GRiD's original
 ; assembler, which preferred the numerically higher of ambiguous encodings.

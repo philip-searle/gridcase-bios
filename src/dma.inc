@@ -31,21 +31,21 @@ PORT_DMA2_MODE		equ	0D6h	; (-W)
 PORT_DMA2_CLEAR_FF	equ	0D8h	; (-W)
 PORT_DMA2_MASTER_CLEAR	equ	0DAh	; (-W)
 
-; DMA controller 1 channels
+; DMA controller 1 channels (byte transfers)
 PORT_DMA_CHAN0_CUR	equ	00h	; (R-) current address
 PORT_DMA_CHAN0_BASE	equ	00h	; (-W) base address
-PORT_DMA_CHAN0_WC	equ	01h	; (RW) word count
+PORT_DMA_CHAN0_WC	equ	01h	; (RW) byte count
 PORT_DMA_CHAN1_CUR	equ	02h	; (R-) current address
 PORT_DMA_CHAN1_BASE	equ	02h	; (-W) base address
-PORT_DMA_CHAN1_WC	equ	03h	; (RW) word count
+PORT_DMA_CHAN1_WC	equ	03h	; (RW) byte count
 PORT_DMA_CHAN2_CUR	equ	04h	; (R-) current address
 PORT_DMA_CHAN2_BASE	equ	04h	; (-W) base address
-PORT_DMA_CHAN2_WC	equ	05h	; (RW) word count
+PORT_DMA_CHAN2_WC	equ	05h	; (RW) byte count
 PORT_DMA_CHAN3_CUR	equ	06h	; (R-) current address
 PORT_DMA_CHAN3_BASE	equ	06h	; (-W) base address
-PORT_DMA_CHAN3_WC	equ	07h	; (RW) word count
+PORT_DMA_CHAN3_WC	equ	07h	; (RW) byte count
 
-; DMA controller 2 channels
+; DMA controller 2 channels (word transfers)
 PORT_DMA_CHAN4_CUR	equ	0C0h	; (R-) current address
 PORT_DMA_CHAN4_BASE	equ	0C0h	; (-W) base address
 PORT_DMA_CHAN4_WC	equ	0C2h	; (RW) word count

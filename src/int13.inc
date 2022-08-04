@@ -1,32 +1,48 @@
 
 ; ---------------------------------------------------------------------------
-; Fixed disk parameter table entry
+; Fixed disk parameter table entry (AT- and XT-compatible variants)
+; Note that [TechRef 9-40] only documents the AT-compatible form.
+; In the XT-compatible version only, multibyte values are stored in the HDC's
+; native big-endian order.
 ; ---------------------------------------------------------------------------
 
 FIXED_DISK_PARAMS_XT	struc
-.cylinders	dw	0
-.heads		db	0
-.rwcCylinder	dw	0	; reduced write current start cylinder
-.writePreComp	dw	0	; write precompensation start cylinder
-.eccBurstLength	db	0
-.controlByte	db	0
-.stdTimeout	db	0
-.formatTimeout	db	0
-.checkTimeout	db	0
-.reserved	db	0
+.cylinders	d w
+.heads		d b
+.rwcCylinder	d w	; reduced write current start cylinder
+.writePreComp	d w	; write precompensation start cylinder
+.eccBurstLength	d b
+.controlByte	d b
+.stdTimeout	d b
+.formatTimeout	d b
+.checkTimeout	d b
+.reserved	d b	; actually max sector number
 		endstruc
 
+FDS_XT_INSTANCE	%macro
+	dw_b	%1	; cylinders
+	db	%2	; heads
+	dw_b	%3	; reduced write current cylinder
+	dw_b	%4	; write precompensation start cylinder
+	db	%5	; ecc burst length
+	db	%6	; control byte
+	db	%7	; standard timeout
+	db	%8	; format timeout
+	db	%9	; check timeout
+	db	%10	; sectors per track
+	%endmacro
+
 FIXED_DISK_PARMS_AT	struc
-.cylinders	dw	0
-.heads		db	0
-.unused1	dw	0
-.writePreComp	dw	0
-.unused2	db	0
-.control	db	0
-.unused3	db	0, 0, 0
-.landingZone	dw	0
-.sectorsPerTrk	db	0
-.reserved	db	0
+.cylinders	d w
+.heads		d b
+.unused1	d w
+.writePreComp	d w
+.unused2	d b
+.control	d b
+.unused3	d 3 * b
+.landingZone	d w
+.sectorsPerTrk	d b
+.reserved	d b
 		endstruc
 
 FDS_AT_INSTANCE	%macro	; (cylinders, heads, writePreComp, control, landingZone, sectorsPerTrack)
@@ -115,7 +131,9 @@ INT13STAT_DMABOUNDARY	equ	009h	; DMA crossed 64K boundary
 INT13STAT_BADSECTOR	equ	00Ah	; Bad sector flag detected
 INT13STAT_NOTUSED	equ	00Bh	; "Not used"
 INT13STAT_BADMEDIA	equ	00Ch	; Unsupported track/invalid media
-;				00Dh-00Fh	Omitted from TechRef
+INT13STAT_BAD_CALIBRATE	equ	00Dh	; Recalibrate failed, omitted from TechRef
+;				00Eh	 	Omitted from TechRef
+INT13STAT_UNKNOWN	equ	00Fh	; No last status available, omitted from TechRef
 INT13STAT_BADECC	equ	010h	; Uncorrectable data error
 INT13STAT_DATACORRECTED	equ	011h	; ECC corrected data error
 ;				012h-01Fh	Omitted from TechRef
@@ -132,7 +150,8 @@ INT13STAT_UNDEFINED	equ	0BBh	; Undefined error occurred
 INT13STAT_WRITEFAULT	equ	0CCh	; Write fault on selected drive
 ;				0CDh-0DFh	Omitted from TechRef
 INT13STAT_NOERROR	equ	0E0h	; "Status error/Error Register-0"
-;				0E1h-0FFh	Omitted from TechRef
+;				0E1h-0FEh	Omitted from TechRef
+INT13STAT_SENSEFAILED	equ	0FFh	;  Sense operation failed, omitted from TechRed
 
 ; Int13 AT-compatible hard-disk command handlers can rely on this stack layout
 ; to be in place when they are called and can poke data into it to return
