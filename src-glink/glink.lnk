@@ -43,6 +43,7 @@ input {
 		../src/build/cmos.obj
 		../src/build/prntscrn.obj
 		../src/build/int13_xt.obj
+		../src/build/grid_cpu.obj
 		../src/build/sysident.obj
 		../src/build/at_compat.obj
 		../src/build/rom_trailer.obj
@@ -89,8 +90,6 @@ linker {
 		VidWinSelect			=> F000:B637
 		GridVidInit				=> F000:D4DF
 		GridVidInitHi			=> F000:D4B9
-		GridCpuFast				=> F000:CF92
-		GridCpuSlow				=> F000:CF98
 		VidDecColMap			=> F000:DCFE
 		VidIncColMap			=> F000:DD1D
 		Int15_Grid				=> F000:D606
@@ -144,6 +143,7 @@ linker {
 		link	{ input		=> cmos,				segment => CODE					}
 		link	{ input		=> prntscrn,			segment => CODE					}
 		link	{ input		=> int13_xt,			segment => CODE					}
+		link	{ input		=> grid_cpu,			segment => CODE					}
 
 		fill	{ to		=> F000:DFD0,			with => 0xFF					}
 		link	{ input		=> sysident,			segment => CODE					}

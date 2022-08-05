@@ -4,6 +4,13 @@
 ; ---------------------------------------------------------------------------
 
 ; ---------------------------------------------------------------------------
+; CPU speed selection [TechRef 2-15]
+PORT_CPU_SPEED		equ	416h
+CPU_SPEED_HIGH		equ	000h
+CPU_SPEED_LOW		equ	001h
+CPU_SPEED_RESERVED	equ	0FEh
+
+; ---------------------------------------------------------------------------
 ; ROM subsystem select/status
 ; Mentioned in [TechRef 3-30] with the note "Write subsystem select, read
 ; subsystem status" but unfortunately not elaborated on.  Possibly this is
