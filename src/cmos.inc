@@ -88,4 +88,3 @@ FD_5_360K		equ	01h	; 360KB 5.25" drive
 FD_5_1M			equ	02h	; 1.2MB 5.25" drive
 FD_3_720K		equ	03h	; 720KB 3.5" drive
 FD_3_1M			equ	04h	; 1.44MB 3.5" drive
-

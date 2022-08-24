@@ -39,6 +39,7 @@ OBJECTS	:=	build/rom_header.obj \
 			build/prntscrn.obj \ 
 			build/int13_xt.obj \
 			build/grid_cpu.obj \
+			build/grid_autodetect.obj \
 			build/sysident.obj \
 			build/at_compat.obj \
 			build/rom_trailer.obj

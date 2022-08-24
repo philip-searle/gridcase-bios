@@ -44,6 +44,7 @@ input {
 		../src/build/prntscrn.obj
 		../src/build/int13_xt.obj
 		../src/build/grid_cpu.obj
+		../src/build/grid_autodetect.obj
 		../src/build/sysident.obj
 		../src/build/at_compat.obj
 		../src/build/rom_trailer.obj
@@ -60,7 +61,6 @@ linker {
 		EoiPic1					=> F000:F53C
 		EoiPic1and2				=> F000:F543
 		DetectMemController		=> F000:F63D
-		GridAutodetect			=> F000:CFA3
 		VidInit					=> F000:D541
 		VidInitBacklite			=> F000:D160
 		IdeAutodetect_70		=> F000:D09C
@@ -144,6 +144,7 @@ linker {
 		link	{ input		=> prntscrn,			segment => CODE					}
 		link	{ input		=> int13_xt,			segment => CODE					}
 		link	{ input		=> grid_cpu,			segment => CODE					}
+		link	{ input		=> grid_autodetect,		segment => CODE					}
 
 		fill	{ to		=> F000:DFD0,			with => 0xFF					}
 		link	{ input		=> sysident,			segment => CODE					}
