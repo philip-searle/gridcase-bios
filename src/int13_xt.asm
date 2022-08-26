@@ -21,12 +21,12 @@ INT13_XT	PROGRAM	OutFile=build/int13_xt.obj
 HdInit		PROC
 		mov	dx, PORT_ROM_SUBSYSTEM1
 		in	al, dx
-		and	al, GRID_SLED_MASK
-		cmp	al, GRID_SLED_30
+		and	al, GRID_BKPL_MASK
+		cmp	al, GRID_BKPL_30
 		jz	HdXtInit
-		cmp	al, GRID_SLED_40
+		cmp	al, GRID_BKPL_40
 		jz	HdXtInit
-		cmp	al, GRID_SLED_80
+		cmp	al, GRID_BKPL_80
 		jz	HdXtInit
 		jmp	HdAtInit
 		ENDPROC	HdInit
@@ -1243,10 +1243,10 @@ HdXtEarlyReset	PROC
 		; XT-compatible hard drives attached.
 		mov	dx, PORT_ROM_SUBSYSTEM1
 		in	al, dx
-		and	al, GRID_SLED_MASK
-		cmp	al, GRID_SLED_20
+		and	al, GRID_BKPL_MASK
+		cmp	al, GRID_BKPL_20
 		jbe	.leaveFunction
-		cmp	al, GRID_SLED_50
+		cmp	al, GRID_BKPL_50
 		jnb	.leaveFunction
 
 		; Give the controller a few chances to reset itself

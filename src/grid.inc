@@ -25,25 +25,25 @@ PORT_ROM_SUBSYSTEM7	equ	6FEh
 PORT_ROM_SUBSYSTEM8	equ	6FFh
 
 ; Upper half of PORT_ROM_SUBSYSTEM1 contains type ID for the internal
-; floppy/hard disk sled.  This is used to determine the number of floppy
-; drives (when combined with the external floppy detect bits in the
-; parallel port status registers), as well as the presence of an internal
-; hard disk drives and the method to use to detect its size.
-; Note that if a sled supporting internal floppy drives is present then it
-; is assumed that all of them are populated and are 3.5" 1.44MB models.
-GRID_SLED_MASK	equ	0F0h
+; floppy/hard disk backplane.  This is used to determine the number of
+; floppy drives (when combined with the external floppy detect bits in
+; the parallel port status registers), as well as the presence of
+; internal hard disk drives and the method to use to detect its size.
+; Note that if a backplane supporting internal floppy drives is present
+; then it is assumed that all of them are populated 3.5" 1.44MB models.
+GRID_BKPL_MASK	equ	0F0h
 				;	Floppy0	Floppy1	HardDisk
-GRID_SLED_NONE	equ	00h	; 0  =	None	None	None
-GRID_SLED_10	equ	10h	; 1  =	1.44MB	None	None
-GRID_SLED_20	equ	20h	; 2  =	1.44MB	1.44MB	None
-GRID_SLED_30	equ	30h	; 3  =	1.44MB	None	XT-compatible (subtypes 1/2/3)
-GRID_SLED_40	equ	40h	; 4  =	None	None	??-compatible (subtype 4)
-GRID_SLED_50	equ	50h	; 5  =	None	None	AT-compatible (subtype 4)
-GRID_SLED_60	equ	60h	; 6  =	None	None	None - not used?
-GRID_SLED_70	equ	70h	; 7  =	None	None	AT-compatible (subtypes 5/6/7/9 identified by model number)
-GRID_SLED_80	equ	80h	; 8  =	None	None	XT-compatible (unknown)
-GRID_SLED_90	equ	90h	; 9  =	1.44MB	None	AT-compatible (subtypes 5/6/7/8 identified by model number)
-; Sled IDs A-F not used?
+GRID_BKPL_NONE	equ	00h	; 0  =	None	None	None
+GRID_BKPL_10	equ	10h	; 1  =	1.44MB	None	None
+GRID_BKPL_20	equ	20h	; 2  =	1.44MB	1.44MB	None
+GRID_BKPL_30	equ	30h	; 3  =	1.44MB	None	XT-compatible (subtypes 1/2/3)
+GRID_BKPL_40	equ	40h	; 4  =	None	None	??-compatible (subtype 4)
+GRID_BKPL_50	equ	50h	; 5  =	None	None	AT-compatible (subtype 4)
+GRID_BKPL_60	equ	60h	; 6  =	None	None	None - not used?
+GRID_BKPL_70	equ	70h	; 7  =	None	None	AT-compatible (subtypes 5/6/7/9 identified by model number)
+GRID_BKPL_80	equ	80h	; 8  =	None	None	XT-compatible (unknown)
+GRID_BKPL_90	equ	90h	; 9  =	1.44MB	None	AT-compatible (subtypes 5/6/7/8 identified by model number)
+; Backplanes IDs A-F not used?
 
 ; ---------------------------------------------------------------------------
 ; GRiD hard disk autodetect values

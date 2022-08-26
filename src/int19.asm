@@ -334,24 +334,24 @@ GridBootFdIds	PROC
 		cmp	al, .ExternalDriveMask
 		jnz	.leaveFunction
 
-; Fetch drive sled type from ROM subsystem
+; Fetch drive backplane type from ROM subsystem
 		mov	dx, PORT_ROM_SUBSYSTEM1
 		in	al, dx
-		and	al, GRID_SLED_MASK
+		and	al, GRID_BKPL_MASK
 
-; Drive sleds with zero/one floppy drive use the default boot order
-		cmp	al, GRID_SLED_NONE
+; Drive backplanes with zero/one floppy drive use the default boot order
+		cmp	al, GRID_BKPL_NONE
 		jz	.leaveFunction
-		cmp	al, GRID_SLED_40
+		cmp	al, GRID_BKPL_40
 		jz	.leaveFunction
-		cmp	al, GRID_SLED_50
+		cmp	al, GRID_BKPL_50
 		jz	.leaveFunction
-		cmp	al, GRID_SLED_70
+		cmp	al, GRID_BKPL_70
 		jz	.leaveFunction
-		cmp	al, GRID_SLED_80
+		cmp	al, GRID_BKPL_80
 		jz	.leaveFunction
-; Drive sleds with two floppy drives need the external drive's ID adjusting upwards
-		cmp	al, GRID_SLED_20
+; Drive backplanes with two floppy drives need the external drive's ID adjusting upwards
+		cmp	al, GRID_BKPL_20
 		jnz	.checkExtSwap
 		mov	bx, 0002h
 ; If external drive is set to be A: then swap the floppy/extra floppy boot IDs

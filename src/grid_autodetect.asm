@@ -88,12 +88,12 @@ FdAutodetect	PROC
 		mov_	ah, al
 		mov	cl, 4
 		shr	ah, cl			; shift hi-nibble to lo-nibble
-		cmp	ah, GRID_SLED_90 >> 4
+		cmp	ah, GRID_BKPL_90 >> 4
 		jnz	.1			; 90 goes straight to 3
 		mov	ah, 3
-.1		cmp	ah, GRID_SLED_70 >> 4
+.1		cmp	ah, GRID_BKPL_70 >> 4
 		jz	.2			; 70 goes to 0 via 5
-		cmp	ah, GRID_SLED_80 >> 4
+		cmp	ah, GRID_BKPL_80 >> 4
 		jnz	.3			; 80 also goes to 0 but not via 5?
 						; End result is the same, no need to special-case this one?
 .2		mov	ah, 5
@@ -158,8 +158,8 @@ FdAutodetect	PROC
 		; If the drive backplane supports two floppy drives then our FD count maxes out the CMOS_EQUIPMENT bits
 		mov	dx, PORT_ROM_SUBSYSTEM1
 		in	al, dx
-		and	al, GRID_SLED_MASK
-		cmp	al, GRID_SLED_20		; backplane supports two floppy drives?
+		and	al, GRID_BKPL_MASK
+		cmp	al, GRID_BKPL_20		; backplane supports two floppy drives?
 		jnz	.equipByteReady			; if not, skip external drive checks
 
 		; If the drive backplane supports two floppy drives then we must inspect the external disk drive
