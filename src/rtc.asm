@@ -353,7 +353,7 @@ Int70		PROC
 
 ; =====================================================================
 ; RtcStopClock
-; Resets RTC to default timing and disables clock updated.
+; Resets RTC to default timing and disables clock updates.
 ; Returns CMOS RAM valid flag in AL bit 7.
 ; =====================================================================
 RtcStopClock	PROC

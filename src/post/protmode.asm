@@ -49,7 +49,7 @@ kPmIdtLen	equ	800h
 kPmGdt		equ	kPmIdt+kPmIdtLen
 kPmGdtLen	equ	88h
 
-;kPmSysDataLen	equ	kPmGdt+kPmGdtLen
+kPmSysDataLen	equ	kPmIdtLen+kPmGdtLen
 
 ; =====================================================================
 ; Protected mode GDT template.
@@ -114,7 +114,7 @@ PmIret		PROC
 ; =====================================================================
 PmClearTraces	PROC
 		mov	di, kPmIdt
-		mov	cx, 444h
+		mov	cx, kPmSysDataLen / 2
 		mov	ax, 0
 		mov	es, ax
 		rep	stosw
@@ -375,7 +375,7 @@ DetectMemSize	PROC
 ; =====================================================================
 ; PmDetectMem
 ; Detects writable memory by altering GDT descriptor dtiDetectMem and
-; reading/writing tests pattern 55AAh to the start of each 64KB segment
+; reading/writing test pattern 55AAh to the start of each 64KB segment
 ; in turn.
 ;
 ; On entry:
@@ -421,7 +421,7 @@ kDecreasingMem	db	' Decreasing available memory',0Dh,,0Ah,0
 ; Cycles through all memory (base and extended/expanded), testing each
 ; segment's address and data lines.  Reports progress to the screen
 ; as it goes.  ESC terminates memory tests.
-; On failure, decreased detected memory size to known good size.
+; On failure, decreases detected memory size to known good size.
 ; Call from real-mode (switches to/from protected-mode internally).
 ; =====================================================================
 TestAllMem	PROC
@@ -487,7 +487,7 @@ TestAllMem	PROC
 		cmp_	bl, bh		; reached end?
 		jz	.reachedEnd
 
-		; Memory fault found, report it and limit mme size to checked amount
+		; Memory fault found, report it and limit mem size to checked amount
 		test	[InterruptFlag], 20h
 		jnz	.l2
 		mov	al, BEEP_RAM_ALL
@@ -594,7 +594,7 @@ TestAllMem	PROC
 ;   CF clear on success
 ;   CF set on failure
 ;      BH==BL if user terminated memory test with ESC
-;      BH!=BL is memory error detected, BL is failing segment
+;      BH!=BL if memory error detected, BL is failing segment
 ; =====================================================================
 TestMemSegments	PROC
 		push	di
@@ -701,7 +701,7 @@ TestMemSegments	PROC
 ;         bit 15 0 to test regular address line
 ;   BP == length of segment to test
 ;   ES -> segment to be tested
-;   SP -> different segment
+;   SP -> different segment to ES (for checking stuck address lines)
 ;
 ; On return:
 ;   DX -> string describing last check made
@@ -731,7 +731,7 @@ TestMemHiAddr	PROC
 		not	ax
 		mov_	di, sp		; store inverted AX via ES to same offset
 		mov	[es:di], ax
-		pop	cx		; attempt to poo AX into CX
+		pop	cx		; attempt to pop AX into CX
 					; this may read the inverted value just moved via ES
 					; if the upper address bits are broken
 		not	ax
@@ -806,7 +806,7 @@ TestMemData	PROC
 
 ; =====================================================================
 ; TestMemFailAddr
-; Shared function tail for memory test failure of the address lines
+; Shared function tail for memory test failure of the address lines.
 ; On return:
 ;   DX -> string describing failing component
 ;   Falls through to TestMemFailCx.
@@ -872,7 +872,7 @@ TestMemLoAddr	PROC
 		; Write the test value complement to addresses in the segment
 		; that are even powers of two.  If we see these complemented values
 		; anywhere else within the segment then we know we're not writing
-		; (or reading) data properly.
+		; (or reading) data properly, likely because a low address line is stuck.
 		not	ax
 		mov	di, 2
 .writeSentinals	mov	[es:di], ax
@@ -985,7 +985,7 @@ WriteMemSize	PROC
 		sub	si, 4			; decrease to 3 digits if not
 
 .printDigit	xor_	dx, dx
-		; ??? operand is offset backwards by 2, error by original programmer?
+		; SI is stored excess-2 so the JNZ below correctly exits the loop
 		div	[cs:.divisors-2+si]	; extract digit
 		add	al, '0'
 		call	ConChar

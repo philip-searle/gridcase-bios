@@ -24,7 +24,7 @@ kMagic2		d w	18
 ; =====================================================================
 ; InitTimerTicks
 ; Converts the current RTC value to count of timer ticks since midnight
-; and stores this in the Bios Data Area for the Int1A handler to update
+; and stores this in the BIOS Data Area for the Int1A handler to update
 ; =====================================================================
 InitTimerTicks	PROC
 		mov	ds, [cs:kBdaSegment]

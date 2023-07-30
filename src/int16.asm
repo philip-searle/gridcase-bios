@@ -96,10 +96,11 @@ KbStatusRet	PROC
 ; Stub for int16 functions we do not support.
 ; ===========================================================================
 KbUnsupported	PROC
-		; Can't find any docs on what unsupported int16 functions
-		; return.  AT BIOS doesn't do anything special for invalid
-		; functions but AH does end up modified by a dec/jz chain.
-		; I guess making sure AX is changed is enough for compat...
+		; [Compat] Can't find any docs on what unsupported int16
+		; functions return.  The IBM AT BIOS doesn't do anything special
+		; for invalid functions, but AH does end up modified by a dec/jz
+		; comparison chain.  I guess making sure AX is changed is enough
+		; for compatibility?
 		dec	ax
 		jmp	KbStatusRet
 		ENDPROC	KbUnsupported
@@ -117,7 +118,7 @@ KbReadChar	PROC
 		cmp	di, [KbLastChar]	; key available?
 		jnz	.keyAvailable
 
-		; If not key available, wait for one to appear
+		; If no key available, wait for one to appear
 		mov	ax, 9002h
 		int	15h			; OS hook - device busy, keyboard
 .waitKeyAvail	cli				; disable interrupts while we check the keyboard buffer
@@ -140,7 +141,7 @@ KbReadChar	PROC
 		jmp	.gotKey
 		FillerNop
 
-.notExtCode	; Mysterious extra translation...
+.notExtCode	; ??? Mysterious extra translation...
 		; Maybe something in the int9 handler produces these values...
 		cmp	ah, 85h
 		jnb	.waitKeyAvail
@@ -174,7 +175,7 @@ KbReadExt	PROC
 		cmp	di, [KbLastChar]	; key available?
 		jnz	.keyAvailable
 
-		; If not key available, wait for one to appear
+		; If no key available, wait for one to appear
 		mov	ax, 9002h
 		int	15h			; OS hook - device busy, keyboard
 .waitKeyAvail	cli				; disable interrupts while we check the keyboard buffer
@@ -190,7 +191,7 @@ KbReadExt	PROC
 		mov	[KbNextChar], di
 		sti				; done modifying keyboard buffer
 
-		; Less mysterious translation that the non-ext read method
+		; ??? Less mysterious translation that the non-ext read method
 		cmp	al, 0F0h
 		jnz	.gotKey
 		cmp	ah, 0
@@ -221,14 +222,14 @@ KbCheckChar	PROC
 		mov	ax, [di]
 		pushf
 
-		; Mysterious numpad translation?
+		; ??? Mysterious numpad translation?
 		cmp	ah, SC2_PREFIX_EXT	; [TechRef 8-37] claims E0h-prefixed scan codes aren't supported?
 		jnz	.notExtCode
 		call	KbTranslateExt
 		jmp	.gotKey
 		FillerNop
 
-.notExtCode	; Mysterious extra translation...
+.notExtCode	; ??? Mysterious extra translation...
 		; Maybe something in the int9 handler produces these values...
 		cmp	ah, 85h
 		jnb	.gotExtKey
@@ -273,7 +274,7 @@ KbCheckCharExt	PROC
 		; Load BIOS scan code and ASCII value into AH:AL
 		mov	ax, [di]
 
-		; Mysterious scancode translation
+		; ??? Mysterious scancode translation
 		cmp	al, 0F0h
 		jnz	.gotKey
 		cmp	ah, 0

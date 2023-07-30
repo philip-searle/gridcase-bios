@@ -25,7 +25,7 @@ MAX_FLOPPY_DRIVES	equ	3
 Int13Fd_Actual	PROC
 		call	MakeIsrStack
 
-		; Mysterious check for int13, subfunction 0D4h.
+		; ??? Mysterious check for int13, subfunction 0D4h.
 		; No idea what software calls this and I can't find anywhere
 		; that documents what this subfunction might do.
 		; In this version of the BIOS it hardlocks the machine.

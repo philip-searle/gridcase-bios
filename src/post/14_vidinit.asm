@@ -16,7 +16,7 @@ POST14_VidInit	PROC
 		mov	[EquipmentWord], 20h,DATA=BYTE	; 80x25 colour
 
 		; Check for an option ROM present anywhere between C000:0000
-		; and C8000:0000, at 2KB boundaries.  If found, then assume it
+		; and C8000:0000, at 2KB boundaries.  If found, then assume it's
 		; an EGA+ video adapter and update the default video mode.
 .l1		mov	si, 0C000h
 		mov	cx, 10h
@@ -97,7 +97,7 @@ POST14_VidInit	PROC
 
 .vidInitFail	xor_	ax, ax
 		mov	ds, ax
-		mov	[40h], SoftwareIret,DATA=WORD
+		mov	[IvtInt10], SoftwareIret,DATA=WORD
 
 .vidInitDone	; Exit via fall-through to next POST procedure
 		ENDPROC POST14_VidInit

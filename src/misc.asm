@@ -204,7 +204,7 @@ FuncToOffset	PROC
 
 ; ===========================================================================
 ; LoadBdaToDs
-; Sets DS to point to the Bios Data Area.
+; Sets DS to point to the BIOS Data Area.
 ; ===========================================================================
 LoadBdaToDs	PROC
 		mov	ds, [cs:kBdaSegment],DATA=WORD
@@ -251,7 +251,7 @@ ConBadCsumMsg	PROC
 ; ===========================================================================
 ; ConString_Inline
 ; Writes a string from the address immediately following the near call that
-; entered this procedure.  Plays with the stack so thay on returning,
+; entered this procedure.  Plays with the stack so that on returning,
 ; execution continues at the byte immediately following the string's
 ; nul-terminator.
 ; ===========================================================================
@@ -389,7 +389,7 @@ IntNmi_Actual	PROC
 		cmp	al, 'R'
 		jnz	.noRestart
 		jmp	Reset_Compat
-.noRestart	; User want to disable parity check NMIs?
+.noRestart	; User wants to disable parity check NMIs?
 		cmp	al, 'S'
 		pop	ax
 		jnz	.noStopNmi
@@ -479,7 +479,7 @@ ParDetectPort	PROC
 		dec	dx		; decrement port number back to data port
 		dec	dx
 		in	al, dx		; read back value
-		cmp	al, 0Bh		; matchs what we wrote?
+		cmp	al, 0Bh		; matches what we wrote?
 		jnz	.leaveFunction
 		mov	[bx], dx	; record that port exists
 		inc	bx
@@ -491,7 +491,8 @@ ParDetectPort	PROC
 ; ===========================================================================
 
 ; BIOS Data Area segment, referenced as a word and combines with the zero
-; byte from the following constant to for 0040h.  Unnecessarily complicated...
+; byte from the following constant to form 0040h.
+; An unnecessarily complicated way to save one byte...
 kBdaSegment	db	BDA_SEGMENT & 0FFh
 		%IF	(BOOT_OFFSET & 0FFh) <> (BDA_SEGMENT & 0FF00h)
 		%ERROR	"Constant merging hack won't work with current BDA_SEGMENT and BOOT_OFFSET values"
@@ -538,10 +539,10 @@ kCrLf		db	0Dh,0Ah,0
 
 ; ===========================================================================
 ; SetCriticalErr
-; Sets bit 0 of the SoftResetFlag to indicate that the a critical error
-; occurred during the startup process and that the user should be forced to
-; acknowledge it before the boot process completes.  Also (ab)used to require
-; the user to deactivate the keyboard lock during POST.
+; Sets bit 0 of the SoftResetFlag to indicate that a critical error occurred
+; during the startup process and that the user should be forced to acknowledge
+; it before the boot process completes.  Also (ab)used to require ; the user
+; to deactivate the keyboard lock during POST.
 ; ===========================================================================
 SetCriticalErr	PROC
 		push	ds

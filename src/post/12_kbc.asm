@@ -7,7 +7,7 @@ POST12_InitKbc	PROC
 		mov	al, CHECKPOINT_KEYBOARD
 		out	PORT_DIAGNOSTICS, al
 
-		mov	al, 0F0h		; why this value?
+		mov	al, 0F0h		; ??? why this value?
 		mov	[InterruptFlag], al
 
 		; Reset keyboard controller
@@ -16,7 +16,7 @@ POST12_InitKbc	PROC
 		mov	al, KBC_CMD_RESET
 		out	PORT_KBC_CMD, al	; reset keyboard controller
 
-		; Wait for keyboard controller to response
+		; Wait for keyboard controller to respond
 		call	KbWaitReady
 		in	al, PORT_KBC_DATA	; clear data ready flag
 		mov	dx, KBC_RESET_TIMEOUT	; long delay while KBC resets itself

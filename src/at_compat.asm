@@ -20,6 +20,7 @@ AT_COMPAT	PROGRAM	OutFile=build/at_compat.obj
 		PUBLIC	VidRegenLengths, VidColumns, VidModeSets
 		PUBLIC	GraphicsChars
 		PUBLIC	Copyr_Phoenix, Copyr_Phoenix2
+		PUBLIC	kConfigTable
 
 		; Symbols that are currently unused because the codebase is
 		; not yet complete.
@@ -46,7 +47,8 @@ AT_COMPAT	PROGRAM	OutFile=build/at_compat.obj
 ;          notice at 0F00:E000.  Some programs expect to see the letters 'IBM'
 ;          at address 0F00:E00E but the rest of the string can be blanked out.
 ;          The purpose of the 08ah and 0c3h are currently unknown (the AT BIOS
-;          had spaces in those locations).
+;          had spaces in those locations).  Maybe for programs that checksummed
+;          the copyright message?
 Copyr_Compat	CompatAddress	0E000h
 		d	13 * byte 0FFh
 		db	08Ah, 'IBM', 0C3h
@@ -138,8 +140,24 @@ FixedDiskParams	FDS_AT_INSTANCE	0132h,  4,    80h, 0h, 131h, 11h	; Type 01 10MB
 		FillRom	0E6F2h, 0FFh
 Int19_Compat	jmpn	Int19_Actual
 
-; GRiD BIOS has 18 bytes stored after Int19_Compat, purpose unknown.
-		db	8, 0, 0FCh, 1, 0, 70H, 0, 0, 0, 8, 0, 3, 6, 50h, 54h, 4Ch, 0, 0
+; GRiD BIOS stores int15/C0h config table in slack space after the int19 thunk
+kConfigTable	dw	8	; number of bytes following
+		db	0FCh	; model
+		db	1	; submodel
+		db	0	; BIOS revision
+		db	70H	; feature byte 1:
+				;   2nd interrupt controller (8259) installed
+				;   Real-Time Clock installed
+				;   INT 15/AH=4Fh called upon INT 09h
+		db	0	; feature byte 2
+		db	0	; feature byte 3
+		db	0	; feature byte 4
+		db	8	; feature byte 5
+		db	0	; Phoenix BIOS extra byte
+		db	3	; Phoenix BIOS major version
+		db	6	; Phoenix BIOS minor version
+		db	'PTL'	; Phoenix BIOS signature
+		db	0, 0	; Phoenix BIOS extra bytes
 
 ; ---------------------------------------------------------------------------
 
@@ -256,7 +274,7 @@ Int11_Compat	jmpn	Int11_Actual
 ; [Compat] Int15 (AT extended services) must be at the same location as the
 ;          IBM XT and AT BIOSes.  In the XT, this was for cassette services
 ;          and the AT repurposed it for PC/AT-specific BIOS calls.  GRiD
-;          also extended with their own APIs.
+;          also extended it with their own APIs.
 		FillRom	0F859h, 0FFh
 Int15_Compat	jmpn	Int15_Actual
 
@@ -285,7 +303,7 @@ Int8_Compat	jmpn	Int8_Actual
 InitialIvt:	; PIC1 hardware interrupts
 		dw	Int8_Compat	; Int8: timer
 		dw	Int9_Compat	; Int9: keyboard
-		dw	EoiPic1		; IntA: slave input
+		dw	EoiPic1		; IntA: cascade input
 		dw	UnexpectedInt	; IntB: unused
 		dw	UnexpectedInt	; IntC: unused
 		dw	UnexpectedInt	; IntD: unused

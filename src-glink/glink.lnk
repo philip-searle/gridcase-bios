@@ -94,7 +94,6 @@ linker {
 		VidIncColMap			=> F000:DD1D
 		Int15_Grid				=> F000:D606
 		VidToggleExt			=> F000:D508
-		kConfigTable			=> F000:E6F5
 	}
 	script => [
 		advance	{ to 		=> 0000:0000											}

@@ -42,7 +42,7 @@ FDC_STATUS_SEEK2	equ	02h	; Drive B: or E: in seek mode
 FDC_STATUS_SEEK		equ	01h	; Drive A: in seek mode
 
 ; [TechRef 9-17] (RW) Data Register
-; An 8-bot read/write buffer.
+; An 8-bit read/write buffer.
 PORT_FDC_DATA		equ	3F5h
 
 ; [TechRef 9-18] (R-) Digital Input Register
@@ -103,7 +103,7 @@ FDC_ST0_INTERRUPT_CODE	equ	0C0h	; Reason for most recent interrupt
 					; 0 1 = abrupt termination,
 					;       incomplete execution
 					; 1 0 = invalid commad,
-					;       execution was not begin
+					;       execution was not begun
 					; 1 1 = abnormal termination due to
 					;       drive READY signal changing
 FDC_ST0_SEEK_END	equ	20h	; 0 = seek in progress,

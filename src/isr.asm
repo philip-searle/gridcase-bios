@@ -12,7 +12,7 @@ ISR		PROGRAM	OutFile=build/isr.obj
 ; ===========================================================================
 ; UnexpectedInt
 ; Handler for unexpected interrupts.  Since we don't have a dedicated handler
-; for these interruots we don't know how to handle them.  So we just
+; for these interrupts we don't know how to handle them.  So we just
 ; acknowledge the interrupt and then mask it off so it won't occur again.
 ; ===========================================================================
 UnexpectedInt	PROC
@@ -33,7 +33,7 @@ UnexpectedInt	PROC
 		jnb	.leaveFunction
 
 		test	al, 4		; interrupt was on cascade line?
-		jz	.disableIrq
+		jz	.disableIrq	; if so, ack PIC1 and switch to PIC2
 		mov	al, NONSPECIFIC_EOI
 		out	dx, al		; acknowledge master PIC
 		mov	al, 0Bh		; 0Bh: oCW3 - read IRR

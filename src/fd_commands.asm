@@ -76,7 +76,7 @@ FdSeek		PROC
 		jc	FdRetn
 
 .isCalibrated	; See if we're already on the desired cylinder.  If so,
-		; then we can return immediately else we fall-through
+		; then we can return immediately, else we fall-through
 		; into FdDoSeek.
 		mov	bl, [bp+IsrStackAx.dl]
 		xor_	bh, bh
@@ -128,7 +128,7 @@ FdWaitCmdDone	PROC
 		; the ST0 status register so we can check which unit
 		; it thinks it has selected.  If it's not for the unit
 		; we most recently issued a command for, then keep
-		; waiting - it maybe a spurious interrupt or from a
+		; waiting - it may be a spurious interrupt or from a
 		; previous command?
 		call	FdSenseInt
 		jc	FdRetn
@@ -160,8 +160,8 @@ FdRetn		PROC
 		ENDPROC	FdRetn
 
 ; ---------------------------------------------------------------------
-; Issues a reclibrate command to the FDC, retrying once if needed, then
-; updates the drive calibration status in the BDA.
+; Issues a recalibrate command to the FDC, retrying once if needed,
+; then updates the drive calibration status in the BDA.
 FdCalibrate	PROC
 		mov	al, FDC_CMD_RECALIBRATE
 		call	FdWriteByte

@@ -23,9 +23,8 @@ IRQ_FDC		equ	0y01000000
 
 ; ---------------------------------------------------------------------------
 ; IRQ assignments, PIC2 mask values [TechRef 5-3]
-; See comment in reset.asm for why IRQ_NPU_BUG exists
 IRQ_RTC		equ	0y00000001
-IRQ_NPU_BUG	equ	0y00000010	; actually wired to IRQ2 line in hardware
+IRQ_9		equ	0y00000010	; actually wired to IRQ2 line in hardware
 ;			0y00000100 reserved
 ;			0y00001000 reserved
 ;			0y00010000 reserved

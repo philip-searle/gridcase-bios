@@ -262,7 +262,7 @@ FdHeadDelay	PROC
 		ENDPROC	FdHeadDelay
 
 ; ---------------------------------------------------------------------
-; Ad FdGetDriveType, but returns with CF set if CMOS config is known to
+; As FdGetDriveType, but returns with CF set if CMOS config is known to
 ; be invalid.
 FdGetDriveType2	PROC
 		mov	al, CMOS_STATUS_DIAG | NMI_ENABLE
@@ -519,14 +519,14 @@ FdSetupDma	PROC
 		ENDPROC	FdSetupDma
 
 ; ---------------------------------------------------------------------
-; Blocks til the floppy disk controller is ready to read/write from its
-; data port.
+; Blocks until the floppy disk controller is ready to read/write from
+; its data port.
 ; On success:
 ;   CF clear
 ;   AL == FDC status register
 ;   DX == 3F4h (PORT_FDC_STATUS)
 ; On failure:
-;   CF set, 80h places in FdScratch.returnAh
+;   CF set, 80h placed in FdScratch.returnAh
 FdWaitReady	PROC
 		mov	dx, PORT_FDC_STATUS
 		push	cx
@@ -674,7 +674,7 @@ FdReadResult	PROC
 ; ---------------------------------------------------------------------
 ; Hardware interrupt handler - floppy disk controller
 ; Acknowledges the interrupt and sets a flag in the BDA so int13 code
-; knows the FDC requries attention.
+; knows the FDC requires attention.
 IntE_Actual	PROC
 		push	ax
 		push	dx

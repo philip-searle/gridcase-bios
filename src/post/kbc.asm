@@ -52,7 +52,7 @@ KbWaitEmpty	PROC
 KbWaitResponse	PROC
 		mov_	ch, dl	; the first pass through the timeout
 				; loop may be more than DL*256 as the
-				; lower half of CX is not explicitly set
+				; lower half of CX is not explicitly set;
 				; not really a problem...
 
 .checkKbc	in	al, PORT_KBC_STATUS	; check KBC status

@@ -4,7 +4,7 @@ POST18_Timer2	PROC
 
 ; ---------------------------------------------------------------------------
 ; Test that programmable interval timer channel 2 is advancing correctly
-; See post_05_initpit.asm for a description of the test algorithm.
+; See post/05_pitinit.asm for a description of the test algorithm.
 		mov	al, CHECKPOINT_TIMER2
 		out	PORT_DIAGNOSTICS, al
 

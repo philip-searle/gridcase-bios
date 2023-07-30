@@ -13,6 +13,7 @@ POST10_PicReg	PROC
 		mov	al, BEEP_PIC1_REG
 		jmp	FatalBeeps
 
+		; Test PIC2 mask register
 .testPic1Ok	mov	al, CHECKPOINT_PIC2
 		out	PORT_DIAGNOSTICS, al
 		mov	dx, PORT_PIC2_MASK

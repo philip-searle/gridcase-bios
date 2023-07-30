@@ -302,7 +302,7 @@ HdAtInt13	PROC
 		jnb	.invalidCommand
 		mov_	bp, ax
 		shr	bp, 7		; effectively same as BP=AH*2
-		and	bp, 0FEh	; ensure even
+		and	bp, 0FEh	; ensure value is even
 		cmp	dl, [HdCount]	; several command handlers want to compare
 					; against HdCount so do it here and they
 					; can all reuse the flags
@@ -871,7 +871,7 @@ GetIvtFdsPtr	PROC
 ; ValidHdXferBuf
 ;
 ; On entry:
-; 	ES:BX -> disk tranfer buffer start
+; 	ES:BX -> disk transfer buffer start
 ; 	AL == count of sectors
 ;
 ; On return:
@@ -1023,7 +1023,7 @@ HdAtWaitTask	PROC
 ; 	CF clear
 ; 	ZF set if retry-on-disk-error wanted
 ; 	BH == count of sectors
-; 	Register packet assembled at BDA:HdRAtegPacket for SendAtRegPack to use
+; 	Register packet assembled at BDA:HdAtRegPacket for SendAtRegPack to use
 ;
 ; On failure:
 ; 	CF set
@@ -1137,7 +1137,7 @@ HdAtSendRegPack	PROC
 
 ; ===========================================================================
 ; DecSectorCount
-; Decrements the sector count in BHm checking for hard disk controller errors
+; Decrements the sector count in BH, checking for hard disk controller errors
 ; along the way.
 ;
 ; On return:

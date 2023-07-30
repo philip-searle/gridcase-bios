@@ -206,7 +206,7 @@ SysBlockMove	PROC
 ; Set the shutdown reason so when we reset the CPU we end up running
 ; the block move cleanup code.  [TechRef 3-11] refers to restoring real
 ; mode "when Shutdown (09) is executed" even though our block move
-; shutdown code is 7 (IBM BIOS used 9 here).
+; shutdown code is 7 (interestingly the IBM BIOS used code 9).
 		mov	al, SD_PM_BLOCK_MOVE
 		mov	ah, CMOS_SHUTDOWN_REASON | NMI_DISABLE
 		call	WriteCmos
@@ -241,10 +241,10 @@ SysBlockMove	PROC
 		jz	.resetCpu
 		mov	al, INT15_BM_PARITY_ERROR
 		out	PORT_DIAGNOSTICS, al
-		sub	si, 2			; why read and store this?
-		mov	ax, [si]
-		mov	[si], ax
-		call	CheckParityErr
+		sub	si, 2			; backup to the last word written
+		mov	ax, [si]		; read it...
+		mov	[si], ax		; ...write it...
+		call	CheckParityErr		; ...check parity ok
 
 ; ---------------------------------------------------------------------
 ; Return to real mode by resetting the CPU (it's the only way on an 80286)
@@ -279,7 +279,7 @@ SDH_03		PROC
 		mov	al, INT15_BM_A20FAILURE	; set new failure code if so
 		out	PORT_DIAGNOSTICS, al
 
-.retValueSet	; Extract return value from diagnostic prot and return it
+.retValueSet	; Extract return value from diagnostic port and return it
 		pop	ax
 		xchg	al, ah
 		in	al, PORT_DIAGNOSTICS

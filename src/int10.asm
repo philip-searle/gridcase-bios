@@ -334,11 +334,11 @@ VidSetMode	PROC
 .storePalette	mov	[VidColorPalette], al
 		dec	dx			; decrement to mode control reg
 
-		; Very odd bit here: we check whether the 'display enable' bit
-		; is zero with a timeout of 64k loops.  If not, we XOR the mode
-		; control register to toggle the graphics/text, high-resolution,
-		; and blink-enable bits.  We then have a VERY long delay before
-		; resetting them to the desired values.
+		; ??? Very odd bit here: we check whether the 'display enable'
+		; bit is zero with a timeout of 64k loops.  If not, we XOR the
+		; mode control register to toggle the graphics/text,
+		; high-resolution, and blink-enable bits.  We then have a VERY
+		; long delay before  resetting them to the desired values.
 		; Maybe this is to work around some rare bug in the Yamaha
 		; V6366 chip where it sometimes needs 'resetting' after a
 		; mode change?
@@ -551,7 +551,7 @@ VidReadCell	PROC
 		mov_	al, dl			; store extracted pixels
 		jmp	.extractedRow
 
-.extract1Bpp	; 1Bpp is a simple copy
+.extract1Bpp	; 1bpp is a simple copy
 		or_	al, al			; evaluate row
 		jz	.extractedRow
 		mov	dh, 1			; any bit set -> attribute byte
@@ -564,7 +564,7 @@ VidReadCell	PROC
 		; The extended graphic modes (40h/48h/74h) complicate things
 		; further -- they have two additional memory banks at 4000h and
 		; 6000h. Code seems to have been patched in to special-case this,
-		; which maskes the code look worse than it really is.
+		; which makes the code look worse than it really is.
 		add	di, .kCgaBankStride	; advance to next bank
 		cmp	bl, VID_MODE_EXT_48
 		jnz	.notMode48
@@ -642,7 +642,7 @@ VidReadCell	PROC
 		ENDPROC	VidReadCell
 
 ; ---------------------------------------------------------------------
-; VidWritePel [7-13]
+; VidWritePel [TechRef 7-13]
 ; Writes the value in AL to the pixel located at row/column DX/CX.  If
 ; the high-bit of AL is set the value will be XOR-ed instead of
 ; replacing the existing value.
@@ -670,7 +670,7 @@ VidWritePel	PROC
 		ENDPROC	VidWritePel
 
 ; ---------------------------------------------------------------------
-; VidReadPel [7-13]
+; VidReadPel [TechRef 7-13]
 ; Reads the pixel located at row/column DX/CX to AL.
 ; ---------------------------------------------------------------------
 VidReadPel	PROC
@@ -955,7 +955,7 @@ VidGrapCursorOffset	PROC
 .L1		mul	[cs:kCgaGrapStride]
 		mov_	di, ax		; accumulate offset in DI
 
-		; Calclate the column offset and add it to DI.
+		; Calculate the column offset and add it to DI.
 		; Video modes < 6 have 2bpp and need twice as many bytes
 		; as video modes >= 6 do.
 		xor_	al, al
@@ -1059,7 +1059,7 @@ VidWriteCrtc2	PROC
 
 ; ---------------------------------------------------------------------
 ; VidRetn4
-; Shared fnction tail for normal returns.
+; Shared function tail for normal returns.
 ; ---------------------------------------------------------------------
 VidRetn4	PROC
 		retn
@@ -1431,7 +1431,7 @@ VidWriteCell3	PROC
 		retn
 
 		; --------------------- Text mode char only write
-.textCharOnly	mov_	ax, si			; restore aX from unnecessary save
+.textCharOnly	mov_	ax, si			; restore AX from unnecessary save
 .copyTextChar	stosb				; copy char
 		inc	di			; skip attribute byte
 		loop	.copyTextChar

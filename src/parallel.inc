@@ -49,5 +49,5 @@ PRINTER_STATC_SLCTIN	equ	08h	; Indicates printer has accepted data
 PRINTER_STATC_IRQEN	equ	10h	; Indicates IRQ7 is enabled
 PRINTER_STATC_EFLOPPY	equ	20h	; 0=External floppy drive attached, 1=No external floppy
 PRINTER_STATC_TAPE	equ	40h	; 0=External tape drive attached, 1=No external tape
-PRINTER_STATC_HDDRIVE	equ	80h	; 0=External drive is high density, 1=low density
+PRINTER_STATC_HDDRIVE	equ	80h	; 0=External drive is high density, 1=Low density
 

@@ -81,7 +81,7 @@ InitOptionRoms	PROC
 		mov	si, kRomBadChecksum
 		call	ConBadCsumMsg
 
-.afterRomFound	pop	si		; pop current ROM candiate location
+.afterRomFound	pop	si		; pop current ROM candidate location
 
 .advanceSearch	pop	cx		; pop search end segment
 		add_	si, cx		; advance to next potential ROM location
@@ -124,7 +124,7 @@ TestPicMaskReg	PROC
 
 		in	al, dx		; read back value writtem
 		cmp_	bh, al		; same?
-		jnz	.leaveProc		; if not, return with ZF clear
+		jnz	.leaveProc	; if not, return with ZF clear
 
 		sar	bh, 1		; shift test pattern over one bit
 		cmp	cl, 9		; half-way through testing?

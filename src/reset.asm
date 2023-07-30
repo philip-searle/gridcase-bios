@@ -59,12 +59,12 @@ FATAL_BEEP_LENGTH	equ	300
 ;         xx = Don't care
 ;         aa = Count of beeps minus one, first group
 ;         bb = Count of beeps minus one, second group
-;         cc = Count of beeps minus one, second group
+;         cc = Count of beeps minus one, third group
 ; ===========================================================================
 FatalBeeps	PROC
 		out	PORT_DIAGNOSTICS, al
 		jmp	.l1
-		nop				; Mystery nop to jump over?
+		FillerNop
 .l1		mov	bh, [cs:BeepFactor]	; cs override because ds may not be valid
 		mov_	dh, al			; move beep code to dh; al will be used for port writes
 		mov	al, 0Ch			; setup KBC port B write: both parity checks disabled
@@ -192,7 +192,7 @@ Reset_Actual	PROC
 		mov	al, 1			; PIC1 ICW4: nonbuffered mode, no auto-eoi, 80x86 mode
 		Delay	2
 		out	dx, al
-		mov	al, 0FBh		; PIC1 OCW1: enable IRQ video interrupt
+		mov	al, ~IRQ_CASCADE	; PIC1 OCW1: enable cascade from PIC2
 		Delay	2
 		out	dx, al
 
@@ -355,7 +355,7 @@ SDH_POST	PROC
 		sti
 
 		; 0A0h == 'reading 2-byte KB ID in progress', 'force numlock on'
-		mov	[KbStatusFlags3], 0A0h
+		mov	[KbStatusFlags3], KBSTAT3_ID_1 | KBSTAT3_FORCE_NUMLOCK
 		call	KbWaitReady
 		jnz	.l3			; don't request KB ID if KBC isn't ready in time
 		mov	al, KB_CMD_READ_KB_ID
@@ -401,7 +401,7 @@ SDH_POST	PROC
 ; Detect and init option ROMs outside the the hard disk controller range
 		mov	si, OPT_ROM_SEG_LO
 		mov	cx, OPT_ROM_SEG_HI
-		mov	dl, 0			; ???
+		mov	dl, 0			; DL used to indicate no video available yet
 		call	InitOptionRoms
 
 ; ---------------------------------------------------------------------------
@@ -422,10 +422,10 @@ SDH_POST	PROC
 ; ---------------------------------------------------------------------------
 ; Alert user if keyboard is locked (GRiD 1500 series do not support the
 ; keyboard lock feature, so this should never trigger).
-		and	[KbStatusFlags3], 1Fh	; unset kb ID state bits and
-						; numlock forced on bit
+		; unset kb ID state bits and numlock forced on bit
+		and	[KbStatusFlags3], ~(KBSTAT3_ID_1 | KBSTAT3_ID_2 | KBSTAT3_FORCE_NUMLOCK)
 		in	al, PORT_KBC_STATUS
-		test	al, 10h			; KB inhibit bit == 1?
+		test	al, KBC_STATUS_INH	; Keyboard inhibited?
 		jnz	.pastKbLock		; if so, skip warning
 		Inline	ConString,'Keyboard is locked - please unlock',0Dh,0Ah,0
 		call	SetCriticalErr
@@ -492,17 +492,17 @@ SDH_POST	PROC
 		; If we make it here, the NPU appears to be present and functioning
 		; as expected.  Mark it as available for user code.
 		or	[EquipmentWord], 2,DATA=BYTE	; set 'NPU present bit
-		and	al, 0DFh		; unmask coprocessor interrupt
+		and	al, ~IRQ_NPU			; unmask coprocessor interrupt
 
 .afterNpuInit	; Unreserve word from stack. Note that this doesn't pop to
 		; the same register we pushed from because we need to preserve
 		; the PIC2 mask value in AL.
 		pop	bx
-		; Unmask the NPU's IRQ line
-		; BUG: This unmasks bit 2 (mask value of 0FDh) which actually
-		;      corresponds to IRQ9.  The original author almost certainly
-		;      meant to use a mask value of 0DFh to unmask IRQ13.
-		and	al, ~IRQ_NPU_BUG
+		; Unmask IRQ 9 so it can be redirected to the IRQ 2 hander in
+		; software.  Not really anything to do with the NPU, but this is
+		; our last opportunity to do it before the system expansion ROM
+		; is checked (it might use it?)
+		and	al, ~IRQ_9
 		out	PORT_PIC2_MASK, al
 		sti
 

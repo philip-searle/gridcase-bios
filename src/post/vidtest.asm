@@ -15,7 +15,7 @@ POST_VIDTEST	PROGRAM	OutFile=build/post/vidtest.obj
 ; Procedures in this file are called during POST to test video adapter
 ; functionality.  They cannot use any timers, IVT entries, or keyboard
 ; resources as those system functions have not yet been initialized.
-; The Bios Data Area is available for use and memory NMI handler is
+; The BIOS Data Area is available for use, and memory NMI handler is
 ; configured.
 ; =====================================================================
 
@@ -36,8 +36,8 @@ VidTestBeep	PROC
 
 ; =====================================================================
 ; VidTestRefresh
-; Checks that the configured video adapter is toggling the refresh in
-; progress bit in its status register.  Calls VidTestBeep on failure.
+; Checks that the configured video adapter is toggling the "refresh in
+; progress" bit in its status register.  Calls VidTestBeep on failure.
 ;
 ; On return:
 ; 	CF set on failure

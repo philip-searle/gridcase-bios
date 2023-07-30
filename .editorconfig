@@ -1,4 +1,4 @@
-[*.{asm,inc}]
+[*.{asm,inc,txt}]
 charset = utf-8
 indent_style = tab
 indent_size = 8

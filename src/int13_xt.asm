@@ -133,7 +133,7 @@ HdXtInitDrive0	PROC
 		int	13h
 		jb	.failure
 
-		; Controller check out OK, wait for drive to be ready
+		; Controller checked out OK, wait for drive to be ready
 		xor_	ax, ax
 		mov	[TimerTicks], ax
 .waitDriveReady	mov	ax, [TimerTicks]
@@ -247,7 +247,7 @@ HdXtInt13	PROC
 		pop	ax
 
 .checkReset	; AH == 0 (reset disk system) must be forwarded to the floppy
-		; drive BIOS unconditionaly (AH == 0Dh resets HD BIOS only)
+		; drive BIOS unconditionally (AH == 0Dh resets HD BIOS only)
 		and	dl, 7Fh		; convert drive number to floppy range
 		and_	ah, ah		; is it INT13CMD_RESET?
 		jnz	.notCmdReset
@@ -456,7 +456,7 @@ HdXtReset	PROC
 VerifySector0	%macro
 		; Verify the first sector is valid by calling the int13
 		; interrupt handler directly (to bypass anyone who has
-		; hooked our IVT entry).)
+		; hooked our IVT entry).
 		mov	ax, (INT13CMD_VERIFY << 8) | 01h
 		mov	cx, 1		; verify one sector on cylinder 0
 		mov	dl, [bp+Int13HdXtStack.dx]
@@ -1286,7 +1286,7 @@ HdXtEarlyReset	PROC
 
 ; ===========================================================================
 ; HdXtSelectDisk
-; Selects the disk and waits for it to be ready for XXX
+; Selects the disk and waits for it to be ready.
 ; ===========================================================================
 HdXtSelectDisk	PROC
 		push	cx

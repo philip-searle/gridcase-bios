@@ -9,7 +9,6 @@ ROM_TRAILER	PROGRAM	OutFile=build/rom_trailer.obj
 ; ---------------------------------------------------------------------------
 ; Power-On Reset Vector at F000:FFF0
 ; ---------------------------------------------------------------------------
-		;FillRom	0FFF0h, 0FFh
 
 		; [Public] CPU reset vector is top of address space minus 16 bytes
 		; AT BIOS calls this P_O_R (POWER ON RESET)

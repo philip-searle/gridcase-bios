@@ -13,9 +13,9 @@ POST19_Keyboard	PROC
 
 ; ---------------------------------------------------------------------------
 .l1		; Throughout this proc:
-		;  - SI -> ASCIIZ string describing component being tested
-		;          (or most recently failed component).
-		;  - DI -> code to jump to after all tests are complete.
+		;   SI -> ASCIIZ string describing component being tested
+		;         (or most recently failed component).
+		;   DI -> code to jump to after all tests are complete.
 
 		mov	di, .kbIfTest1
 		call	KbWaitReady
@@ -92,7 +92,7 @@ POST19_Keyboard	PROC
 .reportFailure	Inline	ConString,'Keyboard ',0
 		call	ConString		; write failed component (in SI)
 		Inline	ConString,' failure',0Dh,0Ah,0
-		jmp	di			; ???
+		jmp	di			; continue with next test
 
 ; ---------------------------------------------------------------------------
 ; String constants interpolated into error message above

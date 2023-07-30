@@ -62,26 +62,26 @@ FDS_AT_INSTANCE	%macro	; (cylinders, heads, writePreComp, control, landingZone, 
 ; Floppy diskette parameter table
 ; ---------------------------------------------------------------------------
 DISKETTE_PARMS	struc
-.specify1	db	0	; FDC specify cmd, first byte
-.specify2	db	0	; FDC specify cmd, second bye
-.motorWaitTime	db	0	; motor wait time in clock ticks
-.sectorSize	db	0	; log2 of bytes per sector (2=512)
-.lastSectorId	db	0	; last sector on track
-.gapLength	db	0	; in bytes
-.dtl		db	0	; disk data length (ignored)
-.formatGapLen	db	0
-.formatFillByte	db	0
-.headSettleTime	db	0	; in milliseconds
-.motorStartTime	db	0	; in 0.125 second intervals
+.specify1	d b	; FDC specify cmd, first byte
+.specify2	d b	; FDC specify cmd, second bye
+.motorWaitTime	d b	; motor wait time in clock ticks
+.sectorSize	d b	; log2 of bytes per sector (2=512)
+.lastSectorId	d b	; last sector on track
+.gapLength	d b	; in bytes
+.dtl		d b	; disk data length (ignored)
+.formatGapLen	d b
+.formatFillByte	d b
+.headSettleTime	d b	; in milliseconds
+.motorStartTime	d b	; in 0.125 second intervals
 		endstruc
 
 ; Extension of DISKETTE_PARMS that also stores media type and track count.
 ; Used by FdSetMediaType to get the correct DPB for a given sector/track
 ; count and drive type.
 DPB_MEDIA	struc
-.dpb		ds	DISKETTE_PARMS
-.maxTracks	db	0
-.mediaType	db	0
+.dpb		d DISKETTE_PARMS
+.maxTracks	d b
+.mediaType	d b
 		endstruc
 
 ; ---------------------------------------------------------------------------
@@ -157,35 +157,35 @@ INT13STAT_SENSEFAILED	equ	0FFh	;  Sense operation failed, omitted from TechRed
 ; to be in place when they are called and can poke data into it to return
 ; values to our caller.
 Int13HdAtStack	struc
-.flags		dw	0
-.es		dw	0
-.di		dw	0
-.si		dw	0
-.bp		dw	0
-.sp		dw	0
-.bx		dw	0
-.dx		dw	0
-.cx		dw	0
-.ax		dw	0
+.flags		d w
+.es		d w
+.di		d w
+.si		d w
+.bp		d w
+.sp		d w
+.bx		d w
+.dx		d w
+.cx		d w
+.ax		d w
 		endstruc
 
 ; As Int13HdAtStack, but for the XT-compatible hard disk command handlers.
 Int13HdXtStack	struc
-.ax		dw	0
-.bx		dw	0
-.cx		dw	0
-.dx		dw	0
-.es		dw	0
-.si		dw	0
-.di		dw	0
-.ds		dw	0
-.originalAx	dw	0
-.bp		dw	0
+.ax		d w
+.bx		d w
+.cx		d w
+.dx		d w
+.es		d w
+.si		d w
+.di		d w
+.ds		d w
+.originalAx	d w
+.bp		d w
 
 ; Add aliases for byte registers
 $		equ	.ax
-.al		db	0
-.ah		db	0
+.al		d b
+.ah		d b
 		endstruc
 
 ; Return values from int13/15h (read DASD type)

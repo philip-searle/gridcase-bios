@@ -37,7 +37,7 @@ FdGetDriveInfo	PROC
 		cmp	[bp+IsrStackAx.dl], 2
 		jnz	.notFd2
 
-		; Thrird floppy drive info isn't stored alongside the
+		; Third floppy drive info isn't stored alongside the
 		; standard two in the BDA
 		mov	al, [Fd2DriveInfo]
 		jmp	.gotDriveInfo

@@ -25,6 +25,10 @@ PORT_CGA_CLEAR_LIGHTPEN	equ	3DBh
 
 ; Mentioned in [TechRef 3-31] as "7F8 - 7FF: Write video ROM, read video status"
 ; but no further documentation.  May be a single port with incomplete decoding.
+; Update, 2022-10-29:
+;   Int15/E4/22h (set video font) writes the font index (0-3) to ports
+;   7FBh (lo bit) and 7FCh (hi bit).  Value is ANDed with 1 before writing.
+;   TODO: Investigate whether there are other bits in these registers that do anything...
 PORT_VID_ROMSTATUS	equ	7F8h
 
 ; ---------------------------------------------------------------------------

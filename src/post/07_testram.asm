@@ -76,7 +76,7 @@ POST07_TestRam	PROC
 		mov	ax, cs			; load a fake return stack to handle
 		mov	ss, ax			; (TODO: what?)
 		mov	sp, .returnStack2
-		mov	bp, 8000h		; TODO: is this a length?
+		mov	bp, 8000h		; check 64KB at a time
 		jmp	TestMemData
 
 .loc_F83AC	jnb	.l5

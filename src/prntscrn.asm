@@ -26,8 +26,8 @@ PrntScrn_Actual	PROC
 		dec	al
 		jz	.leaveFunction
 
-		; Print screen takes some time, so we must run with
-		; interrupts enabled so the time-of-day counter keeps working
+		; Print screen takes some time, so to keep the time-of-day
+		; counter keeps working we must run with interrupts enabled
 		sti
 		push	bx
 		push	cx
@@ -43,7 +43,7 @@ PrntScrn_Actual	PROC
 		jmp	.leaveFunction2
 		FillerNop
 
-.printerReady	mov	ah, 0Fh		; Get curent video mode
+.printerReady	mov	ah, 0Fh		; Get current video mode
 		int	10h
 		mov_	bl, ah
 
@@ -115,7 +115,7 @@ PrntScrn_Actual	PROC
 
 ; ---------------------------------------------------------------------
 ; PrintCrLf
-; Output CR?LF pair to LPT1.
+; Output CR/LF pair to LPT1.
 ; ---------------------------------------------------------------------
 PrintCrLf	PROC
 		mov	al, 0Dh		; print carriage-return

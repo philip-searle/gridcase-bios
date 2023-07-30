@@ -109,8 +109,8 @@ Int9Handlers	dw	Int9_Actual.makeLCtrl
 ; Int9_Actual
 ; Interrupt handler for keyboard input.
 ; This is a maze of special cases, backward compatibility, and the need
-; to support both the GRiD 84-key internal keyboard and an external
-; keyboard (101 or 84 key).
+; to simultaneously support both the GRiD 84-key internal keyboard and
+; an external keyboard (101 or 84 key).
 ; ---------------------------------------------------------------------
 Int9_Actual	PROC
 		; Enable interrupts immediately so we don't lose any other hardware interrupts
@@ -780,9 +780,9 @@ Int9_Actual	PROC
 
 ; ---------------------------------------------------------------------
 ; KbShiftAdjSet
-; Set a bit in bl (KbShiftFlags1) and either ch or bh (KbStatusFlags3/
+; Set a bit in BL (KbShiftFlags1) and either CH or CH (KbStatusFlags3/
 ; KbShiftFlags2) depending on whether an E0h prefix code has been seen.
-; Bit to set will be adjusted as needed if bh needs modifying.
+; Bit to set will be adjusted as needed if BH needs modifying.
 ;
 ; On entry:
 ;   CL == bits to set

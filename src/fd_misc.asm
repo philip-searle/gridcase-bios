@@ -1,5 +1,5 @@
 
-FD_MISC		PROGRAM	OutFIle=build/fd_misc.obj
+FD_MISC		PROGRAM	OutFile=build/fd_misc.obj
 
 		include	"macros.inc"
 		include	"segments/bda.inc"
@@ -60,7 +60,7 @@ FdExtractDriveInfo	PROC
 		mov	al, 0
 		out	dx, al
 
-		; Try seekking past track 40
+		; Try seeking past track 40
 		call	FdUpdateMotor
 		mov	ch, 50
 		call	FdSeek

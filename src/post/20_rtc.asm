@@ -20,7 +20,7 @@ POST20_RTC	PROC
 
 		mov_	bh, al		; save diagnostic byte
 
-		mov	cx, 910		; why 910 loops?
+		mov	cx, 910		; ??? why 910 loops?
 		mov	al, CHECKPOINT_RTC
 		out	PORT_DIAGNOSTICS, al
 
@@ -56,7 +56,7 @@ POST20_RTC	PROC
 ; ---------------------------------------------------------------------------
 .rtcUipSet	; RTC update-in-progress flag was seen to be set.  Now let's see
 		; whether it toggles back to unset.
-		mov	cx, 1610	; why 1610 loops?
+		mov	cx, 1610	; ??? why 1610 loops?
 .testUipUnset	mov	al, CMOS_STATUS_A | NMI_DISABLE
 		call	ReadCmos
 		sti

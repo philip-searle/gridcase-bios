@@ -9,6 +9,7 @@ IvtInt00		equ	00h * 4
 IvtInt02		equ	02h * 4
 IvtInt05		equ	05h * 4
 IvtInt08		equ	08h * 4
+IvtInt10		equ	10h * 4
 IvtInt13		equ	13h * 4
 IvtInt14		equ	14h * 4
 IvtVidParms		equ	1Dh * 4	; Int1D is a far pointer, not a real ISR
