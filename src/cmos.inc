@@ -47,7 +47,12 @@ CMOS_EXPMEM2_LOBYTE	equ	30h
 CMOS_EXPMEM2_HIBYTE	equ	31h
 CMOS_CENTURY		equ	32h
 CMOS_INFORMATION	equ	33h
-CMOS_GRIDFLAGS		equ	3Fh	; [TechRef 6-17] documented as 'reserved'
+
+CMOS_GRIDBACKLITE	equ	3Eh	; Not documented in [TechRef], but contains
+					; the backlight timeout for LCD systems
+
+CMOS_GRIDFLAGS		equ	3Fh	; [TechRef 6-17] documents this as 'reserved'
+					; [TechRef 2-9] has the correct description (EMS flag)
 
 ; ---------------------------------------------------------------------------
 ; Valid values for the CMOS_SHUTDOWN_REASON register

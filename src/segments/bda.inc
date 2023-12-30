@@ -18,9 +18,11 @@ Par1BasePort		d w
 Par2BasePort		d w
 Par3BasePort		d w
 
-; Extended BIOS data area segment address.
-; In the PC/XT BIOS this was Par4BasePort.
-EbdaSegment		d w
+; Par4BasePort in XT BIOS.
+; Extended BIOS data area segment address in post-AT machines.
+; 1520 BIOS uses it to store external floppy drive state.
+Fd2Cylinder		d b
+Fd2OpStartState		d b
 
 EquipmentWord		d w
 
@@ -246,6 +248,11 @@ FdDriveInfo		d b	; Bitfield, see FDDI_* constants (FD1/0 in upper/lower nibble)
 Fd0MediaState		d b	; Bitfield, see FDMS_* constants
 Fd1MediaState		d b
 ; Fd2MediaState stored elsewhere (external drive)
+Fd0OpStartState		d b
+Fd1OpStartState		d b
+Fd0Cylinder		d b
+Fd1Cylinder		d b
+; Fd2Cylinder stored elsewhere (external drive)
 
 FDDI_UNUSED		equ	08h
 FDDI_DETERMINED		equ	04h	; Drive type determined?

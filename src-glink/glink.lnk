@@ -45,6 +45,7 @@ input {
 		../src/build/int13_xt.obj
 		../src/build/grid_cpu.obj
 		../src/build/grid_autodetect.obj
+		../src/build/grid_fd.obj
 		../src/build/sysident.obj
 		../src/build/at_compat.obj
 		../src/build/rom_trailer.obj
@@ -62,9 +63,6 @@ linker {
 		EoiPic1and2				=> F000:F543
 		DetectMemController		=> F000:F63D
 		VidInit					=> F000:D541
-		VidInitBacklite			=> F000:D160
-		IdeAutodetect_70		=> F000:D09C
-		MemSetXmsEms			=> F000:D13C
 		PwEnabled				=> F000:F180
 		PwStartInput			=> F000:F1F2
 		PwPrompt				=> F000:F422
@@ -76,16 +74,6 @@ linker {
 		PwClearBuffer			=> F000:F27A
 		GridBootRom				=> F000:D88A
 		DriveIdentify			=> F000:F56F
-		FdGetMediaState			=> F000:D17B
-		FdGetMediaState2		=> F000:D18A
-		FdSetMediaState			=> F000:D192
-		FdSetMediaState2		=> F000:D1A3
-		FdGetOpStartState		=> F000:D1D8
-		FdSetOpStartState		=> F000:D1E7
-		FdGetCylinder			=> F000:D1F8
-		FdSetCylinder			=> F000:D207
-		FdExternalType			=> F000:D218
-		FdCountDrives			=> F000:D1AB
 		IsExtFdIndex			=> F000:D92C
 		VidWinSelect			=> F000:B637
 		GridVidInit				=> F000:D4DF
@@ -144,6 +132,7 @@ linker {
 		link	{ input		=> int13_xt,			segment => CODE					}
 		link	{ input		=> grid_cpu,			segment => CODE					}
 		link	{ input		=> grid_autodetect,		segment => CODE					}
+		link	{ input		=> grid_fd,				segment => CODE					}
 
 		fill	{ to		=> F000:DFD0,			with => 0xFF					}
 		link	{ input		=> sysident,			segment => CODE					}

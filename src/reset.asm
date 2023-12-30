@@ -31,7 +31,7 @@ RESET		PROGRAM	OutFile=build/reset.obj
 		EXTERN	KbWaitReady, KbWaitResponse, KbWaitEmpty
 		EXTERN	ReadCmos, WriteCmos
 		EXTERN	SetCriticalErr, InitTimerTicks
-		EXTERN	GridAutodetect, FdCheckConfigValid, IdeAutodetect_70, HdXtEarlyReset, HdInit
+		EXTERN	GridAutodetect, FdCheckConfigValid, HdDetect70, HdXtEarlyReset, HdInit
 		EXTERN	A20Disable, PmClearTraces
 		EXTERN	PwEnabled, PwStartInput, PwPrompt, PwProcessInput, PwEndInput
 		EXTERN	PwCompareStored, PwBackdoor2, PwIncorrect, PwClearBuffer
@@ -345,7 +345,7 @@ SDH_POST	PROC
 		mov	al, CHECKPOINT_RAM_ALL
 		out	PORT_DIAGNOSTICS, al
 		call	TestAllMem
-.warmBoot	call	IdeAutodetect_70	; ???
+.warmBoot	call	HdDetect70	; ???
 		call	KbWaitEmpty		; consume any keypresses that skipped the memtest
 
 ; ---------------------------------------------------------------------------

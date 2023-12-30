@@ -21,6 +21,7 @@ INT13_AT	PROGRAM	OutFile=build/int13_at.obj
 		PUBLIC	HdAtWaitTask
 		PUBLIC	HdAtMakeRegPack
 		PUBLIC	HdAtSendRegPack
+		PUBLIC	HdAtOpComplete
 
 ; Constant used to locate the interrupt vector table.
 ; The int13 code has its own copy of this constant, probably because it was

@@ -3,21 +3,18 @@ GRID_AUTODETECT	PROGRAM	OutFile=build/grid_autodetect.obj
 
 		include	"macros.inc"
 		include	"segments.inc"
+		include	"segments/ivt.inc"
 		include	"cmos.inc"
 		include	"grid.inc"
 		include	"parallel.inc"
 
 		EXTERN	ReadCmos, WriteCmos
+		EXTERN	HdAtOpComplete
+		EXTERN	DriveIdentify
 
-		PUBLIC	GridAutodetect
-
-TODO           %macro
-$              equ     %1 - 0CFA3h
-%:             db      0
-               %endmacro
-CmosResetCsum	TODO	0D11Ah
-HdDetectNot70	TODO	0D0B0h
-$		equ	0
+		PUBLIC	GridAutodetect, HdDetect70, HdDetectNot70
+		PUBLIC	MemSetXmsEms
+		PUBLIC	VidInitBacklite
 
 ; ===========================================================================
 ; GridAutodetect
@@ -247,5 +244,186 @@ BackplFdTypes	BackplFdType	FD_5_360K,	FD_NONE		; . . . . 0
 		BackplFdType	FD_NONE,	FD_NONE		; X ? ? ? B
 		BackplFdType	FD_NONE,	FD_NONE		; X ? ? ? C
 		BackplFdType	FD_NONE,	FD_NONE		; X ? ? ? D
+
+; ===========================================================================
+; HdDetect70
+; Attempts to auto-detect the type of the attached IDE drive if the drive
+; backplane of type 70, updating the CMOS drive type bytes appropriately.
+; Does nothing otherwise.
+; ===========================================================================
+HdDetect70	PROC
+		push	ax
+		push	dx
+		mov	dx, PORT_ROM_SUBSYSTEM1
+		in	al, dx
+		and	al, GRID_BKPL_MASK
+		cmp	al, GRID_BKPL_70
+		pop	dx
+		pop	ax
+		jnz	.leaveFunction
+		mov	bx, IVT_SEGMENT
+		jmp	HdDetect
+
+.leaveFunction	retn
+		ENDPROC	HdDetect70
+
+; ===========================================================================
+; HdDetectNot70
+; Attempts to auto-detect the type of the attached hard drive if the drive
+; backplane is not type 70, updating the CMOS drive type bytes appropriately.
+; Does nothing otherwise.
+; ===========================================================================
+HdDetectNot70	PROC
+		mov	bx, IVT_SEGMENT
+		mov	dx, PORT_ROM_SUBSYSTEM1
+		in	al, dx
+		and	al, GRID_BKPL_MASK
+		cmp	al, GRID_BKPL_70
+		jz	HdDetect.leaveFunction
+		; Fall-through to HdDetect
+		ENDPROC	HdDetectNot70
+
+; ===========================================================================
+; HdDetect
+; Attempts to auto-detect the type of the attached drive, updating the CMOS
+; drive type bytes appropriately.
+;
+; On entry:
+;   BX == segment of IVT used to save/restore the IvtInt76 vector which is
+;         modified during the auto-detect process
+; ===========================================================================
+HdDetect	PROC
+		push	ds
+		mov	ds, bx
+		push	[IvtInt76]
+		push	[IvtInt76+2]
+		mov	[IvtInt76], HdAtOpComplete,DATA=WORD
+		mov	[IvtInt76+2], cs
+		call	DriveIdentify
+		pop	[IvtInt76+2]
+		pop	[IvtInt76]
+		pop	ds
+		; Couldn't auto-detect the drive type?  Just store anything...
+		jb	.driveTypeInBx
+
+		; Grid type 5 maps to BIOS type 02h
+		cmp	ax, GRID_HD_5
+		jz	.biosHdType02
+
+		; Grid types 4, 6, 9 map to BIOS type 11h
+		cmp	ax, GRID_HD_4
+		jz	.biosHdType11
+		cmp	ax, GRID_HD_9
+		jz	.biosHdType11
+		cmp	ax, GRID_HD_6
+		jz	.biosHdType11
+		cmp	ax, GRID_HD_9	; ??? second check for type 9
+		jz	.biosHdType11
+
+		; Grid type 7 maps to BIOS type E0h
+		cmp	ax, GRID_HD_7
+		jnz	.driveTypeInBx	; All other types are unknown
+
+;.biosHdTypeE0
+		mov	bx, 0F0E0h
+		jmp	.driveTypeInBx
+
+.biosHdType02	mov	bx, 2000h
+		jmp	.driveTypeInBx
+
+.biosHdType11	mov	bx, 0F011h
+
+.driveTypeInBx	mov	ah, CMOS_HD_TYPE | NMI_DISABLE
+		mov_	al, bh
+		call	WriteCmos
+		mov	ah, CMOS_HD_EXTTYPE1 | NMI_DISABLE
+		mov_	al, bl
+		call	WriteCmos
+
+.leaveFunction	retn
+		ENDPROC	HdDetect
+
+; ===========================================================================
+; CmosResetCsum
+; Checksums the contents of CMOS RAM from 10h to 2Dh and stores them in the
+; standard checksum locations 2Eh and 2Fh.
+; ===========================================================================
+CmosResetCsum	PROC
+		mov	bx, 0		; accumulate checksum in BX
+		mov	cx, (2Eh - 10h)
+.csumLoop	mov_	al, cl
+		add	al, 0Fh
+		call	ReadCmos
+		xor_	ah, ah
+		add_	bx, ax
+		loop	.csumLoop
+
+		mov_	al, bh
+		mov	ah, CMOS_CHECKSUM_LO | NMI_DISABLE
+		call	WriteCmos
+		mov_	al, bl
+		mov	ah, CMOS_CHECKSUM_HI | NMI_DISABLE
+		call	WriteCmos
+		retn
+		ENDPROC	CmosResetCsum
+
+; ===========================================================================
+; MemSetXmsEms
+; Adjusts the CMOS extended memory size bytes if the system is configured to
+; to use memory above 1MB as EMS instead of XMS.
+; ===========================================================================
+MemSetXmsEms	PROC
+		pushf
+		push	ax
+		mov	al, CMOS_GRIDFLAGS | NMI_DISABLE
+		call	ReadCmos
+		test	al, GF_EMS
+		jz	.done
+
+		; Switch from extended to expanded memory mode
+		push	dx
+		mov	dx, PORT_UNKNOWN_FFF
+		mov	al, 0
+		out	dx, al
+		pop	dx
+
+		; Zero out "base expansion memory above 1MB" CMOS bytes.
+		; Leave the "base expansion memory" bytes alone because
+		; they apparently include the EMS memory.
+		mov	ah, CMOS_EXPMEM2_LOBYTE | NMI_DISABLE
+		mov	al, 0
+		call	WriteCmos
+		mov	ah, CMOS_EXPMEM2_HIBYTE | NMI_DISABLE
+		mov	al, 0
+		call	WriteCmos
+
+.done		pop	ax
+		popf
+		retn
+		ENDPROC	MemSetXmsEms
+
+; ===========================================================================
+; VidInitBacklite
+; Sets the keyboard controller to control the screen backlight based on the
+; CMOS backlight timeout byte.
+; ===========================================================================
+VidInitBacklite	PROC
+		push	ax
+		push	dx
+		mov	al, CMOS_GRIDBACKLITE | NMI_ENABLE
+		call	ReadCmos
+		cmp	al, 0FFh
+		jz	.setBacklite
+		cmp	al, 60
+		jbe	.setBacklite
+		mov	al, 2		; reset invalid values to 2mins
+
+.setBacklite	mov_	dl, al
+		mov	ax, 0E423h	; GRiD: set backlight timeout
+		int	15h
+		pop	dx
+		pop	ax
+		retn
+		ENDPROC	VidInitBacklite
 
 ENDPROGRAM	GRID_AUTODETECT
