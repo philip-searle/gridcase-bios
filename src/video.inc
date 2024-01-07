@@ -21,8 +21,7 @@ PORT_CGA_STATUS		equ	3DAh
 PORT_CGA_CLEAR_LIGHTPEN	equ	3DBh
 
 ; ---------------------------------------------------------------------------
-; Video controller ports
-
+; (R-) GRiD video board status
 ; Mentioned in [TechRef 3-31] as "7F8 - 7FF: Write video ROM, read video status"
 ; but no further documentation.  May be a single port with incomplete decoding.
 ; Update, 2022-10-29:
@@ -30,6 +29,26 @@ PORT_CGA_CLEAR_LIGHTPEN	equ	3DBh
 ;   7FBh (lo bit) and 7FCh (hi bit).  Value is ANDed with 1 before writing.
 ;   TODO: Investigate whether there are other bits in these registers that do anything...
 PORT_VID_ROMSTATUS	equ	7F8h
+
+; Values read from PORT_VID_ROMSTATUS
+VID_TYPE_UNKNOWN_MASK	equ	0F0h
+VID_TYPE_EXTERNAL	equ	08h	; 0=external active, 1=internal active
+VID_TYPE_INTERNAL_MASK	equ	07h
+VID_TYPE_PLASMA_200	equ	01h	; Plasma/EL 640x200
+;				02h-04h	  Not used
+VID_TYPE_PLASMA_400	equ	05h	; Plasma/EL 640x400
+VID_TYPE_LCD_200	equ	06h	; LCD 640x200
+VID_TYPE_LCD_400	equ	07h	; LCD 640x400
+
+; ---------------------------------------------------------------------------
+; (-W) External display toggle
+; Switches video output from the V6366 chip to the external D-sub connector
+PORT_VID_EXTERNAL	equ	7FDh
+
+; Values written to PORT_VID_EXTERNAL
+; Bits other than bit0 are assumed undefined
+VID_EXTERNAL_ENABLE	equ	0
+VID_EXTERNAL_DISABLE	equ	1
 
 ; ---------------------------------------------------------------------------
 ; Supported BIOS video modes

@@ -19,7 +19,7 @@ INT15		PROGRAM	OutFile=build/int15.obj
 		EXTERN	CheckParityErr, EnableNmi
 		EXTERN	ResetCpu
 		EXTERN	GridCpuFast, GridCpuSlow
-		EXTERN	VidToggleExt
+		EXTERN	GridToggleExt
 		EXTERN	VidIncColMap, VidDecColMap
 
 		PUBLIC	Int15_Actual
@@ -55,7 +55,7 @@ Int15_Actual	PROC
 		; Ctrl+Alt+Tab toggles external video output
 		cmp	al, SC2_TAB
 		jnz	.notTab
-		call	VidToggleExt
+		call	GridToggleExt
 		jmp	.keyIntercepted
 		FillerNop
 

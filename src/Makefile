@@ -41,6 +41,7 @@ OBJECTS	:=	build/rom_header.obj \
 			build/grid_cpu.obj \
 			build/grid_autodetect.obj \
 			build/grid_fd.obj \
+			build/grid_vid.obj \
 			build/sysident.obj \
 			build/at_compat.obj \
 			build/rom_trailer.obj

@@ -46,6 +46,7 @@ input {
 		../src/build/grid_cpu.obj
 		../src/build/grid_autodetect.obj
 		../src/build/grid_fd.obj
+		../src/build/grid_vid.obj
 		../src/build/sysident.obj
 		../src/build/at_compat.obj
 		../src/build/rom_trailer.obj
@@ -76,12 +77,10 @@ linker {
 		DriveIdentify			=> F000:F56F
 		IsExtFdIndex			=> F000:D92C
 		VidWinSelect			=> F000:B637
-		GridVidInit				=> F000:D4DF
-		GridVidInitHi			=> F000:D4B9
 		VidDecColMap			=> F000:DCFE
 		VidIncColMap			=> F000:DD1D
 		Int15_Grid				=> F000:D606
-		VidToggleExt			=> F000:D508
+		VidLoadColMapExpRegs	=> F000:DD4A
 	}
 	script => [
 		advance	{ to 		=> 0000:0000											}
@@ -133,6 +132,7 @@ linker {
 		link	{ input		=> grid_cpu,			segment => CODE					}
 		link	{ input		=> grid_autodetect,		segment => CODE					}
 		link	{ input		=> grid_fd,				segment => CODE					}
+		link	{ input		=> grid_vid,			segment => CODE					}
 
 		fill	{ to		=> F000:DFD0,			with => 0xFF					}
 		link	{ input		=> sysident,			segment => CODE					}

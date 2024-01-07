@@ -36,6 +36,16 @@ CompatAddress	%macro
 		%endmacro
 
 ; ---------------------------------------------------------------------
+; AssertEqual lhs, rhs, message
+;
+; Raises an error if the two arguments are not equal in value
+AssertEqual	%macro
+		%if %1 != %2
+		%error %1 != %2: %3
+		%endif
+		%endmacro
+
+; ---------------------------------------------------------------------
 ; Delay count
 ;
 ; Inserts short jumps to delay execution by count*7 clocks.

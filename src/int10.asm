@@ -9,7 +9,7 @@ INT10		PROGRAM	OutFile=build/int10.obj
 
 		EXTERN	Beep, FuncToOffset
 		EXTERN	MakeIsrStack, UnmakeIsrStack, UnmakeIsrStack2
-		EXTERN	GridVidInitHi, GridVidInit
+		EXTERN	GridVidInitHi, GridVidInitLo
 		EXTERN	VidRegenLengths, VidColumns, VidModeSets
 		EXTERN	VidReadLightpen, VidWinSelect
 		EXTERN	GraphicsChars
@@ -197,7 +197,7 @@ VidSetMode	PROC
 		; maximum CGA resolution of 640x200.
 		mov	[VidActiveMode], al
 		push	ax
-		call	GridVidInit
+		call	GridVidInitLo
 		pop	ax
 		cmp	al, VID_LAST_CGA_MODE
 		jbe	.determinedMode

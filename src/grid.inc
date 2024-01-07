@@ -69,5 +69,3 @@ GRID_INT15_ERROR	equ	86h	; Error return in AX for unsupported functions
 ; No idea what these do yet.
 PORT_UNKNOWN_426	equ	0426h	; set to 1 then 0 in POST
 PORT_UNKNOWN_FFF	equ	0FFFh	; set to 1 in POST
-PORT_UNKNOWN_7FD	equ	07FDh	; set to 0 in POST
-
