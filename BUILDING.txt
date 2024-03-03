@@ -1,0 +1,26 @@
+Building the GRiD 1520 BIOS
+---------------------------
+
+The build process assumes a Linux environment that can also run the
+euroasm.exe assembler.  This might be possible with Wine, but development
+is normally done with a Windows Subsystem for Linux (WSL2) Debian setup.
+
+One-time setup:
+
+ * sudo apt-get perl cpanminus makepp srecord
+ * sudo cpanm Carton
+ * cd src-glink; carton install --deployment; cd ..
+
+For each build, execute "makepp" from the top-level directory.
+This will:
+
+ * Use EuroASM to assemble .asm files into OMF .obj files in the src/build directory.
+ * Use the Perl script in src-glink to link the .obj files into a BIOS image.
+ * Converts the binary image into an Intel HEX text file.
+ * Compares the HEX file to the original BIOS HEX file, reporting the number of mismatched lines.
+
+The output files are:
+
+ * src/build/bios.bin	- Binary BIOS image.
+ * src/build/bios.map	- Listing of symbols and their final addresses in the built image.
+ * src/build/*.asm.lst	- Assembler listing for individual modules.

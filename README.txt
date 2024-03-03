@@ -11,7 +11,9 @@ Once completed, I hope to go back to the two earlier BIOS images that have been
 dumped and figure out what the differences are.
 
 This project is using EuroAssembler (<https://euroassembler.eu/eadoc/>),
-MakePP (<http://makepp.sourceforge.net/>), and Perl 5.10.
+MakePP (<http://makepp.sourceforge.net/>), and Perl 5.
+
+Refer to BUILDING.txt for how to build the BIOS image.
 
 References
 ==========
