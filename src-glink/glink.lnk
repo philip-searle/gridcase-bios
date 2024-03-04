@@ -63,7 +63,6 @@ linker {
 		EoiPic1					=> F000:F53C
 		EoiPic1and2				=> F000:F543
 		DetectMemController		=> F000:F63D
-		VidInit					=> F000:D541
 		PwEnabled				=> F000:F180
 		PwStartInput			=> F000:F1F2
 		PwPrompt				=> F000:F422
@@ -81,6 +80,8 @@ linker {
 		VidIncColMap			=> F000:DD1D
 		Int15_Grid				=> F000:D606
 		VidLoadColMapExpRegs	=> F000:DD4A
+		VidInitV6366			=> F000:DD7B
+		WaitHdSpinUp			=> F000:F685
 	}
 	script => [
 		advance	{ to 		=> 0000:0000											}

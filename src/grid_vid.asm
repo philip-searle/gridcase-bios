@@ -6,10 +6,12 @@ GRID_VID	PROGRAM	OutFile=build/grid_vid.obj
 		include	"grid.inc"
 		include	"v6366.inc"
 
-		EXTERN	VidLoadColMapExpRegs
+		EXTERN	VidLoadColMapExpRegs, VidInitV6366
+		EXTERN	TenthMilliDelay, WaitHdSpinUp
 
 		PUBLIC	GridVidInitLo, GridVidInitHi
 		PUBLIC	GridToggleExt
+		PUBLIC	VidInit
 
 ; Default V6366 secondary register values
 kVidSecRegValues	\
@@ -680,5 +682,140 @@ GridToggleExt	PROC
 		pop	ax
 		retn
 		ENDPROC	GridToggleExt
+
+; Values for video secondary registers 0-1 (colour palette 0) and delay values.
+; Only used for plasma screens.
+kVidBootColors	d b	0, 20h		; Display off
+		d b	0, 40h		; 1/2 grayscale
+		d b	1, 0		; 1/1 grayscale
+kVidBootDelays	d w	1000
+		d w	125
+		d w	125
+		d w	2500
+
+; ===========================================================================
+; VidInit
+; ===========================================================================
+VidInit		PROC
+		push	si
+		push	bx
+		push	es
+		push	ds
+		mov	ax, cs
+		mov	ds, ax
+
+		; Reset ROM subsystem -- why ???
+		mov	dx, PORT_ROM_SUBSYSTEM1
+		xor_	al, al
+		out	dx, al
+
+		call	VidInitV6366
+
+		mov	dx, PORT_V6366_CONTROLID
+		mov	al, 81h		; unlock expansion registers
+		out	dx, al
+
+		sub	dx, (PORT_V6366_CONTROLID - PORT_V6366_BANK_ADDR)
+		mov	al, 29h		; select V6366 expansion register 29h
+		out	dx, al
+		inc	dx		; increment to PORT_V6366_BANK_DATA
+		mov	al, 40h		; set RREG=1 to enable access to control
+					; functions from V6366 Control/IO register
+		out	dx, al
+		mov	dl, (PORT_V6366_MODE_CTRL & 0FFh)
+		in	al, dx
+		push	ax		; save V6366 mode control register
+
+		mov	dx, PORT_V6366_CADDR1
+		xor_	al, al
+		call	VidSetModeReg
+		call	VidSetColorSelectReg
+		call	VidInitSecRegs
+		call	VidInitCurModeType
+
+		pop	ax		; restore V6366 mode control register
+		mov	dx, PORT_V6366_CADDR1
+		call	VidSetModeReg
+		mov	dx, PORT_VID_ROMSTATUS
+		in	al, dx
+		and	al, VID_TYPE_INTERNAL_MASK
+		cmp	al, VID_TYPE_PLASMA_400
+		jz	.plasmaScreen
+		cmp	al, VID_TYPE_PLASMA_200
+		jz	.plasmaScreen
+		jmp	.leaveFunction
+		FillerNop
+
+.plasmaScreen	call	WaitHdSpinUp	; ???
+
+		mov	ax, CGA_REGEN_SEG
+		mov	es, ax
+		mov	bx, 0
+
+		; ??? Display an underscore for a short while.
+		;     Is this trying to emulate a cursor?
+		; BUG: the underscore is black-on-black.  Bug or hastily removed feature?
+		mov	ah, 0		; black-on-black text...
+		mov	al, '_'		; ...display an underscore
+		mov	si, 0		; SI will be unsed to index various arrays
+		mov	cx, [cs:si+kVidBootDelays]
+		mov	[es:bx], ax	; write char to top-left of screen
+.delay1		call	TenthMilliDelay
+		loop	.delay1
+
+		; Remove underscore from the screen
+		mov	ah, 7		; white-on-black text...
+		mov	al, ' '		; ...replace underscore with space
+		mov	[es:bx], ax
+
+		; Unlock V6366 secondary registers
+		mov	dx, PORT_V6366_CONTROLID
+		mov	al, 81h
+		out	dx, al
+
+		; Run through the color/delay arrays, setting palette 0 so the entire
+		; screen gradually brightens.
+		; ??? Is this to ensure max power draw (fullbright screen plus HD spinning)
+		;     to try to diagnose dodgy power supplies?
+		mov	si, 0
+.plasmaLoop	mov	dx, PORT_V6366_BANK_ADDR
+		mov	al, 0		; expansion register 0: palette 0
+		out	dx, al
+		mov	dx, PORT_V6366_BANK_DATA
+		mov	al, [cs:si+kVidBootColors]
+		out	dx, al
+		Delay	2		; inc/mov provides the third delay
+		inc	si
+		mov	al, [cs:si+kVidBootColors]
+		out	dx, al
+		inc	si
+		mov	cx, [cs:si+kVidBootDelays]
+		dec	si
+.delay2		call	TenthMilliDelay
+		loop	.delay2
+		inc	si
+		cmp	si, 5
+		jbe	.plasmaLoop
+
+		; Reset palette back to normal
+		mov	dx, PORT_V6366_BANK_ADDR
+		mov	al, 0
+		out	dx, al
+		mov	dx, PORT_V6366_BANK_DATA
+		out	dx, al
+		Delay	3
+		out	dx, al
+
+		; Lock V6366 secondary registers
+		mov	dx, PORT_V6366_CONTROLID
+		mov	al, 1
+		out	dx, al
+
+.leaveFunction	pop	ds
+		pop	es
+		pop	bx
+		pop	si
+		retn
+		ENDPROC	VidInit
 
 ENDPROGRAM	GRID_VID
