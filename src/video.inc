@@ -41,6 +41,13 @@ VID_TYPE_LCD_200	equ	06h	; LCD 640x200
 VID_TYPE_LCD_400	equ	07h	; LCD 640x400
 
 ; ---------------------------------------------------------------------------
+; (-W) GRiD video board font
+; Two-bit value spread over two ports.
+; TODO: documented in the hardware service student course???
+PORT_VID_FONT_LO	equ	7FBh	; only lo bit valid
+PORT_VID_FONT_HI	equ	7FCh	; only lo bit valid
+
+; ---------------------------------------------------------------------------
 ; (-W) External display toggle
 ; Switches video output from the V6366 chip to the external D-sub connector
 PORT_VID_EXTERNAL	equ	7FDh

@@ -287,7 +287,7 @@ SDH_POST	PROC
 
 		; Default to outputting video to the external D-sub connector
 		mov	dx, PORT_ROM_SUBSYSTEM1
-		mov	al, 0			; ROM subsystem == 0?
+		mov	al, 0			; reset ROM subsystem ???
 		out	dx, al
 		mov	dx, PORT_VID_EXTERNAL
 		mov	al, VID_EXTERNAL_ENABLE

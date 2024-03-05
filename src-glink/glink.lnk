@@ -47,6 +47,7 @@ input {
 		../src/build/grid_autodetect.obj
 		../src/build/grid_fd.obj
 		../src/build/grid_vid.obj
+		../src/build/int15_grid.obj
 		../src/build/sysident.obj
 		../src/build/at_compat.obj
 		../src/build/rom_trailer.obj
@@ -134,6 +135,7 @@ linker {
 		link	{ input		=> grid_autodetect,		segment => CODE					}
 		link	{ input		=> grid_fd,				segment => CODE					}
 		link	{ input		=> grid_vid,			segment => CODE					}
+		link	{ input		=> int15_grid,			segment => CODE					}
 
 		fill	{ to		=> F000:DFD0,			with => 0xFF					}
 		link	{ input		=> sysident,			segment => CODE					}

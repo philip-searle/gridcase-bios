@@ -521,12 +521,12 @@ VidInit_2Panel_Hi	PROC
 		ENDPROC	VidInit_2Panel_Hi
 
 ; ===========================================================================
-; VidInitCurModeType
+; VidInit_Internal
 ; Examines the current video mode and video hardware, then calls the
 ; appropriate GRiD-specific initialization code to initialize the internal
 ; video panel.
 ; ===========================================================================
-VidInitCurModeType	PROC
+VidInit_Internal	PROC
 		; Get current video mode into AH
 		push	ds
 		mov	ax, BDA_SEGMENT
@@ -572,7 +572,7 @@ VidInitCurModeType	PROC
 		call	VidInit_LCD
 
 .leaveFunction	retn
-		ENDPROC	VidInitCurModeType
+		ENDPROC	VidInit_Internal
 
 ; ===========================================================================
 ; GridVidInitHi
@@ -661,7 +661,7 @@ GridToggleExt	PROC
 		jnz	.gotoExternal
 
 		; Active internal panel
-		call	VidInitCurModeType
+		call	VidInit_Internal
 		jmp	.leaveFunction
 
 .gotoExternal	; Activate external screen
@@ -731,7 +731,7 @@ VidInit		PROC
 		call	VidSetModeReg
 		call	VidSetColorSelectReg
 		call	VidInitSecRegs
-		call	VidInitCurModeType
+		call	VidInit_Internal
 
 		pop	ax		; restore V6366 mode control register
 		mov	dx, PORT_V6366_CADDR1

@@ -16,6 +16,7 @@ KBC_STATUS_IBF	equ	02h	; input buffer full
 KBC_STATUS_OBF	equ	01h	; output buffer full
 
 ; Commands for PORT_KBC_CMD [TechRef 8-16]
+KBC_CMD_BKLITE	equ	009h	; GRiD-specific: set backlight timeout
 KBC_CMD_RESET	equ	0AAh	; reset and self-test
 KBC_CMD_WRITE	equ	060h	; next write to data port is a command
 KBC_CMD_READ	equ	0C0h	; read KBC input port and place on KBC_PORT_DATA

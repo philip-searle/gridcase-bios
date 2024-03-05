@@ -319,6 +319,8 @@ TIMER_RESERVED		equ	7Eh
 $		equ	0A6h
 Fd2DriveInfo		d b		; as FdDriveInfo, but for the external drive
 
+VidColorMap		d b		; currently active video color map
+
 ; 0040:0100 is equivalent to 0050:0000
 ; Technically outside the BDA, but segment 50 seems to have always been
 ; intended as an extended BDA/BASIC/DOS data segment.
