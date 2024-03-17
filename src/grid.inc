@@ -64,6 +64,21 @@ GRID_HD_9	equ	9	;    AT   17	 40MB	Yes
 ; GRiD int15 extensions
 GRID_INT15_ERROR	equ	86h	; Error return in AX for unsupported functions
 GRID_INT15_OUTOFRANGE	equ	02h	; Error return in AX for input param out of range
+GRID_INT15_NOTAPEDRIVE	equ	02h	; Return in AX for int 15/E444h when no tape drive detected
+
+; ---------------------------------------------------------------------------
+; (-W) Application ROM enable [TechRef 2-13]
+; Controls whether address space A0000h-BF000h is mapped to display RAM or to
+; the ROMs mounted in the user-accessible sockets above the keyboard.
+; 0 == map display RAM
+; 1 == map application ROMs (mapped at top of address space)
+PORT_APPROM_ENABLE	equ	405h
+
+; ---------------------------------------------------------------------------
+; (-W) Application ROM select [TechRef 2-13]
+; Controls which ROM socket is mapped into application ROM space.
+; PORT_APPROM_ENABLE must be set to 1 for the ROM contents to be visible.
+PORT_APPROM_SELECT	equ	440h
 
 ; ---------------------------------------------------------------------------
 ; Mystery ports!

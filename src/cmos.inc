@@ -83,6 +83,7 @@ CMOS_INFO_RESERVED	equ	3Fh	; Reserved
 ; Flags stored in CMOS_GRIDFLAGS.
 ; Specific to the GRiD 1520 BIOS. [TechRef 2-9]
 GF_EMS			equ	01h	; use EMS instead of XMS
+GF_UNKNOWN		equ	02h	; ??? preserved but never set?
 
 ; ---------------------------------------------------------------------------
 ; Valid values for the CMOS_FD_TYPE register (upper/lower nibble = FD0/FD1)

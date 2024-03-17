@@ -6,11 +6,14 @@ INT15_GRID	PROGRAM	OutFile=build/int15_grid.obj
 		include	"cmos.inc"
 		include	"grid.inc"
 		include	"keyboard.inc"
+		include	"parallel.inc"
 		include	"video.inc"
 
-		EXTERN	CmosWrite
+		EXTERN	CmosRead, CmosWrite
+		EXTERN	GridCpuFast, GridCpuSlow
 		EXTERN	VidInit_External, VidInit_Internal
 		EXTERN	VidLoadColMapExpRegs
+		EXTERN	MachineId, GridModelNumber
 
 ; =====================================================================
 ; Int15_Grid
@@ -296,8 +299,278 @@ GridDisplay22	PROC
 		ENDPROC	GridDisplay22
 
 ; =====================================================================
-; GridDisplay24
+; GridDisplay24 [UNDOC]
 ; Undocumented GRiD BIOS service.
+; ??? What does this do
 ; =====================================================================
-; TODO
+GridDisplay24	PROC
+		push	dx
+		mov	al, 0
+		cmp	dl, 0FFh
+		jz	.query
+		cmp	dl, 0
+		jnz	.set
+		mov	al, 0Fh		; default if not set
+
+.set		mov	dx, PORT_ROM_SUBSYSTEM1
+		out	dx, al
+		pop	dx
+		xor_	ax, ax
+		retn
+
+.query		mov	dx, PORT_ROM_SUBSYSTEM1
+		in	al, dx
+		and	al, 0Fh
+		mov	dl, al
+		xor_	ax, ax
+		retn
+		ENDPROC	GridDisplay24
+
+; =====================================================================
+; Grid15Config
+; Handler for int15/E4, subfunctions 40h-5Fh
+; =====================================================================
+Grid15Config	PROC
+		push	bx
+		mov	bx, .handlers
+		mov	ah, .handlersEnd - .handlers
+		FillerNop
+		FillerNop
+		jmp	Grid15Handler
+
+.handlers	d w	GridConfig40
+		d w	GridConfig41
+		d w	GridConfig42
+		d w	GridConfig43
+		d w	GridConfig44
+		d w	GridConfig45
+		d w	GridConfig46
+		d w	GridConfig47
+		d w	GridConfig48
+		d w	GridConfig49
+		d w	GridConfig4A
+.handlersEnd	d w	GridConfig4B
+		ENDPROC	Grid15Config
+
+; =====================================================================
+; GridConfig40 [TechRef 3-22]
+; Get EMS RAM size
+; =====================================================================
+GridConfig40	PROC
+		pushf
+		mov	al, CMOS_GRIDFLAGS
+		call	CmosRead
+		test	al, GF_EMS	; configured for EMS?
+		mov	cx, 0		; if not, report no EMS RAM
+		jz	.leaveFunction
+
+.readExpMemSize	mov	al, CMOS_EXPMEM_LOBYTE
+		call	CmosRead
+		mov_	cl, al
+		mov	al, CMOS_EXPMEM_HIBYTE
+		call	CmosRead
+		mov_	ch, al
+
+.leaveFunction	xor_	ax, ax
+		popf
+		retn
+		ENDPROC	GridConfig40
+
+; =====================================================================
+; GridConfig41 [TechRef 3-23]
+; Get XMS RAM size
+; =====================================================================
+GridConfig41	PROC
+		pushf
+		mov	al, CMOS_GRIDFLAGS
+		call	CmosRead
+		test	al, GF_EMS	; configured for EMS?
+		mov	cx, 0		; if so, report no XMS RAM
+		jz	GridConfig40.readExpMemSize
+		xor_	ax, ax
+		popf
+		retn
+		ENDPROC	GridConfig41
+
+; =====================================================================
+; GridConfig42 [TechRef 3-23]
+; Gets or sets the extra mmeory type (EMS/XMS)
+; =====================================================================
+GridConfig42	PROC
+		pushf
+		cmp	dl, 0FFh	; enquiry about RAM type?
+		jz	.enquireRamType
+
+		; change extra RAM type
+		mov	al, CMOS_GRIDFLAGS
+		mov_	ah, al
+		and	ah, GF_UNKNOWN	; preserve unknown flag
+		mov_	al, dl
+		and	al, GF_EMS	; set new extra RAM type
+		or_	al, ah		; merge in other flags
+		mov	ah, CMOS_GRIDFLAGS
+		call	CmosWrite
+		xor_	ax, ax
+		popf
+		retn
+
+.enquireRamType	mov	al, CMOS_GRIDFLAGS
+		call	CmosRead
+		and	al, GF_EMS
+		mov_	dl, al
+		xor_	ax, ax
+		popf
+		retn
+		ENDPROC	GridConfig42
+
+; =====================================================================
+; GridConfig43 [TechRef 3-24]
+; Return external floppy drive number
+; =====================================================================
+GridConfig43	PROC
+		push	dx
+		mov	dx, PORT_PRINTER_STATUSC
+		in	al, dx
+		and	al, PRINTER_STATC_EFLOPPY | PRINTER_STATC_TAPE
+		jz	.haveExtDrive
+
+		; No external drive attached, report it would be drive 2
+		pop	dx
+		mov	ah, 2
+		retn
+
+.haveExtDrive	mov	dx, PORT_PRINTER_STATUSB
+		in	al, dx
+		and	al, PRINTER_STATB_BORA
+		mov_	dl, al		; ext drive index in DL
+		jz	.leaveFunction	; if it's A: then just return
+
+		; If external drive is B: then check drive backplane in case it needs incrementing
+		mov	dx, PORT_ROM_SUBSYSTEM1
+		in	al, dx
+		and	al, GRID_BKPL_MASK
+		jz	.leaveFunction
+		cmp	al, GRID_BKPL_20
+		mov	dl, 2		; Backplane 20 has two drives
+		jz	.leaveFunction
+		dec	dl		; Backplanes 10/20/30/90 have one drive
+		cmp	al, GRID_BKPL_90
+		jz	.leaveFunction
+		cmp	al, GRID_BKPL_40
+		jb	.leaveFunction
+		dec	dl		; All other backplanes have no drives
+
+.leaveFunction	mov_	al, dl
+		pop	dx
+		mov_	dl, al
+		xor_	ax, ax
+		retn
+		ENDPROC	GridConfig43
+
+; =====================================================================
+; GridConfig44 [TechRef 3-24]
+; Returns whether a Pouch tape drive is installed
+; =====================================================================
+GridConfig44	PROC
+		push	dx
+		mov	dx, PORT_PRINTER_STATUSC
+		in	al, dx
+		and	al, PRINTER_STATC_EFLOPPY | PRINTER_STATC_TAPE
+		cmp	al, PRINTER_STATC_EFLOPPY
+		mov	ax, 0
+		jz	.leaveFunction
+		mov	ah, GRID_INT15_NOTAPEDRIVE
+.leaveFunction	pop	dx
+		retn
+		ENDPROC	GridConfig44
+
+; =====================================================================
+; GridConfig45 [TechRef 3-24]
+; Sets CPU clock speed hi/lo
+; =====================================================================
+GridConfig45	PROC
+		cmp	dl, 0
+		jnz	.wantFast
+		call	GridCpuSlow
+		jmp	.leaveFunction
+		FillerNop
+.wantFast	call	GridCpuFast
+.leaveFunction	xor_	ax, ax
+		retn
+		ENDPROC	GridConfig45
+
+; =====================================================================
+; GridConfig46 [TechRef 3-25]
+; Battery low check
+; =====================================================================
+GridConfig46	PROC
+		push	dx
+		mov	dx, PORT_PRINTER_STATUSB
+		in	al, dx
+		shr	al, 1		; isolate PRINTER_STATB_MAINPWRLO in lo bit
+		and	al, 1
+		xor_	al, 1		; invert to match documented return
+		pop	dx
+		mov_	dl, al
+		xor_	ax, ax
+		retn
+		ENDPROC	GridConfig46
+
+; =====================================================================
+; GridConfig47 [UNDOC]
+; Undocumented BIOS function that selects which of the two application
+; ROM sockets will be mapped into memory when PORT_APPROM_ENABLE is
+; set to one.
+; On entry:
+;   DL == ROM socket (0/1)
+; =====================================================================
+GridConfig47	PROC
+		push	dx
+		mov_	al, dl
+		and	al, 1		; 1500 series only has two ROM sockets
+		mov	dx, PORT_APPROM_SELECT
+		out	dx, al
+		pop	dx
+		xor_	ax, ax
+		retn
+		ENDPROC	GridConfig47
+
+; =====================================================================
+; GridConfig48 [UNDOC]
+; Undocumented BIOS function that returns identifying details for the
+; GRiD computer.
+; On return:
+;   AX == 0
+;   CL == IBM model byte from F000:FFFE (0FCh = IBM AT)
+;   CH == GRiD model byte from F000:DFFE [TechRef 3-26]
+;   DL == GRiD drive backplane type
+; =====================================================================
+GridConfig48	PROC
+		push	es
+		push	di
+
+		; Place drive backplane ID in DL
+		mov	dx, PORT_ROM_SUBSYSTEM1
+		in	al, dx
+		shr	al, 1		; move backplane ID to lo nibble
+		shr	al, 1
+		shr	al, 1
+		shr	al, 1
+		and	al, 0Fh
+		mov_	dl, al
+
+		; Place model numbers in CX
+		mov	ax, BIOS_SEGMENT
+		mov	es, ax
+		mov	di, MachineId
+		mov	cl, [es:di]
+		mov	di, GridModelNumber
+		mov	ch, [es:di]
+
+		pop	di
+		pop	es
+		xor_	ax, ax
+		retn
+		ENDPROC	GridConfig48
+
 ENDPROGRAM	INT15_GRID
