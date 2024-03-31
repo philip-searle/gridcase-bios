@@ -1,8 +1,9 @@
 #!/usr/bin/perl
 
 use Modern::Perl;
-use Carp;
 use Config::Scoped;
+use Debug::Easy;
+use Term::ANSIColor qw( colored );
 use Data::Dumper;
 use IO::Handle;
 use Struct::Dumb qw( -named_constructors );
@@ -11,6 +12,25 @@ use lib './';
 use OMF::Address;
 use OMF::Model;
 use OMF::Parser qw( parse_omf_file );
+
+my $log = Debug::Easy->new(
+	'LogLevel' => 'INFO',
+	'Color' => 1,
+	'ANSILevel' => {
+		'ERR'      => colored(['white on_red'],			'[ ERROR ]'),
+		'WARN'     => colored(['black on_yellow'],		'[WARNING]'),
+		'NOTICE'   => colored(['black on_green'],		'[NOTICE ]'),
+		'INFO'     => colored(['black on_white'],		'[ INFO  ]'),
+		'DEBUG'    => colored(['bold green'],			'[ DEBUG ]'),
+		'DEBUGMAX' => colored(['bold black on_green'],	'[DEBUGMX]'),
+	}
+);
+
+sub LOGDIE {
+	my $msg = shift;
+	$log->ERROR($msg);
+	die "Fatal error";
+}
 
 # Links a global name to the PublicDef that defines it, as well as collecting
 # all the ExternalDef records that refer to it.
@@ -51,7 +71,7 @@ my $write_ptr = OMF::Address->parse('0000:0000');
 
 sub load_input_files {
     %modules = map {
-        print "Loading OMF: $_\n";
+        $log->INFO("Loading OMF: $_\n");
         my $omf_file = parse_omf_file($_);
         (lc $omf_file->module_name, $omf_file);
     } @{ $config->{input}{files} };
@@ -66,12 +86,12 @@ sub define_xref {
         $xref = $xrefs{$name} = Xref(name => $name, pubdef => undef, omf_externals => []);
     }
     if (defined $pubdef) {
-        die "Duplicate PUBDEF $name" if defined $xref->pubdef;
-        #print "symbol: $name\n";
+		$log->ERROR("Duplicate PUBDEF $name") if defined $xref->pubdef;
+        $log->DEBUG("New symbol: $name\n");
         $xref->pubdef = $pubdef;
     } else {
         # Must be an external ref if no pubdef
-        #print "xref: $name\n";
+        $log->DEBUG("New xref: $name\n");
         push @{ $xref->omf_externals }, $omf_file
     }
 }
@@ -80,7 +100,7 @@ sub define_xref {
 
 sub collect_symbols {
     for my $omf_file (values %modules) {
-        print "Collecting symbols in module " . $omf_file->module_name . "\n";
+        $log->INFO("Collecting symbols in module " . $omf_file->module_name . "\n");
         for my $extdef (@{ $omf_file->externals }) {
             next unless defined $extdef->name;
             define_xref($extdef->name, undef, $omf_file);
@@ -93,15 +113,15 @@ sub collect_symbols {
 
     my @unresolved_symbols = grep { !defined($xrefs{$_}->pubdef) } keys %xrefs;
     if (@unresolved_symbols) {
-        print "Unresolved symbols:\n";
+        $log->ERROR("Unresolved symbols:\n");
         for my $symbol (@unresolved_symbols) {
-            print "\t$symbol\treferenced from modules:";
+			my $msg = "\t$symbol\treferenced from modules:";
             for my $omf_file (@{ $xrefs{$symbol}->omf_externals }) {
-                print ' ' . $omf_file->module_name;
+                $msg .= ' ' . $omf_file->module_name;
             }
-            print "\n";
+            $log->WARN($msg);
         }
-        die "Cannot continue";
+        LOGDIE("Cannot continue");
     }
 }
 
@@ -110,9 +130,9 @@ sub collect_symbols {
 sub process_script_advance {
     my $params = shift;
     my $to = $params->{to};
-    die 'Missing "to" in advance' unless defined $to;
+	LOGDIE('Missing "to" in advance') unless defined $to;
     $write_ptr = OMF::Address->parse($to);
-    print "Advancing to " . $write_ptr . "\n";
+    $log->INFO("Advancing to " . $write_ptr);
 }
 
 # ---------------------------------------------------------------------
@@ -128,9 +148,9 @@ sub collect_segments {
         next unless $omf_file->module_name =~ qr/^$input_regex$/in;
 
         my @found_segments = grep { defined $_->segment_name && $_->segment_name eq $segment_name } @{ $omf_file->segments };
-        die "Duplicate segment for $segment_name in module " . $omf_file->module_name if @found_segments > 1;
+        $log->ERROR("Duplicate segment for $segment_name in module " . $omf_file->module_name) if @found_segments > 1;
         if (@found_segments == 0) {
-            carp "No segment matching $segment_name in module " . $omf_file->module_name;
+            $log->WARN("No segment matching $segment_name in module " . $omf_file->module_name);
             next;
         }
 
@@ -138,13 +158,13 @@ sub collect_segments {
         my $segment = $found_segments[0];
         $combine_class //= $segment->combine;
         if ($segment->combine ne $combine_class) {
-            die "Segment ".$segment->segment_name." in module ".$omf_file->module_name
-                . " has combine type " . $segment->combine . " but expected " . $combine_class;
+            $log->ERROR( "Segment ".$segment->segment_name." in module ".$omf_file->module_name
+                . " has combine type " . $segment->combine . " but expected " . $combine_class);
         }
         push @segments, $segment;
     }
 
-    die "No segments named $segment_name in modules matching $input_regex" unless @segments;
+    LOGDIE("No segments named $segment_name in modules matching $input_regex") unless @segments;
     return \@segments;
 }
 
@@ -160,9 +180,9 @@ my %SEGMENT_ALIGNMENTS = (
 sub align_address {
     my ($address, $segment_type) = @_;
     my $alignment = $SEGMENT_ALIGNMENTS{$segment_type};
-    die "Don't know how to align segment type $segment_type" unless defined $alignment;
+    LOGDIE("Don't know how to align segment type $segment_type") unless defined $alignment;
     my $aligned_address = $address->align_to($alignment);
-    carp "Warning: have to align $address to $aligned_address" unless $address == $aligned_address;
+    $log->WARN("Have to align $address to $aligned_address") unless $address == $aligned_address;
     return $aligned_address;
 }
 
@@ -176,9 +196,9 @@ sub resolve_segments {
         resolve_symbol($segment->unique_name, $write_ptr, $segment);
         if ($segment->combine ne 'COMMON') {
             $write_ptr = $aligned_write + $segment->length;
-            #print "Advancing write_ptr past segment (now $write_ptr), segment length = " . $segment->length . "\n";
+            $log->DEBUGMAX("Advancing write_ptr past segment (now $write_ptr), segment length = " . $segment->length);
         } else {
-            #print "COMMON segment, not advancing write_ptr\n"
+            $log->DEBUGMAX("COMMON segment, not advancing write_ptr\n");
         }
     }
 }
@@ -190,8 +210,8 @@ sub process_script_link {
     my $input = $params->{input};
     my $segment_name = $params->{segment};
     my $virtual = $params->{virtual} // 0;
-    die 'Missing "input" in link' unless defined $input;
-    die 'Missing "segment" in link' unless defined $segment_name;
+    LOGDIE('Missing "input" in link') unless defined $input;
+    LOGDIE('Missing "segment" in link') unless defined $segment_name;
 
     my $segments = collect_segments($segment_name, $input);
     resolve_segments($segments);
@@ -204,8 +224,8 @@ sub process_script_fill {
     my $params = shift;
     my $to = $params->{to};
     my $with = $params->{with};
-    die 'Missing "to" in fill' unless defined $to;
-    die 'Missing "with" in fill' unless defined $with;
+    LOGDIE('Missing "to" in fill') unless defined $to;
+    LOGDIE('Missing "with" in fill') unless defined $with;
 
     # Synthesise a segment which contains fill data for the specified range
     $to = OMF::Address->parse($to);
@@ -222,7 +242,7 @@ sub process_script_fill {
         alignment_padding => 0);
     push @segments_to_write, $fill_segment;
     resolve_symbol($unique_name, $write_ptr, $fill_segment);
-    print "Filling from $write_ptr to $to (length $length) with $with\n";
+    $log->INFO("Filling from $write_ptr to $to (length $length) with $with");
     $write_ptr = $to;
 }
 
@@ -267,7 +287,7 @@ sub resolve_xrefs {
         my $pubdef = $xref->pubdef;
         my $base_symbol_name = $pubdef->segment_def->unique_name;
         my $resolved_base_symbol = $resolved_symbols{$base_symbol_name};
-        die "xref $symbol_name refers to unresolved symbol $base_symbol_name" unless defined $resolved_base_symbol;
+        LOGDIE("xref $symbol_name refers to unresolved symbol $base_symbol_name") unless defined $resolved_base_symbol;
         my $resolved_xref_address = $resolved_base_symbol->address + $pubdef->offset;
         resolve_symbol($symbol_name, $resolved_xref_address, $pubdef->segment_def);
     }
@@ -277,9 +297,10 @@ sub resolve_xrefs {
 
 sub process_script {
     my $script = $config->{linker}{script};
+	$log->INFO((@{$script} / 2) . ' script nodes to process');
     my $script_index = 0;
     while (1) {
-        die 'Incomplete linker script' if $script_index > @$script - 2;
+        LOGDIE('Incomplete linker script') if $script_index > @$script - 2;
         my $action = $script->[$script_index++];
         my $params = $script->[$script_index++];
         last if $action eq 'end';
@@ -292,10 +313,9 @@ sub process_script {
         } elsif ($action eq 'fill') {
             process_script_fill($params);
         } else {
-            die "Unknown script action: $action";
+            LOGDIE("Unknown script action: $action");
         }
     }
-    resolve_xrefs;
 }
 
 # ---------------------------------------------------------------------
@@ -316,20 +336,18 @@ sub resolve_fixups {
         my $resolved_target_address;
         if ($target_method == $TARGET_METHOD_TYPE{external_index}) {
             my $external_def = $ledata->owning_omf_file->externals->[$fixup->target_datum];
-            die "Unknown external index in fixup target_datum: " . Data::Dumper::Dumper($fixup) unless defined $external_def;
+            LOGDIE("Unknown external index in fixup target_datum: " . Data::Dumper::Dumper($fixup)) unless defined $external_def;
             my $resolved_symbol = $resolved_symbols{$external_def->name};
-            #print "\nLLL: ".$external_def->name."\n";
-            die "Unresolved external symbol: " . $external_def->name unless defined $resolved_symbol;
+            LOGDIE("Unresolved external symbol: " . $external_def->name) unless defined $resolved_symbol;
             $resolved_target_address = $resolved_symbol->address + $target_displacement;
         } elsif ($target_method == $TARGET_METHOD_TYPE{segment_index}) {
             my $segment_def = $ledata->owning_omf_file->segments->[$fixup->target_datum];
-            die "Unknown segment index in fixup target datum: " . Data::Dumper::Dumper($fixup) unless defined $segment_def;
+            LOGDIE("Unknown segment index in fixup target datum: " . Data::Dumper::Dumper($fixup)) unless defined $segment_def;
             my $resolved_symbol = $resolved_symbols{$segment_def->unique_name};
-            die "Unresolved segment: " . $segment_def->unique_name unless defined $resolved_symbol;
+            LOGDIE("Unresolved segment: " . $segment_def->unique_name) unless defined $resolved_symbol;
             $resolved_target_address = $resolved_symbol->address + $target_displacement;
         } else {
-            carp "Unimplemented target_method: " . $target_method;
-            die;
+            LOGDIE("Unimplemented target_method: " . $target_method);
         }
 
         # Locate frame.
@@ -337,88 +355,65 @@ sub resolve_fixups {
         if ($fixup->frame_method == $FRAME_METHOD_TYPE{no_x_target}) {
             $resolved_frame_address = $resolved_target_address->with_zero_offset;
         } else {
-            carp "Unimplemented frame_method: " . $fixup->frame_method;
-            die;
+            LOGDIE("Unimplemented frame_method: " . $fixup->frame_method);
         }
 
         # Ensure target is accessible from the given frame
         if ($resolved_target_address->linear_address < $resolved_frame_address->linear_address) {
-            carp "Target $resolved_target_address is below frame origin of $resolved_frame_address";
-            die;
+            LOGDIE("Target $resolved_target_address is below frame origin of $resolved_frame_address");
         }
         if ($resolved_target_address->linear_address > $resolved_frame_address->linear_address + 0xFFFF) {
-            carp "Target $resolved_target_address is above maximum frame address of $resolved_frame_address+0xFFFF";
-            die;
+            LOGDIE("Target $resolved_target_address is above maximum frame address of $resolved_frame_address+0xFFFF");
         }
 
         # Convert to fixup data
         my $fixup_data;
         my $resolved_fixup_address = $resolved_ledata_origin + $fixup->data_record_offset;
-                if ($resolved_fixup_address >= OMF::Address->parse('F000:903F') 
-                        && $resolved_fixup_address <= OMF::Address->parse('F000:9044')) {
-                    print Data::Dumper::Dumper($fixup);
-                    #die;
-                }
+                # if ($resolved_fixup_address >= OMF::Address->parse('F000:903F')
+                #         && $resolved_fixup_address <= OMF::Address->parse('F000:9044')) {
+                #     $logger->warn(Data::Dumper::Dumper($fixup));
+                # }
         if ($fixup->fixup_relative_type == $FIXUP_RELATIVE_TYPE{self_relative}) {
             # Self-relative fixups are actually relative to the instruction immediately after the instruction being fixed-up.
             my $distance = $resolved_target_address->linear_address - $resolved_fixup_address->linear_address;
             if ($fixup->fixup_type == $FIXUP_TYPE{lobyte}) {
                 $distance -= 1;
                 if ($distance < -128 || $distance > 127) {
-                    carp "Self-relative lobyte fixup outside range: $distance";
-                    die;
+                    LOGDIE("Self-relative lobyte fixup outside range: $distance");
                 }
                 my $original_value = unpack 'c', substr($ledata->data, $fixup->data_record_offset, 1);
                 $fixup_data = pack 'c', $original_value + $distance;
             } elsif ($fixup->fixup_type == $FIXUP_TYPE{offset}) {
                 $distance -= 2;
                 if ($distance < -32768 || $distance > 32768) {
-                    carp "Self-relative offset fixup outside range: $distance";
+                    $log->ERROR("Self-relative offset fixup outside range: $distance");
                     dump_fixup_data($fixup, $resolved_fixup_address, $resolved_target_address, $resolved_frame_address);
                     die;
                 }
                 my $original_value = unpack 'v', substr($ledata->data, $fixup->data_record_offset, 2);
                 $fixup_data = pack 'v', $original_value + $distance;
-                #print sprintf("FI: target = $resolved_target_address fixup = $resolved_fixup_address\nFO: %X + %X = %X\n", $original_value, $distance, $original_value + $distance);
             } else {
-                carp "Unsupported self-relative fixup type: " . $fixup->fixup_type;
-                die;
+                LOGDIE("Unsupported self-relative fixup type: " . $fixup->fixup_type);
             }
         } else {
-            
+
             # Segment-relative fixups are relative to the start of the segment
             my $distance = $resolved_target_address->linear_address - $resolved_frame_address->linear_address;
             if ($distance < 0 || $distance > 0xFFFF) {
-                carp "Segment-relative fixup outside range: $distance";
-                die;
+                LOGDIE("Segment-relative fixup outside range: $distance");
             }
             if ($fixup->fixup_type == $FIXUP_TYPE{offset}) {
                 my $original_value = unpack 'v', substr($ledata->data, $fixup->data_record_offset, 2);
                 $fixup_data = pack 'v', ($original_value + $distance);
-                if ($resolved_fixup_address eq 'F000:9040') {
-                    print sprintf("XXX: $resolved_fixup_address %x %x %x\n", $original_value, $distance, $original_value+$distance);
-                    print sprintf("YYY: $resolved_target_address $resolved_frame_address\n");
-                    print Data::Dumper::Dumper($fixup);
-                }
             } elsif ($fixup->fixup_type == $FIXUP_TYPE{pointer}) {
                 my $original_offset = unpack 'v', substr($ledata->data, $fixup->data_record_offset, 2);
                 my $original_segment = unpack 'v', substr($ledata->data, $fixup->data_record_offset + 2, 2);
                 $fixup_data = pack 'vv', $original_offset + $distance, $original_segment + $resolved_frame_address->segment;
             } else {
-                carp "Unimplemented segment-relative fixup type: " . $fixup->fixup_type;
-                die;
+                LOGDIE("Unimplemented segment-relative fixup type: " . $fixup->fixup_type);
             }
         }
 
-        #print "FIXUP @ "
-        #    . sprintf('%04X', $debug_fpos + $fixup->data_record_offset)
-        #    . " X:" . sprintf('%04X + %04X', $debug_fpos, $fixup->data_record_offset)
-        #    . " FRAME:"
-        #    . $resolved_frame_address
-        #    ." TARGET:"
-        #    . $resolved_target_address
-        #    . "\n";
-        #print Data::Dumper::Dumper($fixup);
         push @resolved_fixups, ResolvedFixup(data_record_offset => $fixup->data_record_offset, data => $fixup_data);
     }
     return @resolved_fixups;
@@ -435,8 +430,10 @@ sub dump_fixup_data {
 sub write_output {
     my $bin_path = $config->{output}{bin};
     my $map_path = $config->{output}{map};
-    open my $output_file, '>', $bin_path or die "Cannot open $bin_path for writing: $!";
-    open my $map_file, '>', $map_path or die "Cannot open $map_path for writing: $!";
+	$log->INFO("Output file: $bin_path");
+	$log->INFO("Map file: $map_path");
+    open my $output_file, '>', $bin_path or LOGDIE("Cannot open $bin_path for writing: $!");
+    open my $map_file, '>', $map_path or LOGDIE("Cannot open $map_path for writing: $!");
     binmode $output_file, ':raw';
     $output_file->autoflush;
 
@@ -445,20 +442,14 @@ sub write_output {
     close $map_file;
 
     for my $segment (@segments_to_write) {
-        print "Writing segment " . $segment->unique_name . "\n";
+        $log->DEBUG("Writing segment " . $segment->unique_name);
         my $offset = 0;
         for my $ledata (@{ $segment->ledata }) {
-            #die "Gap in ledata records between $offset and " . $ledata->offset unless $ledata->offset == $offset;
-            #print "Writing " . $ledata->length . " bytes at offset " . $ledata->offset . "\n";
+            $log->DEBUGMAX("Writing " . $ledata->length . " bytes at offset " . $ledata->offset);
             my $data_record_origin = tell $output_file;
             my $resolved_ledata_origin = $resolved_symbols{$segment->unique_name}->address + $ledata->offset;
             print $output_file $ledata->data;
             for my $resolved_fixup (resolve_fixups($ledata, $data_record_origin, $resolved_ledata_origin)) {
-                #print "FIXUP: "
-                #    . sprintf('%x', $data_record_origin + $resolved_fixup->data_record_offset)
-                #    . " DATA: "
-                #    . $resolved_fixup->data
-                #    ."\n";
                 seek $output_file, $data_record_origin + $resolved_fixup->data_record_offset, 0;
                 print $output_file $resolved_fixup->data;
             }
@@ -466,7 +457,7 @@ sub write_output {
             $offset += $ledata->length;
         }
         print $output_file 0x90 x $segment->alignment_padding;
-        die "Gap after ledata records at offset $offset" unless $offset == $segment->length;
+        LOGDIE("Gap after ledata records at offset $offset") unless $offset == $segment->length;
     }
 }
 
@@ -474,9 +465,8 @@ sub write_output {
 
 sub resolve_symbol {
     my ($symbol_name, $address, $segdef) = @_;
-    print "PHILTEST: $symbol_name\n" if $symbol_name eq 'VidIsTextMode';
     my $resolved_symbol = ResolvedSymbol(segdef => $segdef, address => $address);
-    die "Duplicate symbol resolved: $symbol_name" if defined $resolved_symbols{$symbol_name};
+    LOGDIE("Duplicate symbol resolved: $symbol_name") if defined $resolved_symbols{$symbol_name};
     return $resolved_symbols{$symbol_name} = $resolved_symbol;
 }
 
@@ -486,6 +476,7 @@ sub predefine_symbols {
     my $definitions = $config->{linker}{define};
     while (my ($symbol_name, $address) = each %{ $definitions }) {
         $address = OMF::Address->parse($address);
+		$log->INFO("Predefined $address as $symbol_name");
         my $pubdef = PublicDef(name => $symbol_name,
             group_name => undef,
             segment_def => undef,
@@ -500,11 +491,21 @@ sub predefine_symbols {
 # ---------------------------------------------------------------------
 
 sub main {
+	$log->NOTICE('Predefining symbols');
     predefine_symbols;
+	$log->NOTICE('Loading input files');
     load_input_files;
+	$log->NOTICE('Collecting symbols');
     collect_symbols;
+	$log->NOTICE('Processing linker script');
     process_script;
+	$log->NOTICE('Resolving cross-references');
+    resolve_xrefs;
+	$log->NOTICE('Writing output file');
     write_output;
+
+	$log->WARN('Asserts not yet implemented');
+	#verify_asserts;
 }
 
 # ---------------------------------------------------------------------
