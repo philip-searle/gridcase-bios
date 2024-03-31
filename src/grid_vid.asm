@@ -12,6 +12,7 @@ GRID_VID	PROGRAM	OutFile=build/grid_vid.obj
 		PUBLIC	GridVidInitLo, GridVidInitHi
 		PUBLIC	GridToggleExt
 		PUBLIC	VidInit
+		PUBLIC	VidInit_Internal, VidInit_External
 
 ; Default V6366 secondary register values
 kVidSecRegValues	\

@@ -9,11 +9,13 @@ INT15_GRID	PROGRAM	OutFile=build/int15_grid.obj
 		include	"parallel.inc"
 		include	"video.inc"
 
-		EXTERN	CmosRead, CmosWrite
+		EXTERN	ReadCmos, WriteCmos
 		EXTERN	GridCpuFast, GridCpuSlow
 		EXTERN	VidInit_External, VidInit_Internal
 		EXTERN	VidLoadColMapExpRegs
-		EXTERN	MachineId, GridModelNumber
+		EXTERN	MachineId, GridSysId
+		EXTERN	DriveIdentify, HdAtSpinDown
+		EXTERN	PwBackdoor1
 
 ; =====================================================================
 ; Int15_Grid
@@ -203,7 +205,7 @@ GridDisplay21	PROC
 					;      Actually, it returns the current color map index
 					;      in DL.
 		jnz	.setColorMap
-		mov	dl, VidColorMap	; return current color map index
+		mov	dl, [VidColorMap]	; return current color map index
 		jmp	.leaveFunction
 
 .setColorMap	cmp	dl, 5		; compare to max color map index
@@ -250,7 +252,7 @@ GridDisplay23	PROC
 
 .adjustBacklite	mov	al, CMOS_GRIDBACKLITE
 		xchg	al, ah			; store new timeout to CMOS
-		call	CmosWrite
+		call	WriteCmos
 		xchg	al, ah
 		pushf
 		push	cx
@@ -359,16 +361,16 @@ Grid15Config	PROC
 GridConfig40	PROC
 		pushf
 		mov	al, CMOS_GRIDFLAGS
-		call	CmosRead
+		call	ReadCmos
 		test	al, GF_EMS	; configured for EMS?
 		mov	cx, 0		; if not, report no EMS RAM
 		jz	.leaveFunction
 
 .readExpMemSize	mov	al, CMOS_EXPMEM_LOBYTE
-		call	CmosRead
+		call	ReadCmos
 		mov_	cl, al
 		mov	al, CMOS_EXPMEM_HIBYTE
-		call	CmosRead
+		call	ReadCmos
 		mov_	ch, al
 
 .leaveFunction	xor_	ax, ax
@@ -383,7 +385,7 @@ GridConfig40	PROC
 GridConfig41	PROC
 		pushf
 		mov	al, CMOS_GRIDFLAGS
-		call	CmosRead
+		call	ReadCmos
 		test	al, GF_EMS	; configured for EMS?
 		mov	cx, 0		; if so, report no XMS RAM
 		jz	GridConfig40.readExpMemSize
@@ -404,18 +406,18 @@ GridConfig42	PROC
 		; change extra RAM type
 		mov	al, CMOS_GRIDFLAGS
 		mov_	ah, al
-		and	ah, GF_UNKNOWN	; preserve unknown flag
+		and	ah, GF_PASSWORD	; preserve password enabled flag
 		mov_	al, dl
 		and	al, GF_EMS	; set new extra RAM type
 		or_	al, ah		; merge in other flags
 		mov	ah, CMOS_GRIDFLAGS
-		call	CmosWrite
+		call	WriteCmos
 		xor_	ax, ax
 		popf
 		retn
 
 .enquireRamType	mov	al, CMOS_GRIDFLAGS
-		call	CmosRead
+		call	ReadCmos
 		and	al, GF_EMS
 		mov_	dl, al
 		xor_	ax, ax
@@ -564,7 +566,7 @@ GridConfig48	PROC
 		mov	es, ax
 		mov	di, MachineId
 		mov	cl, [es:di]
-		mov	di, GridModelNumber
+		mov	di, GridSysId
 		mov	ch, [es:di]
 
 		pop	di
@@ -573,4 +575,73 @@ GridConfig48	PROC
 		retn
 		ENDPROC	GridConfig48
 
+; =====================================================================
+; GridConfig49 [UNDOC]
+; Undocumented BIOS function that configures or queries the AT hard
+; drive spindown powersaving feature.
+; Actually implemented in the AT hard drive code; aliased here to keep
+; the GridConfigXX naming pattern consistent.
+; =====================================================================
+GridConfig49	equ	HdAtSpinDown
+
+; =====================================================================
+; GridConfig4A [UNDOC]
+; Undocumented BIOS function that uses the IDE IDENTIFY command to try
+; to identify the size and type of the attached AT-compatible hard disk
+; =====================================================================
+GridConfig4A	PROC
+		call	DriveIdentify
+		mov_	cx, ax
+		xor_	ax, ax
+		clc
+		retn
+		ENDPROC	GridConfig4A
+
+; =====================================================================
+; GridConfig4B [UNDOC]
+; Undocumented BIOS function that checks for the presence of a secret
+; password reset dongle attached to the parallel port.  If present, the
+; CMOS flag enabling the boot password is cleared.
+;
+; On return:
+;   AH == 0
+;   CL == 3 if CMOS power loss or hardware failure
+;      == 2 if password reset dongle not present
+;      == 1 if password successfully disabled
+; =====================================================================
+GridConfig4B	PROC
+		push	ax
+
+		; Check RTC good flag set and power fail flag not set
+		mov	al, CMOS_STATUS_D
+		call	ReadCmos
+		test	al, 80h
+		jz	.prereqFailed
+		mov	al, CMOS_STATUS_DIAG
+		call	ReadCmos
+		test	al, 80h
+		jz	.cmosOk
+
+.prereqFailed	pop	ax
+		mov	ah, 0
+		mov	cl, GRID_INT15_CMOS_BAD
+		retn
+
+.cmosOk		; Attempt to clear the password flag
+		call	PwBackdoor1
+		jc	.prereqFailed	; Dead code??? PwBackdoor1 always sets CF
+		pop	ax
+		mov	al, CMOS_GRIDFLAGS
+		call	ReadCmos
+		mov	cl, GRID_INT15_PW_CLEARED
+		test	al, GF_PASSWORD	; Password clear succeeded?
+		mov	ah, 0
+		jz	.pwClearFailed
+		retn
+
+.pwClearFailed	inc	cl		; inc to GRID_INT15_NO_DONGLE
+		retn
+		ENDPROC	GridConfig4B
+
+Grid15Rom	d w 0
 ENDPROGRAM	INT15_GRID

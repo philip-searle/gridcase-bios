@@ -4,6 +4,8 @@ SYSIDENT	PROGRAM	OutFile=build/sysident.obj
 		include	"macros.inc"
 		include	"segments.inc"
 
+		PUBLIC	GridSysId
+
 ; ---------------------------------------------------------------------------
 ; System identification section at F000:DFD0
 ; ---------------------------------------------------------------------------

@@ -1,10 +1,12 @@
 
 ROM_TRAILER	PROGRAM	OutFile=build/rom_trailer.obj
 
-		EXTERN	Reset_Compat
-
 		include	"macros.inc"
 		include	"segments.inc"
+
+		EXTERN	Reset_Compat
+
+		PUBLIC	MachineId
 
 ; ---------------------------------------------------------------------------
 ; Power-On Reset Vector at F000:FFF0

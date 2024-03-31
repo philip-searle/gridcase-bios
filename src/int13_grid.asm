@@ -13,6 +13,8 @@ INT13_GRID	PROGRAM	OutFile=build/int13_grid.obj
 		EXTERN	HdAtDecideError
 		EXTERN	HdAtWaitTask
 
+		PUBLIC	HdAtSpinDown
+
 ; ===========================================================================
 ; HdAtSpinDown [TechRef 3-25]
 ; GRiD-specific BIOS call that controls hard disk spin down behaviour.

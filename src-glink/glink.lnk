@@ -70,6 +70,7 @@ linker {
 		PwProcessInput			=> F000:F37B
 		PwEndInput				=> F000:F1D2
 		PwCompareStored			=> F000:F23A
+		PwBackdoor1				=> F000:F104
 		PwBackdoor2				=> F000:F291
 		PwIncorrect				=> F000:F2D8
 		PwClearBuffer			=> F000:F27A

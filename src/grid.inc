@@ -62,10 +62,17 @@ GRID_HD_9	equ	9	;    AT   17	 40MB	Yes
 
 ; ---------------------------------------------------------------------------
 ; GRiD int15 extensions
-GRID_INT15_ERROR	equ	86h	; Error return in AX for unsupported functions
-GRID_INT15_OUTOFRANGE	equ	02h	; Error return in AX for input param out of range
-GRID_INT15_NOTAPEDRIVE	equ	02h	; Return in AX for int 15/E444h when no tape drive detected
+; Generic error codes
+GRID_INT15_ERROR	equ	86h	; Returned in AX for unsupported functions
+GRID_INT15_OUTOFRANGE	equ	02h	; Returned in AX for input param out of range
 
+; Error codes for int 15/E444h
+GRID_INT15_NOTAPEDRIVE	equ	02h	; Returned in AX for when no tape drive detected
+
+; Error codes for int 15/£44Bh
+GRID_INT15_CMOS_BAD	equ	03h	; CMOS contents bad or power failed
+GRID_INT15_NO_DONGLE	equ	02h	; Password reset dongle not present
+GRID_INT15_PW_CLEARED	equ	01h	; Password flag successfully cleared
 ; ---------------------------------------------------------------------------
 ; (-W) Application ROM enable [TechRef 2-13]
 ; Controls whether address space A0000h-BF000h is mapped to display RAM or to
