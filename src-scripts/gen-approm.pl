@@ -15,4 +15,3 @@ my $word_count = $ROM_SIZE_K * 1024 / 4;
 for (my $word = 0; $word < $word_count; $word++) {
   print pack('N', ($ROM_ID << 24) | ($word * 4));
 }
-
