@@ -1,4 +1,8 @@
 
+include euroasm_scanner.mk
+
+&mkdir -p build/post
+
 OBJECTS	:=	build/rom_header.obj \
 			build/reset.obj \
 			build/reset_utils.obj \
@@ -47,7 +51,7 @@ OBJECTS	:=	build/rom_header.obj \
 			build/at_compat.obj \
 			build/rom_trailer.obj
 
-build/%.obj: %.asm *.inc
+build/%.obj: %.asm
 	../euroasm.exe $(input)
 
 build/post/%.obj: post/%.asm
