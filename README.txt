@@ -20,10 +20,19 @@ References
 
 Some code comments are prefixed with a tag in square brackets.  These denote
 important compatibility constraints or restrictions on behaviour imposed on the
-BIOS.  The possible tags are:
+BIOS, as well as references to GRiD documentation.  The possible tags are:
 
  * [TechRef]
-   Refers to the GRiDCase 1500 Series Hardware Technical Reference.
+   Refers to "GRiDCase 1500 Series Hardware Technical Reference Manual", October 1988.
+   GRiD order number 1500-50.
+
+ * [GridEprom]
+   Refers to "Programming EPROMs for GRiDCase and Compass", October 1986.
+   GRiD order number 031031-44.
+
+ * [FE3001A manual]
+   Refers to "FE3001A AT Clock Generation and Cycle Control Device".
+   Western Digital advance information, 10/24/90.
 
  * [Public]
    Identifies locations/APIs mentioned in publicly available documentation,
@@ -32,6 +41,10 @@ BIOS.  The possible tags are:
  * [Compat]
    Identifies places where data/code layout must remain fixed for compatibility
    with software that relies on undocumented or semi-documented functionality.
+
+ * [UNDOC]
+   Marks functionality or behaviour that is not documented in public documentation
+   but may be used by non-BIOS code.
 
  * [ReadMe]
    Refers to the file README.txt in this project.
