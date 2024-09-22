@@ -281,7 +281,7 @@ SDH_POST	PROC
 		mov	dx, PORT_UNKNOWN_426	; unnecessary reload of dx?
 		mov	al, 0			; set port 426 to 0
 		out	dx, al
-		mov	dx, PORT_UNKNOWN_FFF
+		mov	dx, PORT_XMS_ENABLE
 		mov	al, 1			; set port FFF to 1
 		out	dx, al
 

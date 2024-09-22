@@ -98,7 +98,12 @@ PORT_APPROM_SELECT	equ	440h
 ; Mystery ports!
 ; No idea what these do yet.
 PORT_UNKNOWN_426	equ	0426h	; set to 1 then 0 in POST
-PORT_UNKNOWN_FFF	equ	0FFFh	; set to 1 in POST
+
+; ---------------------------------------------------------------------------
+; (?W) High RAM mapping enable [UNDOC]
+; Maps RAM above 1MB into CPU address space when set to 1.
+; When set to 0, RAM above 1MB can only be accessed via the EMS pages.
+PORT_XMS_ENABLE		equ	0FFFh
 
 ; ---------------------------------------------------------------------------
 ; Structures and equates used by int15/4E0? ROM subsystem subroutines

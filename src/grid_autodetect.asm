@@ -382,7 +382,7 @@ MemSetXmsEms	PROC
 
 		; Switch from extended to expanded memory mode
 		push	dx
-		mov	dx, PORT_UNKNOWN_FFF
+		mov	dx, PORT_XMS_ENABLE
 		mov	al, 0
 		out	dx, al
 		pop	dx
