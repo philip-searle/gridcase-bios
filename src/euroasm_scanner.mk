@@ -5,7 +5,7 @@ perl_begin
 	use Mpp::Scanner::C;
 	our @ISA = qw/Mpp::Scanner::C/;
 	sub get_directive {
-		s/^\s*(include)\s*//i ? $1 : undef;
+		s/^\s*(include)1?\s*//i ? $1 : undef;
 	}
 	sub factory {
 		Mpp::Scanner::Euroasm->new(@_);
