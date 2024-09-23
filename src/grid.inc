@@ -116,7 +116,7 @@ APPROM_MAPPING_END	equ	0C000h	; first segment past end of ROM mapping
 
 ; Fixed-size header for data segment storing ROM image details
 APPROM_DSEG_HEADER	struc
-.signature		d 2 * b		; 'RB'
+.signature		d w		; 'RB'
 .maxRomIndex		d b
 .curRomIndex		d b
 .unknown		d 08h * b
@@ -128,7 +128,7 @@ APPROM_DSEG_ENTRY	struc
 .unknownFlag80h		d b
 .unknown		d 2 * b
 .bp			d w
-.unknown		d 4 * b
+.unknown2		d 4 * b
 			endstruc
 
 ; Header (actually a trailer) stored in the ROM, describing its contents.

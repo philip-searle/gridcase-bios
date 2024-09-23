@@ -826,7 +826,7 @@ XXX_BD1		equ	0BD1h
 		push	bx
 
 		; Save ROM subsystem status
-		mov	dx, PORT_ROM_SUBSYSTEM
+		mov	dx, PORT_ROM_SUBSYSTEM1
 		in	al, dx
 		push	ax
 
@@ -909,7 +909,7 @@ XXX_BD1		equ	0BD1h
 		; Check ROM size and jump to appropriate mapping code
 		cmp	[es:APPROM_HEADER.numRomsInPkg], 1
 		ja	.romLess128k	; multi-ROM packages can only be in < 128K ROMs
-		cmp	[es:romSize], 128
+		cmp	[es:APPROM_HEADER.romSize], 128
 		jb	.romLess128k	; 128K is the largest ROM supported
 		jmp	.rom128k
 
@@ -942,7 +942,7 @@ XXX_BD1		equ	0BD1h
 		xor_	di, di
 		mov	si, di
 		mov	cx, SIZE#APPROM_HEADER / 2
-		cls
+		cli
 		repe cmpsw
 		pop	si
 		pop	ds
@@ -962,6 +962,16 @@ XXX_BD1		equ	0BD1h
 		jbe	.singleRomPkg
 		mov	[si+APPROM_DSEG_ENTRY.unknownFlag80h], 80h
 		mov	ax, bx
+		xchg	al, ah
+		mov	bp, ax
+		xor_	cx, cx
+		mov	di, SIZE#APPROM_DSEG_HEADER
+.moveToNextRom	; TODO
+.singleRomPkg	; TODO
+GridRom02	; TODO
+GridRom03	; TODO
+GridRom04	; TODO
+		Unused	.checkRomLoop	; TODO
 		ENDPROC	GridRom01
 
 ; =====================================================================
