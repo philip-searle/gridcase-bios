@@ -171,7 +171,7 @@ HdAtInit	PROC
 
 		add	dl, 80h			; convert to int13 drive number
 
-		SEGES	mov ax, [es:SoftResetFlag]
+		mov	ax, [es:SoftResetFlag]
 		and	al, ~CRITICAL_ERR_FLAG	; mask off 'critical error' flag
 		cmp	ax, SOFT_RESET_FLAG	; soft reset?
 		jz	.initDriveType		; skip waiting for drive to become ready if so

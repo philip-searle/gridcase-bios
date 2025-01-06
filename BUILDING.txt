@@ -7,13 +7,14 @@ is normally done with a Windows Subsystem for Linux (WSL2) Debian setup.
 
 One-time setup:
 
- * sudo apt-get perl cpanminus makepp srecord
+ * sudo apt-get perl cpanminus makepp srecord unzip
  * sudo cpanm Carton
  * cd src-glink; carton install --deployment; cd ..
 
 For each build, execute "makepp" from the top-level directory.
 This will:
 
+ * Extract EuroASM from its distribution archive.
  * Use EuroASM to assemble .asm files into OMF .obj files in the src/build directory.
  * Use the Perl script in src-glink to link the .obj files into a BIOS image.
  * Converts the binary image into an Intel HEX text file.

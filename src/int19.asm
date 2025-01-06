@@ -225,7 +225,7 @@ LoadBootSector	PROC
 ;
 ; Note that we do NOT check for the last two bytes being the 55AAh marker
 ; as many sources say we should -- it is not present in DOS 1.0 boot sectors.
-		SEGES mov	ax, [7C00h]
+		mov	ax, [es:7C00h]
 		cmp	al, 6
 		jb	.leaveFunction
 		push	cx
@@ -242,7 +242,7 @@ LoadBootSector	PROC
 ; Ensure hard disk first sector is bootable.  Since hard disk boot sectors
 ; were never standardised in the same way that floppy disk boot sectors were,
 ; we perform minimal validation: just a check for the trailing AA55h marker.
-.hardDrive	SEGES cmp	[7DFEh], 0AA55h,DATA=WORD
+.hardDrive	cmp	[es:7DFEh], 0AA55h,DATA=WORD
 		jnz	.leaveFunction
 
 ; Prepare the environment for the boot sector and jump to it.

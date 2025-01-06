@@ -3,3 +3,4 @@ build/
 src-glink/local/
 .makepp/
 .vscode/
+euroasm/

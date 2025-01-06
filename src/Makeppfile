@@ -52,11 +52,10 @@ OBJECTS	:=	build/rom_header.obj \
 			build/rom_trailer.obj
 
 build/%.obj: %.asm
-	../euroasm.exe $(input)
+	../euroasm/euroasm.exe $(input)
 
 build/post/%.obj: post/%.asm
-	pwd && \
-	../euroasm.exe $(input)
+	../euroasm/euroasm.exe $(input)
 
 build/bios.bin: $(OBJECTS) ../src-glink/glink.lnk ../src-glink/test.pl
 	cd ../src-glink && \

@@ -206,6 +206,17 @@ sub parse_record_segdef {
 
 # ---------------------------------------------------------------------
 
+sub skip_record_grpdef {
+	my ($fh, $length, $omf_file) = @_;
+
+	my $grpdef_name = read_name($fh);
+	$length -= name_byte_count($grpdef_name);
+    read $fh, (my $buf), $length;
+	skip_record_trailer($fh);
+}
+
+# ---------------------------------------------------------------------
+
 sub parse_record_extdef {
     my ($fh, $length, $omf_file) = @_;
 
@@ -345,6 +356,7 @@ my %PARSE_HANDLERS = (
     COMENT => \&parse_record_coment,
     LNAMES => \&parse_record_lnames,
     SEGDEF => \&parse_record_segdef,
+	GRPDEF => \&skip_record_grpdef,
     EXTDEF => \&parse_record_extdef,
     PUBDEF => \&parse_record_pubdef,
     LEDATA => \&parse_record_ledata,
@@ -364,7 +376,7 @@ sub parse_omf_file {
         # print "Record: " . Data::Dumper::Dumper($header);
         my $handler = $PARSE_HANDLERS{$header->type->sixcc};
         if (!defined $handler) {
-            print "XXL:".$omf_file->last_ledata->offset."\n\n";
+            #print "XXL:".$omf_file->last_ledata->offset."\n\n";
             die "Unimplemented record type: " . $header->type->sixcc;
         }
         $handler->($fh, $header->length, $omf_file);
