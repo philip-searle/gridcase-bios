@@ -8,7 +8,6 @@
 EUROASM FPU=ON
 EUROASM LISTINCLUDE=OFF, LISTVAR=ON, LISTMACRO=OFF, LISTREPEAT=OFF
 EUROASM AUTOALIGN=OFF, AUTOSEGMENT=OFF
-EUROASM LISTFILE="build/%^SourceName%^SourceExt.lst"
 
 ; ---------------------------------------------------------------------
 ; FillRom address, fill
