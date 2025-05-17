@@ -194,7 +194,7 @@ struct PublicDef => [qw(
 # contains this ledata record so we can access the ExternalDefs
 struct LogicalEnumeratedData => [qw(
     offset length data fixups
-    owning_omf_file
+    owning_omf_file segment_index
 )], named_constructor => 1;
 
 struct FixupDef => [qw(

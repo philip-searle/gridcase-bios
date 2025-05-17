@@ -263,7 +263,7 @@ sub parse_record_ledata {
     my $offset = unpack_fh $fh, 2, 'v';
     $length -= index_byte_count($segment_index) + 2;
 
-    if ($EUROASM_LEDATA_WORKAROUND && defined($omf_file->last_ledata)) {
+    if ($EUROASM_LEDATA_WORKAROUND && defined($omf_file->last_ledata) && $omf_file->last_ledata->segment_index == $segment_index) {
         # Assume offset is immediately after previous LEDATA record ends
         $offset = $omf_file->last_ledata->offset + $omf_file->last_ledata->length;
     }
@@ -271,7 +271,7 @@ sub parse_record_ledata {
     my $data = unpack_fh $fh, $length, "a[$length]";
     my $ledata = LogicalEnumeratedData(offset => $offset,
         length => $length, data => $data, fixups => [],
-        owning_omf_file => $omf_file);
+        owning_omf_file => $omf_file, segment_index => $segment_index);
     push @{ $omf_file->segments->[$segment_index]->ledata }, $ledata;
     $omf_file->last_ledata = $ledata;
     skip_record_trailer($fh);

@@ -16,7 +16,9 @@ INT15_GRID	PROGRAM	OutFile=build/int15_grid.obj
 		EXTERN	VidLoadColMapExpRegs
 		EXTERN	MachineId, GridSysId
 		EXTERN	DriveIdentify, HdAtSpinDown
-		EXTERN	PwBackdoor1
+		EXTERN	GridConfig4B
+
+		PUBLIC	Int15_Grid
 
 ; =====================================================================
 ; Int15_Grid
@@ -752,7 +754,7 @@ GridRomHandlers	d w	GridRom00
 		d w	GridRom03
 		d w	GridRom04
 Grid15Rom	PROC
-		cmp	al, Grid15Rom - GridRomHandlers
+		cmp	al, (Grid15Rom - GridRomHandlers) >> 1
 		jb	.rangeOk
 		mov	ah, GRID_INT15_ERROR
 		jmp	.leaveFunction
@@ -813,11 +815,6 @@ GridRom00	PROC
 ;   AL == number of logical ROM images
 ; =====================================================================
 GridRom01	PROC
-XXX_7FA		equ	7FAh
-XXX_7F8		equ	7F8h
-XXX_7F9		equ	7F9h
-XXX_BD0		equ	0BD0h
-XXX_BD1		equ	0BD1h
 		; Save all registers we'll use
 		push	es
 		push	bp
@@ -836,12 +833,12 @@ XXX_BD1		equ	0BD1h
 
 		; Reset ROM mapping registers???
 		mov	al, 0
-		mov	dx, XXX_7FA
+		mov	dx, PORT_APPROM_128K
 		out	dx, al
 		mov	al, 0
-		mov	dx, XXX_7F8
+		mov	dx, PORT_APPROM_MAPPING0
 		out	dx, al
-		mov	dx, XXX_7F9
+		mov	dx, PORT_APPROM_MAPPING1
 		out	dx, al
 
 		; Clear AppROM data segment
@@ -849,11 +846,11 @@ XXX_BD1		equ	0BD1h
 		mov	al, SIZE#APPROM_DSEG_ENTRY
 		mul	cl
 		add	ax, SIZE#APPROM_DSEG_HEADER
-		mov	cx, ax
+		mov_	cx, ax
 		push	ds
 		pop	es
 		xor_	ax, ax
-		mov	di, ax
+		mov_	di, ax
 		cld
 		rep stosb
 
@@ -865,17 +862,17 @@ XXX_BD1		equ	0BD1h
 		; ES -> ROM header (assuming it is mapped correctly)
 		; BX == index of current ROM image
 		; SI -> ROM image slot in data segment
-		mov	ax, APPROM_MAPPING_END - SIZE#APPROM_HEADER
+		mov	ax, APPROM_MAPPING_END - (SIZE#APPROM_HEADER >> 4)
 		mov	es, ax
 		xor_	bx, bx
 		mov	si, SIZE#APPROM_DSEG_HEADER
 
 .checkRomLoop	; Set ROM size registers??? and check whether ROM signature
 		; is present where we expect it to be.
-		mov	ax, bx
-		mov	dx, XXX_BD0
+		mov_	ax, bx
+		mov	dx, PORT_APPROM_SIZE0
 		out	dx, al
-		mov	dx, XXX_BD1
+		mov	dx, PORT_APPROM_SIZE1
 		out	dx, al
 		cmp	[es:APPROM_HEADER.romHereFlag], APPROM_ROMHEREFLAG
 		jz	.romPresent
@@ -888,23 +885,23 @@ XXX_BD1		equ	0BD1h
 		mov	ax, 80h		; default if not set in header
 .L1		mov	cl, 7
 		shr	ax, cl		; get hi-bit into lowest bit
-		mov	cx, ax
-		mov	ax, bx
+		mov_	cx, ax
+		mov_	ax, bx
 		and	ax, 3		; clamp loop counter to lo bits
-		cmp	ax, cx		; ??? weird comparison
+		cmp_	ax, cx		; ??? weird comparison
 		jb	.checkRomSize
 		jmp	.moveToNextRom	; skip ROM image if test met
 
 .checkRomSize	; Mark ROM image present in data segment
-		mov	al, 0FFh
+		mov	al, APPROM_PRESENT
 		mov	[si+APPROM_DSEG_ENTRY.romPresentFlag], al
 
 		; Calculate correct port to set to map ROM.
 		; Images > 4 are on the second ROM socket???
-		mov	cx, bx
+		mov_	cx, bx
 		shr	cx, 1
 		shr	cx, 1
-		add	cx, XXX_7F8
+		add	cx, PORT_APPROM_MAPPING0
 
 		; Check ROM size and jump to appropriate mapping code
 		cmp	[es:APPROM_HEADER.numRomsInPkg], 1
@@ -913,20 +910,20 @@ XXX_BD1		equ	0BD1h
 		jb	.romLess128k	; 128K is the largest ROM supported
 		jmp	.rom128k
 
-.romLess128k	mov	dx, cx
+.romLess128k	mov_	dx, cx
 		mov	al, 0
 		out	dx, al		; set ROM mapping
 
-		mov	dx, XXX_7FA
+		mov	dx, PORT_APPROM_128K
 		mov	al, 1
 		out	dx, al		; ??? 7FA
 		jmp	.set7FA
 
-.rom128k	mov	dx, cx
+.rom128k	mov_	dx, cx
 		mov	al, 1
 		out	dx, al		; set ROM mapping (different from above???)
 
-		mov	dx, XXX_7FA
+		mov	dx, PORT_APPROM_128K
 		mov	al, 0
 		out	dx, al		; ??? 7FA (different from above)
 
@@ -934,15 +931,15 @@ XXX_BD1		equ	0BD1h
 		; header area is identical -- likely indicates a 64K ROM that
 		; is mis-mapped (maybe because 128K ROM pinouts weren't
 		; standardized when BIOS code was written?)
-		mov	dx, cx
+		mov_	dx, cx
 		push	ds
 		push	si
-		mov	ax, APPROM_MAPPING_END - 64K - SIZE#APPROM_HEADER
-		mov	dx, ax
+		mov	ax, 0AFF0h	; ??? use consts
+		mov	ds, ax
 		xor_	di, di
-		mov	si, di
+		mov_	si, di
 		mov	cx, SIZE#APPROM_HEADER / 2
-		cli
+		cld
 		repe cmpsw
 		pop	si
 		pop	ds
@@ -961,63 +958,303 @@ XXX_BD1		equ	0BD1h
 .set7FA		cmp	[es:APPROM_HEADER.numRomsInPkg], 1
 		jbe	.singleRomPkg
 		mov	[si+APPROM_DSEG_ENTRY.unknownFlag80h], 80h
-		mov	ax, bx
+		mov_	ax, bx
 		xchg	al, ah
-		mov	bp, ax
+		mov_	bp, ax
 		xor_	cx, cx
 		mov	di, SIZE#APPROM_DSEG_HEADER
-.moveToNextRom	; TODO
-.singleRomPkg	; TODO
-GridRom02	; TODO
-GridRom03	; TODO
-GridRom04	; TODO
-		Unused	.checkRomLoop	; TODO
+		cmp	[es:APPROM_HEADER.romSumsArray], cx	; Checksum present?
+		jz	.romsDone
+
+.recordRom	cmp	[di+APPROM_DSEG_ENTRY.romPresentFlag], APPROM_PRESENT
+		jz	.nextRomEntry
+		mov_	ax, cx
+		mov	dx, PORT_APPROM_SIZE0
+		out	dx, al	; map rom?
+
+		; Checksum ROM content (excluding last word which holds the checksum)
+		; Covers the full 32K so maybe the ROM area reads zeroes where a
+		; smaller ROM isn't present instead of floating bus?
+		push	ds
+		push	si
+		mov	si, APPROM_MAPPING_START
+		mov	ds, si
+		mov	si, 32K - 2	; exclude checksum and patchCode bytes
+		xor_	dx, dx
+		std		; checksum from end of ROM to start
+.checksumWord	lodsw
+		add_	dx, ax
+		or_	si, si
+		jns	.checksumWord
+		pop	si
+		pop	ds
+
+		; Does checksum match?
+		cmp	[es:APPROM_HEADER.romSumsArray], dx
+		jnz	.nextRomEntry
+		mov_	ax, cx
+		or_	bp, ax	; ??? romImageParas, why OR it?
+		jmp	.romsDone
+
+.nextRomEntry	inc	cx	; advance to next ROM entry
+		add	di, SIZE#APPROM_DSEG_ENTRY
+		cmp	cx, APPROM_MAX_ROM_IMAGES
+		jb	.recordRom
+		; Reached max images per ROM, mark it as invalid
+		mov	[si+APPROM_DSEG_ENTRY.romPresentFlag], 0
+		jmp	.moveToNextRom
+
+.romsDone	mov_	dx, cx
+		shr	dx, 1
+		shr	dx, 1
+		add	dx, PORT_APPROM_MAPPING0
+		mov	al, 0
+		out	dx, al
+		mov	[si+APPROM_DSEG_ENTRY.romImageParas], bp
+		jmp	.finishRomEntry
+
+.singleRomPkg	cmp	[es:APPROM_HEADER.romSize], 80h
+		jz	.L2
+		mov	[si+APPROM_DSEG_ENTRY.unknownFlag80h], 80h
+.L2		mov_	ax, bx
+		mov_	ah, al	; ???
+		mov	[si+APPROM_DSEG_ENTRY.romImageParas], ax
+
+.finishRomEntry	SEGES:	mov	al, [APPROM_HEADER.sysType],DISP=WORD
+			mov	[si+APPROM_DSEG_ENTRY.systemType], al
+		SEGES:	mov	al, [APPROM_HEADER.romSize],DISP=WORD
+			mov	[si+APPROM_DSEG_ENTRY.totalRomImages], al
+		SEGES:	mov	ax, [APPROM_HEADER.romId]
+			mov	[si+APPROM_DSEG_ENTRY.romId], ax
+
+.moveToNextRom	inc	bx
+		add	si, SIZE#APPROM_DSEG_ENTRY
+		cmp	bx, APPROM_MAX_ROM_IMAGES
+		jz	.allSocketsDone
+		jmp	.checkRomLoop
+
+.allSocketsDone	pop	ax
+		mov	dx, PORT_ROM_SUBSYSTEM1
+		out	dx, al
+		pop	bx
+		pop	cx
+		pop	dx
+		pop	bp
+		pop	es
+
+		xor_	ax, ax
+		mov_	di, ax
+		mov	si, SIZE#APPROM_DSEG_HEADER
+.assignIndexes	test	[si+APPROM_DSEG_ENTRY.romPresentFlag], 0FFh
+		jz	.L3
+		mov	[di+APPROM_DSEG_HEADER.romIndexes], al
+		inc	di
+		inc	[APPROM_DSEG_HEADER.maxRomIndex]
+.L3		inc	ax
+		add	si, SIZE#APPROM_DSEG_ENTRY
+		cmp	al, APPROM_MAX_ROM_IMAGES
+		jb	.assignIndexes
+
+		mov	al, [APPROM_DSEG_HEADER.maxRomIndex]
+		call	GridRomValidDs
+		retn
 		ENDPROC	GridRom01
 
 ; =====================================================================
-; GridConfig4B [UNDOC]
-; Undocumented BIOS function that checks for the presence of a secret
-; password reset dongle attached to the parallel port.  If present, the
-; CMOS flag enabling the boot password is cleared.
+; GridRom02 [TechRef 3-18]
+; Returns information about the specified ROM image.
+;
+; On entry:
+;   AX == 0E402h
+;   DL == ROM image number
+;         or FFh for currently selected image
+;   DS == data segment provided by calling application.  Must be at
+;         at least as large as the value returned by int15/E400.
 ;
 ; On return:
-;   AH == 0
-;   CL == 3 if CMOS power loss or hardware failure
-;      == 2 if password reset dongle not present
-;      == 1 if password successfully disabled
+;   CF == 0 (no error)
+;     AL == total number of ROM images
+;     BX == ROM ID
+;     CX == number of paragraphs in ROM image
+;     DH == system type
+;     DL == ROM image number
+;     ES == ROM base segment
+;   CF == 1 (error returned)
+;     AH == 86h subsystem not supported
+;           02h passed data segment is invalid
+;           03h no ROM image exists
+;           04h image number out of range
 ; =====================================================================
-GridConfig4B	PROC
-		push	ax
+GridRom02	PROC
+		call	RomDsegEntry
+		jnz	.leaveFunction
+		mov	al, [si+APPROM_DSEG_ENTRY.totalRomImages]
+		mov	bx, APPROM_MAPPING_START
+		mov	es, bx
+		mov	bx, [si+APPROM_DSEG_ENTRY.romId]
+		mov	cx, [si+APPROM_DSEG_ENTRY.romImageParas]
+		mov	dh, [si+APPROM_DSEG_ENTRY.systemType]
+.leaveFunction	retn
+		ENDPROC	GridRom02
 
-		; Check RTC good flag set and power fail flag not set
-		mov	al, CMOS_STATUS_D
-		call	ReadCmos
-		test	al, 80h
-		jz	.prereqFailed
-		mov	al, CMOS_STATUS_DIAG
-		call	ReadCmos
-		test	al, 80h
-		jz	.cmosOk
+; =====================================================================
+; GridRom03 [TechRef 3-18]
+; Enable a ROM image and return a pointer to the beginning of the image
+;
+; On entry:
+;   AX == 0E403h
+;   DL == ROM image number or 0FFh for the current ROM image
+;   DS == data segment provided by calling application.  Must be at
+;         at least as large as the value returned by int15/E400.
+;
+; On return:
+;   CF == 0 (no error)
+;     ES:BX -> start of ROM image
+;     CX    == number of paragraphs in ROM image
+;   CF == 1 (error)
+;     AH == 86h subsystem not supported
+;           02h passed data segment is invalid
+;           03h no ROM image exists
+;           04h image number out of range
+;
+; BUG??? Does ES:BX really point to ROM start?  Need to investigate.
+; =====================================================================
+GridRom03	PROC
+		call	RomDsegEntry
+		jnz	.leaveFunction
 
-.prereqFailed	pop	ax
+		; Enable ROM mapping
+		mov	[APPROM_DSEG_HEADER.curRomIndex], dl
+		mov	al, 1
+		mov	dx, PORT_ROM_SUBSYSTEM1
+		out	dx, al
+
+		mov	cl, [si+APPROM_DSEG_ENTRY.unknownFlag80h]
+		mov	bx, [si+APPROM_DSEG_ENTRY.romImageParas]
+
+		; ??? Set ROM type and mapping length
+		mov	dx, PORT_APPROM_128K
+		mov	al, 1		; 128k ROM
+		test	cl, 80h
+		jnz	.L1
+		mov	al, 0		; < 128k ROM
+.L1		out	dx, al
+
+		mov	dx, PORT_APPROM_SIZE0
+		mov_	al, bl
+		out	dx, al
+		inc	dx		; advance to PORT_APPROM_SIZE1
+		mov_	al, bh
+		out	dx, al
+
+		mov	dl, [APPROM_DSEG_HEADER.curRomIndex]
+.leaveFunction	retn
+		ENDPROC	GridRom03
+
+; =====================================================================
+; GridRom04 [TechRef 3-19]
+; Disable ROM subsystem by clearing the current ROM image.  Does not
+; re-enable interrupts.
+;
+; On entry:
+;   AX = 0E404h
+;   DS == data segment provided by calling application.  Must be at
+;         at least as large as the value returned by int15/E400.
+;
+; On return:
+;   CF == 0 (no error)
+;   CF == 1 (error)
+;     AH == 86h subsystem not supported
+;           02h passed data segment is invalid
+;           03h no ROM image exists
+; =====================================================================
+GridRom04	PROC
+		call	GridRomValidDs
+		jnz	.leaveFunction
+
+		xchg	di, dx		; save registers
+		xchg	ax, si
+
+		mov	al, 0
+		mov	dx, PORT_ROM_SUBSYSTEM1
+		out	dx, al
+
+		xchg	dx, di		; restore registers
+		xchg	ax, si
+.leaveFunction	retn
+		ENDPROC	GridRom04
+
+; =====================================================================
+; RomDsegEntry
+; Validates an application ROM index and returns the corresponding data
+; segment entry.
+;
+; On entry:
+;   DL == ROM index or 0FFh for currently selected ROM.
+;   DS == data segment provided by calling application.  Must be at
+;         at least as large as the value returned by int15/E400.
+;
+; On return:
+;   AH == 00h (success)
+;     DL    == ROM index
+;     DS:SI -> APPROM_DSEG_ENTRY for the ROM
+;   AH <> 00h (failure)
+; =====================================================================
+RomDsegEntry	PROC
+		call	GridRomValidDs
+		jnz	.leaveFunction
+		mov_	di, dx		; preserve DX
+
+		cmp	dl, 0FFh	; handle 0FFh == current ROM
+		jnz	.L1
+		mov	dl, [APPROM_DSEG_HEADER.curRomIndex]
+.L1		mov	ah, GRID_INT15_ROM_RANGE
+		cmp	dl, [APPROM_DSEG_HEADER.maxRomIndex]
+		jnb	.rangeError
+
+		; Convert ROM index into pointer to ROM entry
+		mov_	ah, dl
+		xchg	ax, si		; preserve AX
+		mov_	di, dx
+		and	di, 0FFh
+		mov	dl, [di+APPROM_DSEG_HEADER.romIndexes]
+		mov	al, SIZE#APPROM_DSEG_ENTRY
+		mul	dl
+		add	ax, SIZE#APPROM_DSEG_HEADER
+		xchg	ax, si		; restore AX
+		mov_	dl, ah
+		mov	ah, 0		; clear error code
+		jmp	.leaveFunction
+
+.rangeError	mov_	dx, di		; restore DX
+.leaveFunction	or_	ah, ah		; set CF
+		retn
+		ENDPROC	RomDsegEntry
+
+; =====================================================================
+; GridRomValidDs
+; Validates that DS points to a properly initialised data segment for
+; application ROM calls to succeed (i.e. GridRom01 has been called and
+; succeeded).
+;
+; On entry:
+;   DS -> application ROM data segment as initialised by GridRom01
+;
+; On return:
+;   CF == 0 (success)
+;   CF <> 0 (failure)
+;     AH == one of the GRID_INT15_ROM_* error codes
+; =====================================================================
+GridRomValidDs	PROC
+		mov	ah, GRID_INT15_ROM_BADDS
+		cmp	[APPROM_DSEG_HEADER.signature], APPROM_DSEG_SIGNATURE
+		jnz	.leaveFunction
+		mov	ah, GRID_INT15_ROM_NOROM
+		cmp	[APPROM_DSEG_HEADER.maxRomIndex], 0
+		jz	.leaveFunction
 		mov	ah, 0
-		mov	cl, GRID_INT15_CMOS_BAD
+.leaveFunction	or_	ah, ah		; set CF
 		retn
-
-.cmosOk		; Attempt to clear the password flag
-		call	PwBackdoor1
-		jc	.prereqFailed	; Dead code??? PwBackdoor1 always sets CF
-		pop	ax
-		mov	al, CMOS_GRIDFLAGS
-		call	ReadCmos
-		mov	cl, GRID_INT15_PW_CLEARED
-		test	al, GF_PASSWORD	; Password clear succeeded?
-		mov	ah, 0
-		jz	.pwClearFailed
-		retn
-
-.pwClearFailed	inc	cl		; inc to GRID_INT15_NO_DONGLE
-		retn
-		ENDPROC	GridConfig4B
+		ENDPROC	GridRomValidDs
 
 ENDPROGRAM	INT15_GRID

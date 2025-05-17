@@ -231,7 +231,7 @@ sub process_script_fill {
     $to = OMF::Address->parse($to);
     my $length = $to->linear_address - $write_ptr->linear_address;
     my $data = chr(hex($with)) x $length;
-    my $ledata = LogicalEnumeratedData(offset => 0, length => $length, data => $data, fixups => [], owning_omf_file => undef);
+    my $ledata = LogicalEnumeratedData(offset => 0, length => $length, data => $data, fixups => [], owning_omf_file => undef, segment_index => 0);
     my $segment_name = 'FILL' . @segments_to_write;
     my $unique_name = "!$segment_name";
     my $fill_segment = SegmentDef(type => $SEGMENT_TYPE{relocatable_byte_lseg},

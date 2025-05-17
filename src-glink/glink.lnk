@@ -48,8 +48,10 @@ input {
 		../src/build/grid_fd.obj
 		../src/build/grid_vid.obj
 		../src/build/int15_grid.obj
+		../src/build/grid_vid2.obj
 		../src/build/sysident.obj
 		../src/build/at_compat.obj
+		../src/build/grid_pw.obj
 		../src/build/rom_trailer.obj
 	]
 }
@@ -70,7 +72,6 @@ linker {
 		PwProcessInput			=> F000:F37B
 		PwEndInput				=> F000:F1D2
 		PwCompareStored			=> F000:F23A
-		PwBackdoor1				=> F000:F104
 		PwBackdoor2				=> F000:F291
 		PwIncorrect				=> F000:F2D8
 		PwClearBuffer			=> F000:F27A
@@ -78,11 +79,6 @@ linker {
 		DriveIdentify			=> F000:F56F
 		IsExtFdIndex			=> F000:D92C
 		VidWinSelect			=> F000:B637
-		VidDecColMap			=> F000:DCFE
-		VidIncColMap			=> F000:DD1D
-		Int15_Grid				=> F000:D606
-		VidLoadColMapExpRegs	=> F000:DD4A
-		VidInitV6366			=> F000:DD7B
 		WaitHdSpinUp			=> F000:F685
 	}
 	script => [
@@ -137,11 +133,15 @@ linker {
 		link	{ input		=> grid_fd,				segment => CODE					}
 		link	{ input		=> grid_vid,			segment => CODE					}
 		link	{ input		=> int15_grid,			segment => CODE					}
+		link	{ input		=> grid_vid2,			segment => CODE					}
 
 		fill	{ to		=> F000:DFD0,			with => 0xFF					}
 		link	{ input		=> sysident,			segment => CODE					}
 		#fill	{ to		=> F000:E000,			with => 0xFF					}
 		link	{ input		=> at_compat,			segment => CODE					}
+		link	{ input		=> grid_pw,				segment => CODE					}
+		fill	{ to		=> F000:F841			with => 0xFF					}
+		link	{ input		=> at_compat,			segment => CODE2				}
 		link	{ input		=> rom_trailer,			segment => CODE					}
 		end		{ }
 	]

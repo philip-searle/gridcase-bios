@@ -6,7 +6,7 @@ GRID_VID	PROGRAM	OutFile=build/grid_vid.obj
 		include	"grid.inc"
 		include	"v6366.inc"
 
-		EXTERN	VidLoadColMapExpRegs, VidInitV6366
+		EXTERN	VidLoadColMapExpRegs, VidInitColMap
 		EXTERN	TenthMilliDelay, WaitHdSpinUp
 
 		PUBLIC	GridVidInitLo, GridVidInitHi
@@ -710,7 +710,7 @@ VidInit		PROC
 		xor_	al, al
 		out	dx, al
 
-		call	VidInitV6366
+		call	VidInitColMap
 
 		mov	dx, PORT_V6366_CONTROLID
 		mov	al, 81h		; unlock expansion registers

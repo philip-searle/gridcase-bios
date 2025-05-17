@@ -71,10 +71,15 @@ GRID_INT15_OUTOFRANGE	equ	02h	; Returned in AX for input param out of range
 ; Error codes for int 15/E444h
 GRID_INT15_NOTAPEDRIVE	equ	02h	; Returned in AX for when no tape drive detected
 
-; Error codes for int 15/£44Bh
+; Error codes for int 15/E44Bh
 GRID_INT15_CMOS_BAD	equ	03h	; CMOS contents bad or power failed
 GRID_INT15_NO_DONGLE	equ	02h	; Password reset dongle not present
 GRID_INT15_PW_CLEARED	equ	01h	; Password flag successfully cleared
+
+; Error codes for int 15/E40Xh (application ROM calls)
+GRID_INT15_ROM_BADDS	equ	02h	; Invalid data segment provided
+GRID_INT15_ROM_NOROM	equ	03h	; No such ROM image exists
+GRID_INT15_ROM_RANGE	equ	04h	; Supplied ROM index out of range
 
 ; ---------------------------------------------------------------------------
 ; (-W) Application ROM enable [TechRef 2-13] [TechRef 3-32]
@@ -82,6 +87,7 @@ GRID_INT15_PW_CLEARED	equ	01h	; Password flag successfully cleared
 ; the ROMs mounted in the user-accessible sockets above the keyboard.
 ; 0 == map display RAM
 ; 1 == map application ROMs (mapped at top of address space)
+; ??? Not referenced in BIOS code, is this outdated documentation?
 PORT_APPROM_ENABLE	equ	405h
 
 ; ---------------------------------------------------------------------------
@@ -92,7 +98,19 @@ PORT_424		equ	424h
 ; (-W) Application ROM select [TechRef 2-13] [TechRef 3-32]
 ; Controls which ROM socket is mapped into application ROM space.
 ; PORT_APPROM_ENABLE must be set to 1 for the ROM contents to be visible.
+; ??? Not referenced in BIOS code, is this outdated documentation?
 PORT_APPROM_SELECT	equ	440h
+
+; ---------------------------------------------------------------------------
+; (-W) Possibly application ROM mapping start offset?
+PORT_APPROM_128K	equ	07FAh	; 1=128k ROM, 0=<128k ROM
+PORT_APPROM_MAPPING0	equ	07F8h	; selects ROM socket?
+PORT_APPROM_MAPPING1	equ	07FAh	; selects ROM socket?
+
+; ---------------------------------------------------------------------------
+; (-W) Possibly application ROM mapping length/RM size
+PORT_APPROM_SIZE0	equ	0BD0h
+PORT_APPROM_SIZE1	equ	0BD1h
 
 ; ---------------------------------------------------------------------------
 ; Mystery ports!
@@ -110,7 +128,7 @@ PORT_XMS_ENABLE		equ	0FFFh
 
 APPROM_MAX_ROM_IMAGES	equ	8	; maximum ROM images supported
 APPROM_MAX_SOCKETS	equ	2	; maximum physical ROM sockets
-APPROM_DSEG_SIGNATURE	equ	'RB'	; magic number at start of data segment
+APPROM_DSEG_SIGNATURE	equ	'BR'	; magic number at start of data segment
 APPROM_MAPPING_START	equ	0A000h	; lowest segment where ROMs are mapped
 APPROM_MAPPING_END	equ	0C000h	; first segment past end of ROM mapping
 
@@ -119,17 +137,20 @@ APPROM_DSEG_HEADER	struc
 .signature		d w		; 'RB'
 .maxRomIndex		d b
 .curRomIndex		d b
-.unknown		d 08h * b
+.romIndexes		d 08h * b
 			endstruc
 
 ; Structure describing one ROM image in the data segment
 APPROM_DSEG_ENTRY	struc
 .romPresentFlag		d b		; 0FFh if ROM image present
 .unknownFlag80h		d b
-.unknown		d 2 * b
-.bp			d w
-.unknown2		d 4 * b
+.romId			d w
+.romImageParas		d w
+.systemType		d b
+.totalRomImages		d b
 			endstruc
+
+APPROM_PRESENT		equ	0FFh
 
 ; Header (actually a trailer) stored in the ROM, describing its contents.
 ; Ref [GridEprom D-3] for layout and description.

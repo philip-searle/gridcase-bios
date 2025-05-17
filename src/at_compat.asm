@@ -259,10 +259,16 @@ VidUnknown1	db	5Bh,44h,5Eh,68h,7Dh,5Fh,7Ch,4Dh		; What are these for?
 ; TODO: All the custom GRiD code for password, hard disk detection, etc. goes here
 ; ---------------------------------------------------------------------------
 
+; GRiD password and IDE Identify code is placed after the video constants.
+; We'll use a second code segment to hold the remainder of the at_compat code
+; and let the linker worry about putting it all in the correct place.
+[CODE2]	SEGMENT WIDTH=16, ALIGN=1, CLASS=CODE, PURPOSE=DATA|CODE, COMBINE=PUBLIC
+
+%XxxBase	%seta 0F841h
 
 ; ---------------------------------------------------------------------------
 ; [Compat] Int12 (memory size) must be at same location as the XT BIOS
-		FillRom	0F841h, 0FFh
+		;FillRom	0F841h, 0FFh
 Int12_Compat	jmpn	Int12_Actual
 
 ; ---------------------------------------------------------------------------

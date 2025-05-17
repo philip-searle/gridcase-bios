@@ -47,8 +47,10 @@ OBJECTS	:=	build/rom_header.obj \
 			build/grid_fd.obj \
 			build/grid_vid.obj \
 			build/int15_grid.obj \
+			build/grid_vid2.obj \
 			build/sysident.obj \
 			build/at_compat.obj \
+			build/grid_pw.obj \
 			build/rom_trailer.obj
 
 build/%.obj: %.asm
