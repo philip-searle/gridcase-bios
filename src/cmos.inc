@@ -48,6 +48,16 @@ CMOS_EXPMEM2_HIBYTE	equ	31h
 CMOS_CENTURY		equ	32h
 CMOS_INFORMATION	equ	33h
 
+CMOS_GRID_PASSWORD	equ	34h	; \
+;				35h	; | Not documented in [TechRef], but locations 34h
+;				36h	; | through 3Ch hold the eight-byte encrypted BIOS
+;				37h	; | boot password.
+;				38h	; |
+;				39h	; |
+;				3Ah	; |
+;				3Bh	; /
+;				3Ch	; ??? Not used
+;				3Dh	; ??? Not used
 CMOS_GRIDBACKLITE	equ	3Eh	; Not documented in [TechRef], but contains
 					; the backlight timeout for LCD systems
 
@@ -81,9 +91,16 @@ CMOS_INFO_RESERVED	equ	3Fh	; Reserved
 
 ; ---------------------------------------------------------------------------
 ; Flags stored in CMOS_GRIDFLAGS.
-; Specific to the GRiD 1520 BIOS. [TechRef 2-9]
+; Specific to the GRiD 1520 BIOS. [TechRef 2-9] only doucments lowest bit.
 GF_EMS			equ	01h	; use EMS instead of XMS
 GF_PASSWORD		equ	02h	; boot password enabled if set
+GF_PW_LANG_MASK		equ	0Ch	; two bits store password prompt language
+
+; ---------------------------------------------------------------------------
+; Valid values for the CMOS_GRIDFLAGS, bits GF_PW_LANG_MASK, shifted right by two.
+GF_PW_LANG_EN		equ	00h
+GF_PW_LANG_DE		equ	01h
+GF_PW_LANG_FR		equ	02h
 
 ; ---------------------------------------------------------------------------
 ; Valid values for the CMOS_FD_TYPE register (upper/lower nibble = FD0/FD1)

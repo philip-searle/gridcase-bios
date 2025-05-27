@@ -66,15 +66,6 @@ linker {
 		EoiPic1					=> F000:F53C
 		EoiPic1and2				=> F000:F543
 		DetectMemController		=> F000:F63D
-		PwEnabled				=> F000:F180
-		PwStartInput			=> F000:F1F2
-		PwPrompt				=> F000:F422
-		PwProcessInput			=> F000:F37B
-		PwEndInput				=> F000:F1D2
-		PwCompareStored			=> F000:F23A
-		PwBackdoor2				=> F000:F291
-		PwIncorrect				=> F000:F2D8
-		PwClearBuffer			=> F000:F27A
 		GridBootRom				=> F000:D88A
 		DriveIdentify			=> F000:F56F
 		IsExtFdIndex			=> F000:D92C

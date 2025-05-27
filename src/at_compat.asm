@@ -22,10 +22,6 @@ AT_COMPAT	PROGRAM	OutFile=build/at_compat.obj
 		PUBLIC	Copyr_Phoenix, Copyr_Phoenix2
 		PUBLIC	kConfigTable
 
-		; Symbols that are currently unused because the codebase is
-		; not yet complete.
-		Unused	VidUnknown1
-
 %XxxBase	%seta 0E000h
 
 ; ===========================================================================
@@ -252,12 +248,6 @@ VidRegenLengths	dw	2048,4096,16384,16384
 VidColumns	dw	2828h,5050h,2828h,5050h			; Not sure about these...
 
 VidModeSets	db	2Ch,28h,2Dh,29h,2Ah,2Eh,1Eh,29h
-
-VidUnknown1	db	5Bh,44h,5Eh,68h,7Dh,5Fh,7Ch,4Dh		; What are these for?
-
-; ---------------------------------------------------------------------------
-; TODO: All the custom GRiD code for password, hard disk detection, etc. goes here
-; ---------------------------------------------------------------------------
 
 ; GRiD password and IDE Identify code is placed after the video constants.
 ; We'll use a second code segment to hold the remainder of the at_compat code
