@@ -18,7 +18,7 @@ INT15_GRID	PROGRAM	OutFile=build/int15_grid.obj
 		EXTERN	DriveIdentify, HdAtSpinDown
 		EXTERN	GridConfig4B
 
-		PUBLIC	Int15_Grid
+		PUBLIC	Int15_Grid, GridBootRom, IsExtFdIndex
 
 ; =====================================================================
 ; Int15_Grid

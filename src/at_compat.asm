@@ -4,14 +4,15 @@ AT_COMPAT	PROGRAM	OutFile=build/at_compat.obj
 		include	"macros.inc"
 		include	"segments.inc"
 		include	"int13.inc"
+		include	"pic.inc"
 
 		EXTERN	Reset_Actual
 		EXTERN	IntNmi_Actual, HdAtInt13, Int19_Actual
 		EXTERN	Int14_Actual, Int16_Actual, Int9_Actual, Int13Fd_Actual
 		EXTERN	IntE_Actual, Int17_Actual, Int12_Actual, Int11_Actual
-		EXTERN	Int15_Actual, Int1A_Actual, Int8_Actual, EoiPic1
+		EXTERN	Int15_Actual, Int1A_Actual, Int8_Actual
 		EXTERN	UnexpectedInt, Int18, Int70, Int71, Int75, Int10_Actual
-		EXTERN	EoiPic1and2, PrntScrn_Actual
+		EXTERN	PrntScrn_Actual
 
 		PUBLIC	Reset_Compat, IntNmi_Compat, Int13Hd_Compat
 		PUBLIC	Int8_Compat, DisketteParams, FixedDiskParams
@@ -253,10 +254,38 @@ VidColumns	dw	2828h,5050h,2828h,5050h			; Not sure about these...
 
 VidModeSets	db	2Ch,28h,2Dh,29h,2Ah,2Eh,1Eh,29h
 
-; GRiD password and IDE Identify code is placed after the video constants.
-; We'll use a second code segment to hold the remainder of the at_compat code
+; GRiD password code is placed after the video constants.
+; We'll use a second code segment to hold the EOI functions
 ; and let the linker worry about putting it all in the correct place.
 [CODE2]	SEGMENT WIDTH=16, ALIGN=1, CLASS=CODE, PURPOSE=DATA|CODE, COMBINE=PUBLIC
+
+; ---------------------------------------------------------------------------
+; EoiPic1
+; Interrupt handler.  Sends a non-specific end-of-interrupt to PIC1.
+EoiPic1		PROC
+		push	ax
+		mov	al, NONSPECIFIC_EOI
+		out	PORT_PIC1_CTRL, al
+		pop	ax
+		iret
+		ENDPROC	EoiPic1
+
+; ---------------------------------------------------------------------------
+; EoiPic1and2
+; Interrupt handler.  Sends a non-specific end-of-interrupt to both PICs.
+EoiPic1and2	PROC
+		push	ax
+		mov	al, NONSPECIFIC_EOI
+		out	PORT_PIC2_CTRL, al
+		out	PORT_PIC1_CTRL, al
+		pop	ax
+		iret
+		ENDPROC	EoiPic1and2
+
+; GRiD IDE Identify, memory controller, and HD spindown code is placed after the
+; EOI function.  We'll use a third code segment to hold the remainder of the
+; at_compat code and let the linker worry about putting it all in the correct place.
+[CODE3]	SEGMENT WIDTH=16, ALIGN=1, CLASS=CODE, PURPOSE=DATA|CODE, COMBINE=PUBLIC
 
 %XxxBase	%seta 0F841h
 

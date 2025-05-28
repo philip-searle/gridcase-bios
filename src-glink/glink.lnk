@@ -63,12 +63,8 @@ output {
 
 linker {
 	define => {
-		EoiPic1					=> F000:F53C
-		EoiPic1and2				=> F000:F543
 		DetectMemController		=> F000:F63D
-		GridBootRom				=> F000:D88A
 		DriveIdentify			=> F000:F56F
-		IsExtFdIndex			=> F000:D92C
 		VidWinSelect			=> F000:B637
 		WaitHdSpinUp			=> F000:F685
 	}
@@ -131,8 +127,10 @@ linker {
 		#fill	{ to		=> F000:E000,			with => 0xFF					}
 		link	{ input		=> at_compat,			segment => CODE					}
 		link	{ input		=> grid_pw,				segment => CODE					}
-		fill	{ to		=> F000:F841			with => 0xFF					}
 		link	{ input		=> at_compat,			segment => CODE2				}
+		#link	{ input		=> grid_misc,			segment => CODE					}
+		fill	{ to		=> F000:F841			with => 0xFF					}
+		link	{ input		=> at_compat,			segment => CODE3				}
 		link	{ input		=> rom_trailer,			segment => CODE					}
 		end		{ }
 	]
