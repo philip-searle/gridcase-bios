@@ -761,7 +761,7 @@ Grid15Rom	PROC
 
 .rangeOk	push	di
 		push	si
-		mov	di, ax
+		mov_	di, ax
 		and	di, 0FFh
 		shl	di, 1
 		call	[cs:di+GridRomHandlers]

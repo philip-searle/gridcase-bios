@@ -105,7 +105,7 @@ PORT_APPROM_SELECT	equ	440h
 ; (-W) Possibly application ROM mapping start offset?
 PORT_APPROM_128K	equ	07FAh	; 1=128k ROM, 0=<128k ROM
 PORT_APPROM_MAPPING0	equ	07F8h	; selects ROM socket?
-PORT_APPROM_MAPPING1	equ	07FAh	; selects ROM socket?
+PORT_APPROM_MAPPING1	equ	07F9h	; selects ROM socket?
 
 ; ---------------------------------------------------------------------------
 ; (-W) Possibly application ROM mapping length/RM size
