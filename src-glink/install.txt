@@ -8,4 +8,4 @@ For production build:
   2. Install cpanfile.snapshot dependencies into a project-local directory: `carton install --deployment`
 
 To run application:
-  carton exec -- ./test.pl ../build/reset.obj
+  carton exec -- ./glink.pl ../build/reset.obj

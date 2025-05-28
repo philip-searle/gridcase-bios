@@ -59,6 +59,6 @@ build/%.obj: %.asm
 build/post/%.obj: post/%.asm
 	../euroasm/euroasm.exe $(input)
 
-build/bios.bin: $(OBJECTS) ../src-glink/glink.lnk ../src-glink/test.pl
+build/bios.bin: $(OBJECTS) ../src-glink/glink.lnk ../src-glink/glink.pl
 	cd ../src-glink && \
-	carton exec -- ./test.pl
+	carton exec -- ./glink.pl
