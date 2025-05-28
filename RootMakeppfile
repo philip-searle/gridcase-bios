@@ -2,7 +2,7 @@
 load-makefile src/Makeppfile
 
 $(phony all-hex): build/bios.hex build/original-1989-03-11.hex
-	echo -n Mismatched lines between original ROM and built ROM hex files: && \
+	@echo -n " ***  Mismatched lines between original ROM and built ROM hex files: " && \
 	diff -y --suppress-common-lines build/original-1989-03-11.hex build/bios.hex | wc -l
 
 $(phony all): build/bios.bin build/original-1989-03-11.bin
@@ -21,6 +21,5 @@ build/original-1989-03-11.hex: build/original-1989-03-11.bin
 	         build/original-1989-03-11.bin -Binary
 
 build/bios.hex: src/build/bios.bin
-	echo XXX
 	srec_cat -Output build/bios.hex \
 	         src/build/bios.bin -Binary
