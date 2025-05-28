@@ -9,7 +9,6 @@ SYSIDENT	PROGRAM	OutFile=build/sysident.obj
 ; ---------------------------------------------------------------------------
 ; System identification section at F000:DFD0
 ; ---------------------------------------------------------------------------
-		CompatAddress 0DFD0h
 
 		; EPROM part numbers, arranged so each split ROM has a unique number.
 		; 1520 BIOS EPROM part numbers differ in the final digit.
@@ -20,7 +19,6 @@ SYSIDENT	PROGRAM	OutFile=build/sysident.obj
 
 		; [Public] 0F000h:0DFFEh == 34h
 		; [TechRef] 3-26 "System Identification"
-GridSysId	CompatAddress 0DFFEh
-		dw	0034h
+GridSysId	dw	0034h
 
 ENDPROGRAM	SYSIDENT

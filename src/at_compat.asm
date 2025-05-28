@@ -22,6 +22,13 @@ AT_COMPAT	PROGRAM	OutFile=build/at_compat.obj
 		PUBLIC	Copyr_Phoenix, Copyr_Phoenix2
 		PUBLIC	kConfigTable
 
+		PUBLIC_COMPAT	Copyr_Compat
+		PUBLIC_COMPAT	Int9_Compat, IntE_Compat, Int10_Compat
+		PUBLIC_COMPAT	Int11_Compat, Int12_Compat, Int13Fd_Compat
+		PUBLIC_COMPAT	Int15_Compat, Int14_Compat, Int16_Compat
+		PUBLIC_COMPAT	Int17_Compat, Int19_Compat, Int1A_Compat
+		PUBLIC_COMPAT	VidModeTable
+
 %XxxBase	%seta 0E000h
 
 ; ===========================================================================
@@ -45,8 +52,7 @@ AT_COMPAT	PROGRAM	OutFile=build/at_compat.obj
 ;          The purpose of the 08ah and 0c3h are currently unknown (the AT BIOS
 ;          had spaces in those locations).  Maybe for programs that checksummed
 ;          the copyright message?
-Copyr_Compat	CompatAddress	0E000h
-		d	13 * byte 0FFh
+Copyr_Compat	d	13 * byte 0FFh
 		db	08Ah, 'IBM', 0C3h
 		d	4 * byte 0FFh
 
@@ -171,7 +177,6 @@ BaudRateInit	dw	1047	; 100 Baud
 ; ---------------------------------------------------------------------------
 
 ; [Compat] Int14 (serial I/O) entrypoint must be the same place as the XT BIOS
-		CompatAddress 0E739h
 Int14_Compat	jmpn	Int14_Actual
 
 ; ---------------------------------------------------------------------------
@@ -217,7 +222,6 @@ DisketteParams	db	0DFh	; 1st specify byte
 ; ---------------------------------------------------------------------------
 
 ; [Compat] Int17 (printer services) must be same location as the XT BIOS
-		CompatAddress 0EFD2h
 Int17_Compat	jmpn	Int17_Actual
 
 ; ---------------------------------------------------------------------------
@@ -282,7 +286,6 @@ INCLUDE		"graphics_charset.asm"
 
 ; ---------------------------------------------------------------------------
 ; [Compat] Int1A (timer) must be in the same location as the XT BIOS
-		CompatAddress 0FE6Eh
 Int1A_Compat	jmpn	Int1A_Actual
 
 ; ---------------------------------------------------------------------------
@@ -340,7 +343,6 @@ SoftwareIret	iret
 
 ; ---------------------------------------------------------------------------
 ; [Compat] Print screen handler is called by applications; don't move it
-		CompatAddress 0FF54h
 PrntScrn_Compat	jmpn	PrntScrn_Actual
 
 

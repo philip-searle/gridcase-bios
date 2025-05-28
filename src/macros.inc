@@ -22,16 +22,19 @@ FillRom		%macro
 		%endmacro
 
 ; ---------------------------------------------------------------------
-; CompatAddress address
+; PUBLIC_COMPAT symbol [, symbol...]
 ;
-; Raises an error if the current assembly location is not equal to the address
-; provided.  Meant to prevent items that have fixed addresses due to external
-; compatibility constraints from shifting around by accident.
-CompatAddress	%macro
-%here		%seta %XxxBase + offset#$
-		%if %1 != %here
-		;%error Compatibility constraint failed: %00 must be at %1 but was at %here
-		%endif
+; Makes the supplies symbols available as PUBLIC exports, but with the
+; name prefixed with a tilde (~).  Intended for symbols which aren't
+; intended to be referenced from other BIOS modules, but which need to
+; be made available so the linker can assert that their addresses
+; match publicly-known values.
+PUBLIC_COMPAT	%macro
+symbol		%for 1..%#
+~%1		equ	%1
+		PUBLIC	~%1
+		%shift
+		%endfor
 		%endmacro
 
 ; ---------------------------------------------------------------------

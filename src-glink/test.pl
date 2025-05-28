@@ -20,7 +20,7 @@ my $log = Debug::Easy->new(
 		'ERR'      => colored(['white on_red'],			'[ ERROR ]'),
 		'WARN'     => colored(['black on_yellow'],		'[WARNING]'),
 		'NOTICE'   => colored(['black on_green'],		'[NOTICE ]'),
-		'INFO'     => colored(['black on_white'],		'[ INFO  ]'),
+		'INFO'     => colored(['white on_black'],		'[ INFO  ]'),
 		'DEBUG'    => colored(['bold green'],			'[ DEBUG ]'),
 		'DEBUGMAX' => colored(['bold black on_green'],	'[DEBUGMX]'),
 	}
@@ -490,6 +490,30 @@ sub predefine_symbols {
 
 # ---------------------------------------------------------------------
 
+sub verify_asserts {
+	my $assertions_failed = 0;
+	my $asserts = $config->{linker}{assert};
+
+	while (my ($symbol, $expected_address) = each %{ $asserts }) {
+		my $resolved_symbol = $resolved_symbols{$symbol} || $resolved_symbols{"~$symbol"};
+		if (!defined $resolved_symbol) {
+			$log->WARN("Symbol not found for assertion: $symbol = $expected_address");
+			$assertions_failed++;
+			next;
+		}
+		if (OMF::Address->parse($expected_address) != $resolved_symbol->address) {
+			$log->WARN("Symbol $symbol expected at $expected_address but was at " . $resolved_symbol->address);
+			$assertions_failed++;
+			next;
+		}
+	}
+
+	LOGDIE("Compatibility assertions failed: $assertions_failed") unless $assertions_failed == 0;
+	$log->INFO("Assertions passed: " . %{ $asserts });
+}
+
+# ---------------------------------------------------------------------
+
 sub main {
 	$log->NOTICE('Predefining symbols');
     predefine_symbols;
@@ -504,8 +528,8 @@ sub main {
 	$log->NOTICE('Writing output file');
     write_output;
 
-	$log->WARN('Asserts not yet implemented');
-	#verify_asserts;
+	$log->NOTICE('Verifying assertions');
+	verify_asserts;
 }
 
 # ---------------------------------------------------------------------
