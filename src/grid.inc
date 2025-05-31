@@ -51,6 +51,9 @@ GRID_BKPL_90	equ	90h	; 9  =	1.44MB	None	AT-compatible (subtypes 5/6/7/8 identifi
 ; GRiD hard disk autodetect values
 ; 				  Iface	BIOS		SpinDown
 ; 				   Type	Type	 Size	Support		Notes
+GRID_HD_UNKNOWN	equ	0	;    N/A
+GRID_HD_1	equ	1	;    XT
+GRID_HD_2	equ	2	;    XT
 GRID_HD_3	equ	3	;    XT
 GRID_HD_4	equ	4	;    AT   17	 40MB	No
 GRID_HD_5	equ	5	;    AT    2	 20MB	Yes

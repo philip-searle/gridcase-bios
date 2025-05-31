@@ -52,6 +52,7 @@ input {
 		../src/build/sysident.obj
 		../src/build/at_compat.obj
 		../src/build/grid_pw.obj
+		../src/build/grid_misc.obj
 		../src/build/rom_trailer.obj
 	]
 }
@@ -128,7 +129,7 @@ linker {
 		link	{ input		=> at_compat,			segment => CODE					}
 		link	{ input		=> grid_pw,				segment => CODE					}
 		link	{ input		=> at_compat,			segment => CODE2				}
-		#link	{ input		=> grid_misc,			segment => CODE					}
+		link	{ input		=> grid_misc,			segment => CODE					}
 		fill	{ to		=> F000:F841			with => 0xFF					}
 		link	{ input		=> at_compat,			segment => CODE3				}
 		link	{ input		=> rom_trailer,			segment => CODE					}

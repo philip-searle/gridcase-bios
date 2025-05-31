@@ -13,7 +13,7 @@ INT13_GRID	PROGRAM	OutFile=build/int13_grid.obj
 		EXTERN	HdAtDecideError
 		EXTERN	HdAtWaitTask
 
-		PUBLIC	HdAtSpinDown
+		PUBLIC	HdAtIdentify, HdAtSpinDown
 
 ; ===========================================================================
 ; HdAtSpinDown [TechRef 3-25]
@@ -107,6 +107,9 @@ HdAtSpinDown	PROC
 ; ===========================================================================
 ; HdAtIdentify
 ; Requests identifying information from the hard disk drive.
+;
+; On return:
+;   ES:DI -> bytes 1Ch-
 ; ===========================================================================
 HdAtIdentify	PROC
 		; Allocate buffer for drive identity (in BP)
@@ -175,19 +178,19 @@ HdAtIdentify	PROC
 
 		; Read (and ignore) the first 1Bh words
 		mov	dx, PORT_HD_AT_DATA
-		mov	cx, 1Bh
+		mov	cx, IdentifyDrive.modelNumber / 2
 .readLoop1	in	ax, dx
 		loop	.readLoop1
 
 		; Read (and store) the next 11h words
-		mov	cx, 11h
+		mov	cx, GRID_IDENTIFY_DRIVE_MODEL_BYTES / 2
 .readLoop2	in	ax, dx
 		xchg	ah, al	; disk controller reports data byteswapped
 		stosw
 		loop	.readLoop2
 
 		; Read (and ignore) the remainder of the sector buffer
-		mov	cx, 0D4h
+		mov	cx, (SIZE#IdentifyDrive - IdentifyDrive.modelNumber - GRID_IDENTIFY_DRIVE_MODEL_BYTES) / 2
 .readLoop3	in	ax, dx
 		loop	.readLoop3
 

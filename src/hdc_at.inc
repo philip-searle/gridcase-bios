@@ -67,3 +67,33 @@ HD_AT_DIGOUT_SRST	equ	004h	; System software reset
 ; Documented as "not used by the GRiDCase 1500 Series computers".
 ; No definition given for its contents.
 PORT_HD_AT_DRIVEADDR	equ	3F7h
+
+; Layout of 512-byte buffer returned by the IDENTIFY DRIVE command.
+; Ref: Conner CP3022 specification, Fev 1988.
+IdentifyDrive	struc
+.magic		d w	; Constant 0A5Ah
+.cylFixed	d w	; Number of fixed cyliners
+.cylRemovable	d w	; Number of removable cylinders
+.heads		d w	; Number of heads
+.bytesPerTrk	d w	; Number of unformatted bytes/physical track
+.bytesPerSector	d w	; Number of unformatted bytes/sector
+.sectorsPerTrk	d w	; Number of physical sectors/track
+.syncGapSize	d w	; Number of bytes in the inter-sector gaps
+.syncFieldSize	d w	; Number of bytes in the sync fields
+.zero		d w	; 0000
+.serialNumber	d 10* w	; Serial number
+.controllerType	d w	; 1 == single ported sector buffer
+.bufferSize	d w	; Controller buffer size in 512 byte increments
+.eccBytes	d w	; Number of ECC bytes passed on r/w long commands
+.firmwareRev	d 4 * w	; Controller firmware revision
+.modelNumber	d 20* w	; Model number
+.sectorsPerInt	d w	; Number of sectors/interrupt (0 == does not support > 1)
+.dwordTransfer	d w	; Double word transfer support (1 == capable)
+.reserved	d 207 * w
+		endstruc
+
+; When HdAtIdentify reads the model number from the IDENTIFY DRIVE
+; response it ignores the last few words.  Unsure why: the Conner
+; drive specification clearly shows that field to be 20 words long
+; yet it only reads 17.
+GRID_IDENTIFY_DRIVE_MODEL_BYTES equ 34
