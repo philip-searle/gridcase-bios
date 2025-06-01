@@ -24,7 +24,7 @@ RESET		PROGRAM	OutFile=build/reset.obj
 		EXTERN	UnexpectedInt, IntNmi_Compat, PrntScrn_Compat, SoftwareIret, Int8_Compat
 		EXTERN	VidInit, VidInitBacklite
 		EXTERN	VidTestMem, TestAllMem, TestMemData, TestMemLoAddr
-		EXTERN	DetectMemController, DetectMemSize, MemSetXmsEms
+		EXTERN	DetectMemC, DetectMemSize, MemSetXmsEms
 		EXTERN	ChecksumBios, ChecksumRom, InitOptionRoms, CheckParityErr
 		EXTERN	SerDetectPort, ParDetectPort
 		EXTERN	TestDmaRegs, TestPicMaskReg

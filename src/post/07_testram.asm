@@ -59,7 +59,7 @@ POST07_TestRam	PROC
 .l1		mov	ax, cs			; load a fake return stack to handle
 		mov	ss, ax			; the checking the first 64KB of RAM
 		mov	sp, .returnStack1
-		jmpn	DetectMemController
+		jmpn	DetectMemC
 
 .loc_F8387	jnb	.memc1M			; TODO: where does this come from?
 .memc256K	mov	dx, PORT_PAR_PORTC_R

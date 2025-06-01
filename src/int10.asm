@@ -11,7 +11,7 @@ INT10		PROGRAM	OutFile=build/int10.obj
 		EXTERN	MakeIsrStack, UnmakeIsrStack, UnmakeIsrStack2
 		EXTERN	GridVidInitHi, GridVidInitLo
 		EXTERN	VidRegenLengths, VidColumns, VidModeSets
-		EXTERN	VidReadLightpen, VidWinSelect
+		EXTERN	VidReadLightpen
 		EXTERN	GraphicsChars
 		EXTERN	kCrLf, ConString2
 
@@ -26,7 +26,7 @@ Int10.handlers		dw	VidSetMode
 			dw	VidSetCursorPos
 			dw	VidGetCursorPos
 			dw	VidReadLightpen
-			dw	VidWinSelect
+			dw	VidPageSelect
 			dw	VidWinScrollUp
 			dw	VidWinScrollDn
 			dw	VidReadCell

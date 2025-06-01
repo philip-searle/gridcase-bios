@@ -133,7 +133,7 @@ POST17_ProtMode	PROC
 
 ; ---------------------------------------------------------------------------
 ; Configure the memory controller based on the detected memory size
-		call	DetectMemController
+		call	DetectMemC
 		mov	al, 0
 		jnb	.ramc1M		; 1MB or 256KB memory controller?
 

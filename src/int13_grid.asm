@@ -107,9 +107,6 @@ HdAtSpinDown	PROC
 ; ===========================================================================
 ; HdAtIdentify
 ; Requests identifying information from the hard disk drive.
-;
-; On return:
-;   ES:DI -> bytes 1Ch-
 ; ===========================================================================
 HdAtIdentify	PROC
 		; Allocate buffer for drive identity (in BP)

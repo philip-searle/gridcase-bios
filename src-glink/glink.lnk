@@ -64,10 +64,7 @@ output {
 
 linker {
 	define => {
-		DetectMemController		=> F000:F63D
-		DriveIdentify			=> F000:F56F
-		VidWinSelect			=> F000:B637
-		WaitHdSpinUp			=> F000:F685
+	#	Symbol				=>	Segm:Offs
 	}
 	script => [
 		advance	{ to 		=> 0000:0000											}

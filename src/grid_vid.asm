@@ -7,7 +7,7 @@ GRID_VID	PROGRAM	OutFile=build/grid_vid.obj
 		include	"v6366.inc"
 
 		EXTERN	VidLoadColMapExpRegs, VidInitColMap
-		EXTERN	TenthMilliDelay, WaitHdSpinUp
+		EXTERN	TenthMilliDelay, HdWaitSpinUp
 
 		PUBLIC	GridVidInitLo, GridVidInitHi
 		PUBLIC	GridToggleExt
@@ -747,7 +747,7 @@ VidInit		PROC
 		jmp	.leaveFunction
 		FillerNop
 
-.plasmaScreen	call	WaitHdSpinUp	; ???
+.plasmaScreen	call	HdWaitSpinUp	; ???
 
 		mov	ax, CGA_REGEN_SEG
 		mov	es, ax
