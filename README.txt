@@ -5,10 +5,12 @@ This is a work-in-progress project to create a documented assembly listing of
 the GRiDCase 1520 BIOS that can be assembled into a byte-identical image of the
 original ROMs.
 
-Current progress is ~85% complete.
+As of commit 6275509ec2ae56762f64cc711beffe5b96b138b5 (2025-06-01) it builds a
+bit-perfect image of the 1989-03-11 BIOS ROM.
 
-Once completed, I hope to go back to the two earlier BIOS images that have been
-dumped and figure out what the differences are.
+Once documentation of this image is complete, I hope to go back to the two
+earlier BIOS images that have been dumped and figure out what the differences
+are.
 
 This project is using EuroAssembler (<https://euroassembler.eu/eadoc/>),
 MakePP (<http://makepp.sourceforge.net/>), and Perl 5.
