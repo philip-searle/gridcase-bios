@@ -241,7 +241,7 @@ RtcSetDate	PROC
 		mov	ah, CMOS_CENTURY | NMI_ENABLE
 		mov_	al, ch
 		call	WriteCmos
-		; re-enbable clock updates
+		; re-enable clock updates
 		mov	al, CMOS_STATUS_B | NMI_ENABLE
 		mov_	ah, al
 		call	ReadCmos

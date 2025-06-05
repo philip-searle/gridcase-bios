@@ -1,0 +1,32 @@
+NAMING AND NAMES
+================
+
+With a few exceptions, procedure names are restricted to 15 characters
+so that they will not cause code to be unnecessarily indented (assuming
+a two-tab indent).  There are a few common prefixes that are used to
+group procedures by subsystem:
+
+Prefix		Subsystem
+-----------------------------------------------------------
+A20		Address line 20 control
+Cmos		Nonvolatile memory in the RTC chip
+Con		Console output to the screen
+Fd		Floppy disk controller
+Grid		GRiD-specific features
+Hd		Hard drive, not specific to AT/XT types
+HdAt		AT ("compatible") hard drive
+HdXt		XT ("non-compatible") hard drive
+Int		Interrupt handler
+Kb		PS/2 keyboard
+Par		Parallel ports
+Pm		Protected-mode
+POST		Power-on self-test
+Pw		GRiD BIOS boot password
+Rtc		Date/time/alarm in the RTC chip
+SDH		Shutdown handlers for recovering from reset
+Ser		Serial ports
+Sys		Int15 interrupt handlers
+Test		Hardware functinoality tests
+Vid		Video functions
+VidGrap		Graphical mode video functions
+VidInit		Video controller initialisation

@@ -7,7 +7,7 @@ is normally done with a Windows Subsystem for Linux (WSL2) Debian setup.
 
 One-time setup:
 
- * sudo apt-get perl cpanminus makepp srecord unzip
+ * sudo apt-get install perl cpanminus makepp srecord unzip
  * sudo cpanm Carton
  * cd src-glink; carton install --deployment; cd ..
 

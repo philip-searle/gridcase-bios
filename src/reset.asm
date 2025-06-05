@@ -131,7 +131,7 @@ Reset_Actual	PROC
 		mov	al, CMOS_SHUTDOWN_REASON | NMI_DISABLE
 		out	PORT_CMOS_ADDRESS, al
 		Delay	2
-		in	al, PORT_CMOS_DATA	; read shutdown reason form CMOS
+		in	al, PORT_CMOS_DATA	; read shutdown reason from CMOS
 		mov_	ah, al			; store it for later comparisons
 .l1		Delay	2
 
@@ -281,20 +281,22 @@ SDH_POST	PROC
 		mov	dx, PORT_UNKNOWN_426	; unnecessary reload of dx?
 		mov	al, 0			; set port 426 to 0
 		out	dx, al
-		mov	dx, PORT_XMS_ENABLE
-		mov	al, 1			; set port FFF to 1
-		out	dx, al
+		mov	dx, PORT_XMS_ENABLE	; POST code requires easy access
+		mov	al, 1			; to hi-RAM so map it as XMS
+		out	dx, al			; instead of EMS
 
-		; Default to outputting video to the external D-sub connector
+		; Default to outputting video to the external D-sub connector.
+		; Also make sure the application ROMs aren't mapped over the
+		; video RAM (might still be enabled from pre-reboot).
 		mov	dx, PORT_ROM_SUBSYSTEM1
-		mov	al, 0			; reset ROM subsystem ???
+		mov	al, 0
 		out	dx, al
 		mov	dx, PORT_VID_EXTERNAL
 		mov	al, VID_EXTERNAL_ENABLE
 		out	dx, al
 
 ; ---------------------------------------------------------------------------
-; Check for undocumented shutdown reason 0FCh -- maybe BIOS password?
+; ??? Check for undocumented shutdown reason 0FCh -- maybe BIOS password?
 		cmp	ah, SD_UNKNOWN_FC
 		jz	.l2
 		mov	[ds:SoftResetFlag], 0	; mark it as not a soft reset?
@@ -348,7 +350,7 @@ SDH_POST	PROC
 		out	PORT_DIAGNOSTICS, al
 		call	TestAllMem
 .warmBoot	call	HdDetect70	; ???
-		call	KbWaitEmpty		; consume any keypresses that skipped the memtest
+		call	KbWaitEmpty	; consume any keypresses that skipped the memtest
 
 ; ---------------------------------------------------------------------------
 ; We're ready for the timer and keyboard to be processed normally via interrupts
@@ -434,7 +436,7 @@ SDH_POST	PROC
 
 ; ---------------------------------------------------------------------------
 ; If POST checks resulted in a critically important message, prompt the user
-; to
+; to press F1 to acknowledge it.
 .pastKbLock	test	[SoftResetFlag], CRITICAL_ERR_FLAG,DATA=BYTE	; lowest bit set (important message)?
 		jz	.pastF1Prompt
 		call	PromptF1Cont		; make sure user has read POST messages
@@ -466,7 +468,7 @@ SDH_POST	PROC
 
 		; Issue FNSTCW, wait a bit, and see if it wrote the expected value.
 		; We can't use the no-wait version because if an NPU is not
-		; present then we will lockup waiting for it to response.
+		; present then we will lockup waiting for it to respond.
 		mov_	bp, sp			; point BP to word we just reserved
 		fnstcw	[bp+0]			; store NPU control word
 		Delay	4
@@ -493,7 +495,7 @@ SDH_POST	PROC
 
 		; If we make it here, the NPU appears to be present and functioning
 		; as expected.  Mark it as available for user code.
-		or	[EquipmentWord], 2,DATA=BYTE	; set 'NPU present bit
+		or	[EquipmentWord], 2,DATA=BYTE	; set 'NPU present' bit
 		and	al, ~IRQ_NPU			; unmask coprocessor interrupt
 
 .afterNpuInit	; Unreserve word from stack. Note that this doesn't pop to
