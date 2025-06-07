@@ -20,6 +20,9 @@ build/original-1989-03-11.hex: build/original-1989-03-11.bin
 	srec_cat -Output build/original-1989-03-11.hex \
 	         build/original-1989-03-11.bin -Binary
 
-build/bios.hex: src/build/bios.bin
+build/bios.bin: src/build/bios.bin
+	cp src/build/bios.bin build/
+
+build/bios.hex: build/bios.bin
 	srec_cat -Output build/bios.hex \
 	         src/build/bios.bin -Binary

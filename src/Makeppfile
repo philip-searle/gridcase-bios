@@ -54,10 +54,10 @@ OBJECTS	:=	build/rom_header.obj \
 			build/grid_misc.obj \
 			build/rom_trailer.obj
 
-build/%.obj: %.asm
+build/%.obj %.asm.lst: %.asm
 	../euroasm/euroasm.exe $(input)
 
-build/post/%.obj: post/%.asm
+build/post/%.obj post/%.asm.lst: post/%.asm
 	../euroasm/euroasm.exe $(input)
 
 build/bios.bin: $(OBJECTS) ../src-glink/glink.lnk ../src-glink/glink.pl
