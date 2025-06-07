@@ -49,17 +49,17 @@ GRID_BKPL_90	equ	90h	; 9  =	1.44MB	None	AT-compatible (subtypes 5/6/7/8 identifi
 
 ; ---------------------------------------------------------------------------
 ; GRiD hard disk autodetect values
-; 				  Iface	BIOS		SpinDown
-; 				   Type	Type	 Size	Support		Notes
-GRID_HD_UNKNOWN	equ	0	;    N/A
+;                                 Iface BIOS            SpinDown
+;                                  Type Type     Size   Support         Notes
+GRID_HD_UNKNOWN	equ	0	;   N/A
 GRID_HD_1	equ	1	;    XT
 GRID_HD_2	equ	2	;    XT
 GRID_HD_3	equ	3	;    XT
-GRID_HD_4	equ	4	;    AT   17	 40MB	No
-GRID_HD_5	equ	5	;    AT    2	 20MB	Yes
-GRID_HD_6	equ	6	;    AT   17	 40MB	Yes
-GRID_HD_7	equ	7	;    AT  224	100MB	No		*1
-GRID_HD_9	equ	9	;    AT   17	 40MB	Yes
+GRID_HD_4	equ	4	;    AT   17     40MB   No
+GRID_HD_5	equ	5	;    AT    2     20MB   Yes
+GRID_HD_6	equ	6	;    AT   17     40MB   Yes
+GRID_HD_7	equ	7	;    AT  224    100MB   No              *1
+GRID_HD_9	equ	9	;    AT   17     40MB   Yes
 
 ; *1 Drive may support power commands but [TechRef 3-25] claims it is
 ;    not supported in the BIOS because the disk's mass would consume

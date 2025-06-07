@@ -1382,19 +1382,19 @@ HdXtDriveIndex	PROC
 ; FIXED_DISK_PARAMS_XT instances for the three supported XT-compatible hard
 ; drives.  From [TechRef 9-33] [TechRef 9-40]:
 ;
-; GRiD				Supported	Sectors
-; Option	HDC Model	Disk Drive	/Track	Heads	Cylinders
-;    320 (MFM)	JVC 5523-1	10MB JVC	    17	    2	      612
-;    321 (RLL)	JVC 5523-2	20MB JVC	    34	    2	      615
-;    321 (RLL)	JVC 5523-3	20MB ALPS	    34	    2	      615
+; GRiD                          Supported       Sectors
+; Option        HDC Model       Disk Drive      /Track  Heads   Cylinders
+;    320 (MFM)  JVC 5523-1      10MB JVC            17      2         612
+;    321 (RLL)  JVC 5523-2      20MB JVC            34      2         615
+;    321 (RLL)  JVC 5523-3      20MB ALPS           34      2         615
 ;
 ; Note that this doesn't match the table embedded in the BIOS here -- there's
 ; an additional 5MB drive supported as well.
 ; ALso note that cylinder numbers are reduced by two when reported via
 ; int13/08h because they are reserved for drive diagnostics.
 ; ===========================================================================
-;				        rwc   wp     ctrl  |---timeout---|
-;				cyl hd  cyl  cyl ecc byte  std   fmt   chk spt
+;                                       rwc   wp     ctrl  |---timeout---|
+;                               cyl hd  cyl  cyl ecc byte  std   fmt   chk spt
 FDS_XT_F6	FDS_XT_INSTANCE	612, 2, 306,   0, 11, 05h, 30h, 0FFh, 0FFh, 17	; 5MB
 FDS_XT_FE	FDS_XT_INSTANCE	612, 4, 612,   0, 11, 05h, 30h, 0FFh, 0FFh, 17	; 20MB
 FDS_XT_DEFAULT	FDS_XT_INSTANCE	612, 2, 612, 356, 11, 05h, 30h, 0FFh, 0FFh, 34	; 10MB

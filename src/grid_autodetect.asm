@@ -196,8 +196,8 @@ BackplFdType	%macro
 ;  8 * PRINTER_STATB_3OR5 --------------------------------------------+ | |
 ; 16 * PRINTER_STATB_BORA ------------------------------------------+ | | |
 ; 32 * PRINTER_STATC_EFLOPPY -------------------------------------+ | | | |
-;								  | | | | |
-;				Fd0		Fd1		  v v v v v
+;                                                                 | | | | |
+;                               Fd0             Fd1               v v v v v
 BackplFdTypes	BackplFdType	FD_5_360K,	FD_NONE		; . . . . 0
 		BackplFdType	FD_5_360K,	FD_3_1M		; . . . . 1
 		BackplFdType	FD_5_360K,	FD_3_1M		; . . . . 2
