@@ -1,3 +1,37 @@
+PROJECT ORGANISATION
+====================
+
+build/
+	Output directory for built ROM image (.bin and .hex).
+
+euroasm/
+	Extracted contents of the EuroAssembler ZIP file.
+	The EuroAssembler license permits distribution only as an
+	unmodified ZIP file, so we extract the contents at build time.
+
+original-roms/
+	Images dumped from actual GRiD 1520 ROM chips.
+
+src/
+	Source code for the 1520 BIOS.
+
+src/build/
+	Output directory for .obj files.
+
+src/post/
+	Source code for the power-on self-test portion of the BIOS.
+
+src/segments
+	Data layout definitions for the PC's interrupt vector table and
+	the BIOS data area.
+
+src-glink/
+	Perl code implementing a minimal linker that takes 16-bit OMF
+	files and input and links them into a binary ROM image.
+
+src-scripts/
+	Random Perl scripts that aren't part of the main BIOS build.
+
 NAMING AND NAMES
 ================
 
