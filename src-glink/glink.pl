@@ -233,7 +233,7 @@ sub process_script_fill {
     my $data = chr(hex($with)) x $length;
     my $ledata = LogicalEnumeratedData(offset => 0, length => $length, data => $data, fixups => [], owning_omf_file => undef, segment_index => 0);
     my $segment_name = 'FILL' . @segments_to_write;
-    my $unique_name = "!$segment_name";
+    my $unique_name = "FILL!$segment_name";
     my $fill_segment = SegmentDef(type => $SEGMENT_TYPE{relocatable_byte_lseg},
         length => $length, combine => 'PRIVATE',
         segment_name => $segment_name,
