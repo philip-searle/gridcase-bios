@@ -1,9 +1,9 @@
 Building the GRiD 1520 BIOS
 ---------------------------
 
-The build process assumes a Linux environment that can also run the
-euroasm.exe assembler.  This might be possible with Wine, but development
-is normally done with a Windows Subsystem for Linux (WSL2) Debian setup.
+The build process assumes an environment environment that run the Linux
+version of the EuroASM assembler (euroasm.x).  Development is normally
+done with a Windows Subsystem for Linux (WSL2) Debian setup.
 
 One-time setup:
 
@@ -14,14 +14,27 @@ One-time setup:
 For each build, execute "makepp" from the top-level directory.
 This will:
 
- * Extract EuroASM from its distribution archive.
- * Use EuroASM to assemble .asm files into OMF .obj files in the src/build directory.
- * Use the Perl script in src-glink to link the .obj files into a BIOS image.
- * Converts the binary image into an Intel HEX text file.
- * Compares the HEX file to the original BIOS HEX file, reporting the number of mismatched lines.
+ * Setup EuroASM
+   * Extract EuroASM from its distribution archive.
+   * Patch EuroASM so it can assemble source from symbolic links as well
+     as ordinary files.
+   * Assemble and link EuroASM into the tools/ directory.
+ * For each supported version of the BIOS, it will:
+   * Use makepp's repository feature to link required source files into
+     the appropriate build/bios-*/ directory.
+   * Use EuroASM to assemble the .asm files into OMF .obj files.
+   * Use the Perl script in src-glink to link the .obj files into a BIOS image.
+   * Converts the binary image into an Intel HEX text file.
+   * Compares the HEX file to the original BIOS HEX file, reporting the number
+     of mismatched lines.
 
-The output files are:
+The output files are (for each version of the BIOS, in build/bios-*/):
 
- * src/build/bios.bin	- Binary BIOS image.
- * src/build/bios.map	- Listing of symbols and their final addresses in the built image.
- * src/build/*.asm.lst	- Assembler listing for individual modules.
+ * bios.bin		- Binary BIOS image.
+ * bios.hex		- Intel HEX version of BIOS image.
+ * bios.map		- Listing of symbols and their final addresses in the
+                          built image.
+ * *.asm.lst		- Assembler listing for individual modules.
+ * original-bios.bin	- Binary image of original BIOS, dumped from GRiD
+			  hardware.
+* original-bios.hex	- Intel HEX version of original BIOS image.

@@ -1,0 +1,2 @@
+tools/glink		text	eol=lf
+tools/*.diff	text	eol=crlf

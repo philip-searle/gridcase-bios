@@ -1,7 +1,18 @@
 
-build/
+# Resolved CPAN dependencies
 src-glink/local/
+
+# Makepp build metadata cache
 .makepp/
+
+# IDE settings
 .vscode/
-euroasm/
-*.asm.lst
+
+# Locally built tools
+tools/euroasm/
+tools/euroasm.x
+
+# Ignore built files and symlinks from makepp repositories
+# But do track the makefile that drives the build
+build/bios-*/*
+!build/bios-*/Makeppfile

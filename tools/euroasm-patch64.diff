@@ -1,0 +1,12 @@
+888,889c888,895
+<           CMP [RSI+DIRENT64.d_type],DT_REG
+<           JNE .NoMatch:                      ; Skip sockets, pipes, devices and other nonregular files.
+---
+> ; gridcase-bios patch start
+>           CMP [RSI+DIRENT64.d_type],DT_REG   ; Accept regular files
+>           JE .DirEntTypeOk
+>           CMP [RSI+DIRENT64.d_type],DT_LNK   ; Accept symbolic links
+>           JE .DirEntTypeOk
+>           JMP .NoMatch                       ; All other types not acceptable
+> .DirEntTypeOk:
+> ; gridcase-bios patch end

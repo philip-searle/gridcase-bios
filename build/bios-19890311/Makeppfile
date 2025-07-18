@@ -1,0 +1,18 @@
+
+repository ../../src-bios/bios
+repository ../../src-bios/bios-19890311
+repository original-roms=../../original-roms/1989-03-11
+
+$(phony build-19890311): bios.hex original-bios.hex
+	@echo " \n ********************************************************************** "
+	@echo -n " Mismatched lines between original ROM and built ROM hex files:\n "
+	@noecho diff -y --suppress-common-lines original-bios.hex bios.hex | wc -l
+	@echo " ********************************************************************** \n"
+
+original-bios.bin original-bios.hex: original-roms/even-7a00.bin original-roms/odd-2f00.bin
+	srec_cat -Output original-bios.bin -Binary \
+		original-roms/even-*.bin -Binary -unsplit 2 0 \
+		original-roms/odd-*.bin -Binary -unsplit 2 1
+	srec_cat -Output original-bios.hex original-bios.bin -Binary
+
+include Makeppfile.mk

@@ -1,28 +1,6 @@
 
-load-makefile src/Makeppfile
+# Define tools for other makefiles to use
+global EUROASM := $(absolute_filename tools/euroasm.x)
+global GLINK := $(absolute_filename tools/glink)
 
-$(phony all-hex): build/bios.hex build/original-1989-03-11.hex
-	@echo -n " ***  Mismatched lines between original ROM and built ROM hex files: " && \
-	diff -y --suppress-common-lines build/original-1989-03-11.hex build/bios.hex | wc -l
-
-$(phony all): build/bios.bin build/original-1989-03-11.bin
-
-euroasm/euroasm.exe: euroasm.*.zip
-	unzip euroasm.*.zip -d euroasm/
-	chmod +x euroasm/euroasm.exe
-
-build/original-1989-03-11.bin: original-roms/1989-03-11/even-7a00.bin original-roms/1989-03-11/odd-2f00.bin
-	srec_cat -Output build/original-1989-03-11.bin -Binary \
-	         original-roms/1989-03-11/even-7a00.bin -Binary -unsplit 2 0 \
-	         original-roms/1989-03-11/odd-2f00.bin -Binary -unsplit 2 1
-
-build/original-1989-03-11.hex: build/original-1989-03-11.bin
-	srec_cat -Output build/original-1989-03-11.hex \
-	         build/original-1989-03-11.bin -Binary
-
-build/bios.bin: src/build/bios.bin
-	cp src/build/bios.bin build/
-
-build/bios.hex: build/bios.bin
-	srec_cat -Output build/bios.hex \
-	         src/build/bios.bin -Binary
+$(phony build-all): build/bios-19890311/build-19890311

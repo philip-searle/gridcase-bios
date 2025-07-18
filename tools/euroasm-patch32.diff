@@ -1,0 +1,12 @@
+813,814c813,820
+<     CMPB [EBX+DIRENT64.d_type],DT_REG  ; Accept regular files only.
+<     JNE .60:
+---
+> ; gridcase-bios patch start
+>     CMPB [EBX+DIRENT64.d_type],DT_REG  ; Accept regular files
+>     JE .DirEntTypeOk
+>     CMPB [EBX+DIRENT64.d_type],DT_LNK  ; Also accept symbolic links
+>     JE .DirEntTypeOk
+>     JMP .60                            ; All other types not acceptable
+> .DirEntTypeOk:
+> ; gridcase-bios patch end

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+trap "cd \"${PWD}\"" EXIT
+export GLINK_PATH="$(dirname "$0")/../src-glink"
+perl -I"$GLINK_PATH/local/lib/perl5" -I"$GLINK_PATH" "$GLINK_PATH/glink.pl" $*

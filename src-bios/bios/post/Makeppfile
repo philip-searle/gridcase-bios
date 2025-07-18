@@ -1,0 +1,5 @@
+
+#include euroasm_scanner.mk
+
+%.obj %.asm.lst: %.asm euroasm.ini
+	$(EUROASM) $(input)

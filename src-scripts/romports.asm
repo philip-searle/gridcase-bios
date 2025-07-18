@@ -1,4 +1,4 @@
-ROMPORTS	PROGRAM	OutFile=build/romports.exe, FORMAT=COM
+ROMPORTS	PROGRAM	OutFile=romports.exe, FORMAT=COM
 		EUROASM	CPU=286, PRIV=ENABLED, AUTOSEGMENT=ON
 
 ; Macro to suppress unused symbol warning for fall-through

@@ -1,0 +1,18 @@
+
+euroasm.x: euroasm/easource/euroasm.x
+	cp euroasm/easource/euroasm.x ./
+
+euroasm/easource/euroasm.x: euroasm.*.zip
+	# Extract source ZIP
+	&mkdir -p euroasm
+	rm -r euroasm/*
+	unzip euroasm.*.zip -d euroasm/
+	# Apply custom patches (--binary because of CRLF line endings)
+	patch --binary euroasm/maclib/linf32.htm euroasm-patch32.diff
+	patch --binary euroasm/maclib/linf64.htm euroasm-patch64.diff
+	# Set executable permissions
+	chmod +x euroasm/euroasm.x euroasm/easource/eamake.sh
+	# Perform build
+	cd euroasm/easource && echo | ./eamake.sh
+	# Set executable permissions
+	chmod +x euroasm/easource/euroasm.x

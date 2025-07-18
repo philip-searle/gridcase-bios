@@ -1,0 +1,243 @@
+
+# Link script for GRiD 1520 BIOS
+
+input {
+	files => [
+		rom_header.obj
+		reset.obj
+		reset.obj
+		reset_utils.obj
+		post/vidtest.obj
+		post/kbc.obj
+		post/timer.obj
+		post/protmode.obj
+		int19.obj
+		int18.obj
+		int13_at.obj
+		int13_grid.obj
+		int14.obj
+		int16.obj
+		int9.obj
+		kbxlat.obj
+		keyboard.obj
+		kbc_286.obj
+		int13_fd.obj
+		fd_int13_handlers.obj
+		fd_std_dpbs.obj
+		fd_bda.obj
+		fd_commands.obj
+		fd_controller.obj
+		fd_misc.obj
+		int17.obj
+		int10.obj
+		int12.obj
+		int11.obj
+		int15.obj
+		rtc.obj
+		misc.obj
+		kb_extra.obj
+		int75.obj
+		int71.obj
+		isr.obj
+		lightpen.obj
+		cmos.obj
+		prntscrn.obj
+		int13_xt.obj
+		grid_cpu.obj
+		grid_autodetect.obj
+		grid_fd.obj
+		grid_vid.obj
+		int15_grid.obj
+		grid_vid2.obj
+		sysident.obj
+		at_compat.obj
+		grid_pw.obj
+		grid_misc.obj
+		rom_trailer.obj
+	]
+}
+
+output {
+	bin => bios.bin
+	map => bios.map
+}
+
+linker {
+	define => {
+	#	Symbol				=>	Segm:Offs
+	}
+	script => [
+		advance	{ to 		=> 0000:0000											}
+		link	{ input		=> .*,					segment	=> IVT,	virtual	=> true	}
+		advance	{ to		=> 0040:0000											}
+		link	{ input		=> .*,					segment	=> BDA,	virtual => true	}
+
+		advance	{ to		=> F000:8000											}
+		link	{ input		=> rom_header,			segment => CODE					}
+		link	{ input		=> reset,				segment => CODE					}
+		link	{ input		=> post_reset_util,		segment => CODE					}
+		link	{ input		=> post_vidtest,		segment => CODE					}
+		link	{ input		=> post_kbc,			segment => CODE					}
+		link	{ input		=> post_timer,			segment => CODE					}
+		link	{ input		=> post_protmode,		segment => CODE					}
+		link	{ input		=> int19,				segment => CODE					}
+		link	{ input		=> int18,				segment => CODE					}
+		link	{ input		=> int13_at,			segment => CODE					}
+		link	{ input		=> int13_grid,			segment => CODE					}
+		link	{ input		=> int14,				segment => CODE					}
+		link	{ input		=> int16,				segment => CODE					}
+		link	{ input		=> int9,				segment => CODE					}
+		link	{ input		=> kbxlat,				segment => CODE					}
+		link	{ input		=> keyboard,			segment => CODE					}
+		link	{ input		=> kbc_286,				segment => CODE					}
+		link	{ input		=> int13_fd,			segment => CODE					}
+		link	{ input		=> fd_int13_handle,		segment => CODE					}
+		link	{ input		=> fd_std_dpbs,			segment => CODE					}
+		link	{ input		=> fd_bda,				segment => CODE					}
+		link	{ input		=> fd_commands,			segment => CODE					}
+		link	{ input		=> fd_controller,		segment => CODE					}
+		link	{ input		=> fd_misc,				segment => CODE					}
+		link	{ input		=> int17,				segment => CODE					}
+		link	{ input		=> int10,				segment => CODE					}
+		link	{ input		=> int12,				segment => CODE					}
+		link	{ input		=> int11,				segment => CODE					}
+		link	{ input		=> int15,				segment => CODE					}
+		link	{ input		=> rtc,					segment => CODE					}
+		link	{ input		=> misc,				segment => CODE					}
+		link	{ input		=> kb_extra,			segment => CODE					}
+		link	{ input		=> int75,				segment => CODE					}
+		link	{ input		=> int71,				segment => CODE					}
+		link	{ input		=> isr,					segment => CODE					}
+		link	{ input		=> misc,				segment => CODE2				}
+		link	{ input		=> lightpen,			segment => CODE					}
+		link	{ input		=> cmos,				segment => CODE					}
+		link	{ input		=> prntscrn,			segment => CODE					}
+		link	{ input		=> int13_xt,			segment => CODE					}
+		link	{ input		=> grid_cpu,			segment => CODE					}
+		link	{ input		=> grid_autodetect,		segment => CODE					}
+		link	{ input		=> grid_fd,				segment => CODE					}
+		link	{ input		=> grid_vid,			segment => CODE					}
+		link	{ input		=> int15_grid,			segment => CODE					}
+		link	{ input		=> grid_vid2,			segment => CODE					}
+
+		fill	{ to		=> F000:DFD0,			with => 0xFF					}
+		link	{ input		=> sysident,			segment => CODE					}
+		#fill	{ to		=> F000:E000,			with => 0xFF					}
+		link	{ input		=> at_compat,			segment => CODE					}
+		link	{ input		=> grid_pw,				segment => CODE					}
+		link	{ input		=> at_compat,			segment => CODE2				}
+		link	{ input		=> grid_misc,			segment => CODE					}
+		fill	{ to		=> F000:F841			with => 0xFF					}
+		link	{ input		=> at_compat,			segment => CODE3				}
+		link	{ input		=> rom_trailer,			segment => CODE					}
+		end		{ }
+	]
+	assert => {
+		# BIOS data area locations.  Massive backward-compatibility constraints here.
+		# None of this can change location without breaking something.
+#		Ser1BasePort	= 0040:0000
+#		Ser2BasePort	= 0040:0002
+#		Ser3BasePort	= 0040:0004
+#		Ser4BasePort	= 0040:0006
+#		Par1BasePort	= 0040:0008
+#		Par2BasePort	= 0040:000A
+#		Par3BasePort	= 0040:000C
+#		# Par4BasePort reused for GRiD-specific data
+#		EquipmentWord	= 0040:0010
+#		# InterruptFlag is BIOS-internal
+#		MemorySizeKb	= 0040:0013
+#		# KbClickVol is GRiD-specific
+#		KbShiftFlags1	= 0040:0017
+#		KbShiftFlags2	= 0040:0018
+#		AltNumpad		= 0040:0019
+#		KbNextChar		= 0040:001A
+#		KbLastChar		= 0040:001C
+#		KbBuffer		= 0040:001E
+#		FdCalibStatus	= 0040:003E
+#		FdMotorStatus	= 0040:003F
+#		FdMotorTimeout	= 0040:0040
+#		VidActiveMode	= 0040:0049
+#		VidTextColumns	= 0040:004A
+#		VidPageSize		= 0040:004C
+#		VidPageOffset	= 0040:004E
+#		VidCursorPos	= 0040:0050
+#		VidCursorShape	= 0040:0060
+#		VidActivePage	= 0040:0062
+#		VidBasePort		= 0040:0063
+#		VidModeCtrl		= 0040:0065
+#		VidColorPalette	= 0040:0066
+#		TimerTicks		= 0040:006C
+#		TimerOverflow	= 0040:0070
+#		CtrlBrkFlag		= 0040:0071
+#		SoftResetFlag	= 0040:0072
+#		HdLastOpStatus	= 0040:0074
+#		HdCount			= 0040:0075
+#		HdControl		= 0040:0076
+#		HdIoOffset		= 0040:0077
+#		ParPort1Timeout	= 0040:0078
+#		ParPort2Timeout	= 0040:0079
+#		ParPort3Timeout	= 0040:007A
+#		# ParPort4Timeout reused for GRiD-specific data
+#		SerPort1Timeout	= 0040:007C
+#		SerPort2Timeout	= 0040:007D
+#		SerPort3Timeout	= 0040:007E
+#		SerPort4Timeout	= 0040:007F
+#		KbBufStart		= 0040:0080
+#		KbBufEnd		= 0040:0082
+#		FdConfig		= 0040:008B
+#		HdStatus		= 0040:008C
+#		HdError			= 0040:008D
+#		HdTaskComplete	= 0040:008E
+#		FdDriveInfo		= 0040:008F
+#		Fd0MediaState	= 0040:0090
+#		Fd1MediaState	= 0040:0091
+#		Fd0OpStartState	= 0040:0092
+#		Fd1OpStartState	= 0040:0093
+#		Fd0Cylinder		= 0040:0094
+#		Fd1Cylinder		= 0040:0095
+#		KbStatusFlags3	= 0040:0096
+#		KbStatusFlags4	= 0040:0097
+#		TimerNotifyPtrOffset	= 0040:0098
+#		TimerNotifyPtrSegment	= 0040:009B
+#		TimerValue		= 0040:009D
+#		TimerFlags		= 0040:00A1
+#		PrtScrStatus	= 0040:0100
+
+		# Locations from the IBM 5150 BIOS that programs (incorrectly) depend on but
+		# whose absolute location must now be maintained for backward-compatibility.
+		Copyr_Compat	= F000:E000
+		Reset_Compat	= F000:E05B
+		IntNmi_Compat	= F000:E2C3
+		Int13Hd_Compat	= F000:E3FE
+		Int19_Compat	= F000:E6F2
+		BaudRateInit	= F000:E729
+		Int14_Compat	= F000:E739
+		Int16_Compat	= F000:E82E
+		Int9_Compat		= F000:E987
+		Int13Fd_Compat	= F000:EC59
+		IntE_Compat		= F000:EF57
+		DisketteParams	= F000:EFC7
+		Int17_Compat	= F000:EFD2
+		Int10_Compat	= F000:F065
+		VidModeTable	= F000:F0A4
+		Int12_Compat	= F000:F841
+		Int11_Compat	= F000:F84D
+		Int15_Compat	= F000:F859
+		GraphicsChars	= F000:FA6E
+		Int1A_Compat	= F000:FE6E
+		Int8_Compat		= F000:FEA5
+		InitialIvt		= F000:FEF3
+		SoftwareIret	= F000:FF53
+		PrntScrn_Compat	= F000:FF54
+
+		# Intel-documented reset vector
+		Reset			= F000:FFF0
+
+		# IBM-documented BIOS identifiers
+		ReleaseMarker	= F000:FFF5
+		MachineId		= F000:FFFE
+
+		# GRiD-documented ROM identifiers
+		GridSysId		= F000:DFFE
+	}
+}
