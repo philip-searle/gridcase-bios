@@ -4,6 +4,7 @@ GRID_VID	PROGRAM	OutFile=grid_vid.obj
 		include	"macros.inc"
 		include	"segments.inc"
 		include	"segments/bda.inc"
+		include	"bios-version.inc"
 		include	"grid.inc"
 		include	"v6366.inc"
 
@@ -748,7 +749,10 @@ VidInit		PROC
 		jmp	.leaveFunction
 		FillerNop
 
-.plasmaScreen	call	HdWaitSpinUp	; ???
+.plasmaScreen
+		%IF	BIOS_VERSION > 19880912
+		call	HdWaitSpinUp	; ???
+		%ENDIF
 
 		mov	ax, CGA_REGEN_SEG
 		mov	es, ax

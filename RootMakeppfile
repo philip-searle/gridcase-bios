@@ -3,4 +3,6 @@
 global EUROASM := $(absolute_filename tools/euroasm.x)
 global GLINK := $(absolute_filename tools/glink)
 
-$(phony build-all): build/bios-19890311/build-19890311
+$(phony build-all): \
+	build/bios-19890311/build-19890311 \
+	build/bios-19880912/build-19880912

@@ -4,6 +4,7 @@ MISC		PROGRAM	OutFile=misc.obj
 		include	"macros.inc"
 		include	"segments.inc"
 		include	"segments/bda.inc"
+		include	"bios-version.inc"
 		include	"cmos.inc"
 		include	"diagnostics.inc"
 		include	"isr.inc"
@@ -232,8 +233,7 @@ ConBiosBanner	PROC
 		jmp	ConString
 		ENDPROC	ConBiosBanner
 
-kBiosBanner	db	'80286 ROM BIOS Version 3.06    3/11/89',0
-		dw	0	; ??? unused word
+kBiosBanner	BIOS_BANNER
 
 ; ===========================================================================
 ; ConBadCsumMsg

@@ -56,18 +56,22 @@ POST07_TestRam	PROC
 		mov	al, 0
 		out	PORT_KBC_PORTB, al
 
-.l1		mov	ax, cs			; load a fake return stack to handle
-		mov	ss, ax			; the checking the first 64KB of RAM
-		mov	sp, .returnStack1
-		jmpn	DetectMemC
+.l1
+		%IF	BIOS_VERSION > 19880912
+			; Newer BIOS supports 1MB memory controller
+			mov	ax, cs			; load a fake return stack to handle
+			mov	ss, ax			; the checking the first 64KB of RAM
+			mov	sp, .returnStack1
+			jmpn	DetectMemC
 
-.loc_F8387	jnb	.memc1M			; TODO: where does this come from?
-.memc256K	mov	dx, PORT_PAR_PORTC_R
-		mov	al, 1
-		out	dx, al			; TODO: parallel port C isn't writable though?
+.loc_F8387		jnb	.memc1M			; TODO: where does this come from?
+.memc256K		mov	dx, PORT_PAR_PORTC_R
+			mov	al, 1
+			out	dx, al			; TODO: parallel port C isn't writable though?
 
-.memc1M		mov	ax, BDA_SEGMENT		; Set DS to BDA
-		mov	ds, ax
+.memc1M			mov	ax, BDA_SEGMENT		; Set DS to BDA
+			mov	ds, ax
+		%ENDIF
 		mov	ax, 0			; Set ES to first 64K
 		mov	es, ax
 		cmp	bx, SOFT_RESET_FLAG	; is it a soft reset?
@@ -105,7 +109,10 @@ POST07_TestRam	PROC
 
 .returnStack2	dw	.loc_F83AC
 		dw	.loc_F83E4
-.returnStack1	dw	.loc_F8387
+		%IF	BIOS_VERSION > 19880912
+			; Newer BIOS supports 1MB memory controller
+.returnStack1		dw	.loc_F8387
+		%ENDIF
 
 .loc_F83E4	mov_	bx, ax
 		jb	.memTestBeepDet

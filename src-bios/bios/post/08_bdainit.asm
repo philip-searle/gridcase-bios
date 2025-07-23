@@ -34,10 +34,13 @@ POST08_BdaInit	PROC
 		call	SerDetectPort
 		mov	dx, PORT_SER2_LCR
 		call	SerDetectPort
-		mov	dx, PORT_SER3_LCR
-		call	SerDetectPort
-		mov	dx, PORT_SER4_LCR
-		call	SerDetectPort
+		%IF	BIOS_VERSION > 19880912
+			; 1988 BIOS only supports two serial ports
+			mov	dx, PORT_SER3_LCR
+			call	SerDetectPort
+			mov	dx, PORT_SER4_LCR
+			call	SerDetectPort
+		%ENDIF
 
 		mov	bx, Par1BasePort
 		mov	dx, PORT_PAR_CANDIDATE1

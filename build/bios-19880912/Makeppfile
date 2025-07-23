@@ -1,15 +1,15 @@
 
 repository ../../src-bios/bios
-repository ../../src-bios/bios-19890311
-repository original-roms=../../original-roms/1989-03-11
+repository ../../src-bios/bios-19880912
+repository original-roms=../../original-roms/1988-09-12
 
-$(phony build-19890311): bios.hex original-bios.hex
+$(phony build-19880912): bios.hex original-bios.hex
 	@echo " \n ********************************************************************** "
-	@echo -n " Mismatched lines between 19890311 ROM and built ROM hex files:\n "
+	@echo -n " Mismatched lines between 19880912 ROM and built ROM hex files:\n "
 	@noecho diff -y --suppress-common-lines original-bios.hex bios.hex | wc -l
 	@echo " ********************************************************************** \n"
 
-original-bios.bin original-bios.hex: original-roms/even-7a00.bin original-roms/odd-2f00.bin
+original-bios.bin original-bios.hex: original-roms/even-de00.bin original-roms/odd-0b00.bin
 	srec_cat -Output original-bios.bin -Binary \
 		original-roms/even-*.bin -Binary -unsplit 2 0 \
 		original-roms/odd-*.bin -Binary -unsplit 2 1

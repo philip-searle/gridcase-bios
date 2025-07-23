@@ -1,7 +1,7 @@
 
-include euroasm_scanner.mk
-
 &mkdir -p post
+
+include ../../tools/euroasm_scanner.mk
 
 OBJECTS	:=	rom_header.obj \
 			reset.obj \

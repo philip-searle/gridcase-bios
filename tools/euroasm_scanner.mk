@@ -1,5 +1,8 @@
 perl_begin
 {
+	# FIXME: duplicate subroutine warnings when this file included in
+	#        more than one makefile.  Need to move it into a file in
+	#        the perl include path...
 	use strict;
 	package Mpp::Scanner::Euroasm;
 	use Mpp::Scanner::C;

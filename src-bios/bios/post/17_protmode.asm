@@ -84,6 +84,10 @@ POST17_ProtMode	PROC
 		; and, since they share the same helper code, the base
 		; memory size checks as well.
 		jmp	.pastPmodeTests
+		%IF	BIOS_VERSION = 19880912
+			; Older BIOS wasn't as optimized
+			FillerNop
+		%ENDIF
 
 .skipShutdown	; A non-fatal failure in timer tick test ends up here.
 		; (Why?  Maybe we can still reset via the KBC and give
@@ -108,62 +112,70 @@ POST17_ProtMode	PROC
 
 ; ---------------------------------------------------------------------------
 ; Detect the amount of extended memory the computer has fitted
-.detectMemSize	mov	dx, PORT_PAR_PORTB_W
-		mov	al, 1		; ??? enable all address lines
-		out	dx, al
-		Delay	2
-		inc	dx		; ??? increment to 0FFEh
-		out	dx, al
-		call	DetectMemSize
+; Different methods depending on BIOS version
+.detectMemSize
+		%IF	BIOS_VERSION = 19880912
+			; 1988 BIOS just detects memory size
+			call	DetectMemSize
+		%ELSE
+			; Later BIOS also needs to detect and configure memory
+			; controller (256K/1M SIMMs)
+			mov	dx, PORT_PAR_PORTB_W
+			mov	al, 1		; ??? enable all address lines
+			out	dx, al
+			Delay	2
+			inc	dx		; ??? increment to 0FFEh
+			out	dx, al
+			call	DetectMemSize
 
-		; CMOS mem size bytes have been updated, so use the
-		; new values to configure the memory controller
-		mov	al, CMOS_EXPMEM_HIBYTE | NMI_DISABLE
-		call	ReadCmos
-		mov_	ah, al
-		mov	al, CMOS_EXPMEM_LOBYTE | NMI_DISABLE
-		call	ReadCmos
-		mov_	bx, ax			; got expansion memory size
-		mov	al, CMOS_BASEMEM_HIBYTE | NMI_DISABLE
-		call	ReadCmos
-		mov_	ah, al
-		mov	al, CMOS_BASEMEM_LOBYTE | NMI_DISABLE
-		call	ReadCmos
-		add_	bx, ax			; add on base memory size
+			; CMOS mem size bytes have been updated, so use the
+			; new values to configure the memory controller
+			mov	al, CMOS_EXPMEM_HIBYTE | NMI_DISABLE
+			call	ReadCmos
+			mov_	ah, al
+			mov	al, CMOS_EXPMEM_LOBYTE | NMI_DISABLE
+			call	ReadCmos
+			mov_	bx, ax			; got expansion memory size
+			mov	al, CMOS_BASEMEM_HIBYTE | NMI_DISABLE
+			call	ReadCmos
+			mov_	ah, al
+			mov	al, CMOS_BASEMEM_LOBYTE | NMI_DISABLE
+			call	ReadCmos
+			add_	bx, ax			; add on base memory size
 
-; ---------------------------------------------------------------------------
-; Configure the memory controller based on the detected memory size
-		call	DetectMemC
-		mov	al, 0
-		jnb	.ramc1M		; 1MB or 256KB memory controller?
+			; Configure the memory controller based on the detected memory size
+			call	DetectMemC
+			mov	al, 0
+			jnb	.ramc1M		; 1MB or 256KB memory controller?
 
-.ramc256K	cmp	bx, 200h	; <= 512KB?
-		jbe	.configureRamc
-		inc	al
-		cmp	bx, 400h	; <= 1MB?
-		jbe	.configureRamc
-		inc	al
-		cmp	bx, 600h	; <= 1.5MB?
-		jbe	.configureRamc
-		inc	al		; must be 2MB then
-		jmp	.configureRamc
+.ramc256K		cmp	bx, 200h	; <= 512KB?
+			jbe	.configureRamc
+			inc	al
+			cmp	bx, 400h	; <= 1MB?
+			jbe	.configureRamc
+			inc	al
+			cmp	bx, 600h	; <= 1.5MB?
+			jbe	.configureRamc
+			inc	al		; must be 2MB then
+			jmp	.configureRamc
 
-.ramc1M		cmp	bx, 800h	; <= 2MB?
-		jbe	.configureRamc
-		inc	al
-		cmp	bx, 1000h	; <= 4MB?
-		jbe	.configureRamc
-		inc	al
-		cmp	bx, 1800h	; <= 6MB?
-		jbe	.configureRamc
-		inc	al		; must be 8MB then
+.ramc1M			cmp	bx, 800h	; <= 2MB?
+			jbe	.configureRamc
+			inc	al
+			cmp	bx, 1000h	; <= 4MB?
+			jbe	.configureRamc
+			inc	al
+			cmp	bx, 1800h	; <= 6MB?
+			jbe	.configureRamc
+			inc	al		; must be 8MB then
 
-.configureRamc	mov	dx, PORT_PAR_PORTB_W
-		out	dx, al		; ??? 0-3 number of populated RAM banks
-		Delay	2
-		inc	dx		; ??? increment to 0FFEh
-		shr	al, 1
-		out	dx, al		; ??? 0-1
+.configureRamc		mov	dx, PORT_PAR_PORTB_W
+			out	dx, al		; ??? 0-3 number of populated RAM banks
+			Delay	2
+			inc	dx		; ??? increment to 0FFEh
+			shr	al, 1
+			out	dx, al		; ??? 0-1
+		%ENDIF
 
 .pastPmodeTests	; Exit via fall-through to next POST procedure
 		ENDPROC POST17_ProtMode

@@ -5,6 +5,7 @@ RESET		PROGRAM	OutFile=reset.obj
 		include	"segments.inc"
 		include	"segments/bda.inc"
 		include	"segments/ivt.inc"
+		include	"bios-version.inc"
 		include	"cmos.inc"
 		include	"descriptors.inc"
 		include	"diagnostics.inc"
@@ -272,15 +273,17 @@ SDH_POST	PROC
 		mov	dx, PORT_UNKNOWN_426
 		mov	al, 1			; set port 426 to 1
 		out	dx, al
-		mov	bl, 5			; delay for 5x64k nop loops
-		xor_	cx, cx
-.l1		nop
-		loop	.l1
-		dec	bl
-		jnz	.l1
-		mov	dx, PORT_UNKNOWN_426	; unnecessary reload of dx?
-		mov	al, 0			; set port 426 to 0
-		out	dx, al
+		%IF	BIOS_VERSION > 19880912
+			mov	bl, 5			; delay for 5x64k nop loops
+			xor_	cx, cx
+.l1			nop
+			loop	.l1
+			dec	bl
+			jnz	.l1
+			mov	dx, PORT_UNKNOWN_426	; unnecessary reload of dx?
+			mov	al, 0			; set port 426 to 0
+			out	dx, al
+		%ENDIF
 		mov	dx, PORT_XMS_ENABLE	; POST code requires easy access
 		mov	al, 1			; to hi-RAM so map it as XMS
 		out	dx, al			; instead of EMS
@@ -555,27 +558,39 @@ SDH_POST	PROC
 ; Also fallthrough from SDH_POST for cold boot.
 ; ===========================================================================
 SDH_00		PROC
-		; GRiD extensions to password-lock BIOS bootloader
-		call	PwEnabled
-		jnb	.ipl
-		call	PwStartInput
-		call	PwPrompt
-		call	PwProcessInput
-		call	PwEndInput
-		call	PwCompareStored
-		jnb	.passwordOk
-		call	PwBackdoor2
-		jnb	.passwordOk
+		%IF	BIOS_VERSION = 19880912
+			; 1988 BIOS doesn't support boot password
+			; What are these port writes doing?
+			mov	dx, PORT_UNKNOWN_426
+			mov	al, 0
+			out	dx, al
+			mov	dx, PORT_424
+			mov	al, 1
+			out	dx, al
+		%ELSE
+			; GRiD extensions to password-lock BIOS bootloader
+			call	PwEnabled
+			jnb	.ipl
+			call	PwStartInput
+			call	PwPrompt
+			call	PwProcessInput
+			call	PwEndInput
+			call	PwCompareStored
+			jnb	.passwordOk
+			call	PwBackdoor2
+			jnb	.passwordOk
 
-		; Password didn't match, notify user and restart
-		call	PwIncorrect
-		mov	ds, [cs:kBdaSegment]
-		mov	[SoftResetFlag], SOFT_RESET_FLAG
-		jmp	Reset_Actual
+			; Password didn't match, notify user and restart
+			call	PwIncorrect
+			mov	ds, [cs:kBdaSegment]
+			mov	[SoftResetFlag], SOFT_RESET_FLAG
+			jmp	Reset_Actual
 
-.passwordOk	call	PwClearBuffer
+.passwordOk		call	PwClearBuffer
+.ipl			; End of password checks, resume IPL
+		%ENDIF
 
-.ipl		int	19h			; load system from disk
+		int	19h			; load system from disk
 		jmp	SDH_00			; retry if bootloader failed
 
 		ENDPROC	SDH_00

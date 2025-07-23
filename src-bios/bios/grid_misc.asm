@@ -3,6 +3,7 @@ GRID_MISC	PROGRAM	OutFile=grid_misc.obj
 
 		include	"macros.inc"
 		include	"segments.inc"
+		include	"bios-version.inc"
 		include	"grid.inc"
 		include	"hdc_at.inc"
 		include	"hdc_xt.inc"
@@ -14,9 +15,11 @@ GRID_MISC	PROGRAM	OutFile=grid_misc.obj
 
 ; Supported model numbers for IDE IDENTIFY response
 IdCp3022	db	'CP3022'
+		%IF	BIOS_VERSION > 19880912
 IdCp3024	db	'CP3024'
 IdCp3044	db	'CP3044'
 IdCp3042	db	'CP3042'
+		%ENDIF
 IdCp344		db	'CP344'
 IdCp3104	db	'CP3104'
 
@@ -125,20 +128,26 @@ DriveIdentify	PROC
 		mov	ds, ax		; setup for cmpsb against ROM
 		TestDriveModel	IdCp3022
 
-		mov	dx, GRID_HD_5
-		mov_	di, bx
-		TestDriveModel	IdCp3024
+		%IF	BIOS_VERSION > 19880912
+			; 1988 BIOS does not support CP3024 drive model
+			mov	dx, GRID_HD_5
+			mov_	di, bx
+			TestDriveModel	IdCp3024
+		%ENDIF
 
 		mov_	di, bx
 		mov	dx, GRID_HD_6
 		TestDriveModel	IdCp344
 
-		mov	dx, GRID_HD_9
-		mov_	di, bx
-		TestDriveModel	IdCp3044
+		%IF	BIOS_VERSION > 19880912
+			; 1988 BIOS does not support CP3044/CP3042 drive models
+			mov	dx, GRID_HD_9
+			mov_	di, bx
+			TestDriveModel	IdCp3044
 
-		mov_	di, bx
-		TestDriveModel	IdCp3042
+			mov_	di, bx
+			TestDriveModel	IdCp3042
+		%ENDIF
 
 		mov_	di, bx
 		mov	dx, GRID_HD_7

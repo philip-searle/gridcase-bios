@@ -4,6 +4,7 @@ INT13_GRID	PROGRAM	OutFile=int13_grid.obj
 		include	"macros.inc"
 		include	"segments.inc"
 		include	"segments/bda.inc"
+		include	"bios-version.inc"
 		include	"grid.inc"
 		include	"hdc_at.inc"
 		include	"int13.inc"
@@ -26,8 +27,11 @@ HdAtSpinDown	PROC
 		jz	.supportedDrive
 		cmp	ax, GRID_HD_6
 		jz	.supportedDrive
-		cmp	ax, GRID_HD_9
-		jz	.supportedDrive
+		%IF	BIOS_VERSION > 19880912
+			; 1988 BIOS doesn't support drive backplane type nine
+			cmp	ax, GRID_HD_9
+			jz	.supportedDrive
+		%ENDIF
 
 		; Not a drive for which we support spin down
 		mov	ah, GRID_INT15_ERROR

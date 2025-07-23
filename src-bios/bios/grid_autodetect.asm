@@ -4,6 +4,7 @@ GRID_AUTODETECT	PROGRAM	OutFile=grid_autodetect.obj
 		include	"macros.inc"
 		include	"segments.inc"
 		include	"segments/ivt.inc"
+		include	"bios-version.inc"
 		include	"cmos.inc"
 		include	"grid.inc"
 		include	"parallel.inc"
@@ -243,7 +244,13 @@ BackplFdTypes	BackplFdType	FD_5_360K,	FD_NONE		; . . . . 0
 		BackplFdType	FD_NONE,	FD_NONE		; X ? ? ? A
 		BackplFdType	FD_NONE,	FD_NONE		; X ? ? ? B
 		BackplFdType	FD_NONE,	FD_NONE		; X ? ? ? C
+		%IF		BIOS_VERSION = 19880912
+				; 1988 BIOS has a floppy drive here?
+		BackplFdType	FD_3_1M,	FD_NONE		; X ? ? ? D
+		%ELSE
+				; Later BIOSes have no drives here
 		BackplFdType	FD_NONE,	FD_NONE		; X ? ? ? D
+		%ENDIF
 
 ; ===========================================================================
 ; HdDetect70
@@ -313,12 +320,18 @@ HdDetect	PROC
 		; Grid types 4, 6, 9 map to BIOS type 11h
 		cmp	ax, GRID_HD_4
 		jz	.biosHdType11
+		%IF	BIOS_VERSION > 19880912
+			; 1988 BIOS doesn't support drive backplane type nine
 		cmp	ax, GRID_HD_9
 		jz	.biosHdType11
+		%ENDIF
 		cmp	ax, GRID_HD_6
 		jz	.biosHdType11
+		%IF	BIOS_VERSION > 19880912
+			; 1988 BIOS doesn't support drive backplane type nine
 		cmp	ax, GRID_HD_9	; ??? second check for type 9
 		jz	.biosHdType11
+		%ENDIF
 
 		; Grid type 7 maps to BIOS type E0h
 		cmp	ax, GRID_HD_7
