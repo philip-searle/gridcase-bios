@@ -1,10 +1,14 @@
 
 # Link script for GRiD 1520 BIOS
 
+{
+	%include "bios-version.lnk"
+	metadata {}
+}
+
 input {
 	files => [
 		rom_header.obj
-		reset.obj
 		reset.obj
 		reset_utils.obj
 		post/vidtest.obj
@@ -45,6 +49,7 @@ input {
 		int13_xt.obj
 		grid_cpu.obj
 		grid_autodetect.obj
+		grid_driveid.obj
 		grid_fd.obj
 		grid_vid.obj
 		int15_grid.obj
@@ -66,70 +71,74 @@ linker {
 	define => {
 	#	Symbol				=>	Segm:Offs
 	}
+	defaultSegment => CODE
 	script => [
-		advance	{ to 		=> 0000:0000											}
-		link	{ input		=> .*,					segment	=> IVT,	virtual	=> true	}
-		advance	{ to		=> 0040:0000											}
-		link	{ input		=> .*,					segment	=> BDA,	virtual => true	}
+		advance	{ to 	=> 0000:0000											}
+		link	{ input	=> .*				segment	=> IVT,	virtual	=> true		}
+		advance	{ to	=> 0040:0000											}
+		link	{ input	=> .*				segment	=> BDA,	virtual => true		}
 
-		advance	{ to		=> F000:8000											}
-		link	{ input		=> rom_header,			segment => CODE					}
-		link	{ input		=> reset,				segment => CODE					}
-		link	{ input		=> post_reset_util,		segment => CODE					}
-		link	{ input		=> post_vidtest,		segment => CODE					}
-		link	{ input		=> post_kbc,			segment => CODE					}
-		link	{ input		=> post_timer,			segment => CODE					}
-		link	{ input		=> post_protmode,		segment => CODE					}
-		link	{ input		=> int19,				segment => CODE					}
-		link	{ input		=> int18,				segment => CODE					}
-		link	{ input		=> int13_at,			segment => CODE					}
-		link	{ input		=> int13_grid,			segment => CODE					}
-		link	{ input		=> int14,				segment => CODE					}
-		link	{ input		=> int16,				segment => CODE					}
-		link	{ input		=> int9,				segment => CODE					}
-		link	{ input		=> kbxlat,				segment => CODE					}
-		link	{ input		=> keyboard,			segment => CODE					}
-		link	{ input		=> kbc_286,				segment => CODE					}
-		link	{ input		=> int13_fd,			segment => CODE					}
-		link	{ input		=> fd_int13_handle,		segment => CODE					}
-		link	{ input		=> fd_std_dpbs,			segment => CODE					}
-		link	{ input		=> fd_bda,				segment => CODE					}
-		link	{ input		=> fd_commands,			segment => CODE					}
-		link	{ input		=> fd_controller,		segment => CODE					}
-		link	{ input		=> fd_misc,				segment => CODE					}
-		link	{ input		=> int17,				segment => CODE					}
-		link	{ input		=> int10,				segment => CODE					}
-		link	{ input		=> int12,				segment => CODE					}
-		link	{ input		=> int11,				segment => CODE					}
-		link	{ input		=> int15,				segment => CODE					}
-		link	{ input		=> rtc,					segment => CODE					}
-		link	{ input		=> misc,				segment => CODE					}
-		link	{ input		=> kb_extra,			segment => CODE					}
-		link	{ input		=> int75,				segment => CODE					}
-		link	{ input		=> int71,				segment => CODE					}
-		link	{ input		=> isr,					segment => CODE					}
-		link	{ input		=> misc,				segment => CODE2				}
-		link	{ input		=> lightpen,			segment => CODE					}
-		link	{ input		=> cmos,				segment => CODE					}
-		link	{ input		=> prntscrn,			segment => CODE					}
-		link	{ input		=> int13_xt,			segment => CODE					}
-		link	{ input		=> grid_cpu,			segment => CODE					}
-		link	{ input		=> grid_autodetect,		segment => CODE					}
-		link	{ input		=> grid_fd,				segment => CODE					}
-		link	{ input		=> grid_vid,			segment => CODE					}
-		link	{ input		=> int15_grid,			segment => CODE					}
-		link	{ input		=> grid_vid2,			segment => CODE					}
+		advance	{ to	=> F000:8000											}
+		link	{ input	=> rom_header											}
+		link	{ input	=> reset												}
+		link	{ input	=> post_reset_util										}
+		link	{ input	=> post_vidtest											}
+		link	{ input	=> post_kbc												}
+		link	{ input	=> post_timer											}
+		link	{ input	=> post_protmode										}
+		link	{ input	=> int19												}
+		link	{ input	=> int18												}
+		link	{ input	=> int13_at												}
+		link	{ input	=> int13_grid											}
+		link	{ input	=> int14												}
+		link	{ input	=> int16												}
+		link	{ input	=> int9													}
+		link	{ input	=> kbxlat												}
+		link	{ input	=> keyboard												}
+		link	{ input	=> kbc_286												}
+		link	{ input	=> int13_fd												}
+		link	{ input	=> fd_int13_handle										}
+		link	{ input	=> fd_std_dpbs											}
+		link	{ input	=> fd_bda												}
+		link	{ input	=> fd_commands											}
+		link	{ input	=> fd_controller										}
+		link	{ input	=> fd_misc												}
+		link	{ input	=> int17												}
+		link	{ input	=> int10												}
+		link	{ input	=> int12												}
+		link	{ input	=> int11												}
+		link	{ input	=> int15												}
+		link	{ input	=> rtc													}
+		link	{ input	=> misc													}
+		link	{ input	=> kb_extra												}
+		link	{ input	=> int75												}
+		link	{ input	=> int71												}
+		link	{ input	=> isr													}
+		link	{ input	=> misc				segment => CODE2					}
+		link	{ input	=> lightpen												}
+		link	{ input	=> cmos													}
+		link	{ input	=> prntscrn												}
+		link	{ input	=> int13_xt												}
+		link	{ input	=> grid_cpu												}
+		link	{ input	=> grid_autodetect										}
+		link	{ input	=> grid_driveid		if => "\$BIOS_VERSION == 19880912"	}
+		link	{ input	=> grid_autodetect	segment => CODE2					}
+		link	{ input	=> grid_fd												}
+		link	{ input	=> grid_vid												}
+		link	{ input	=> int15_grid											}
+		link	{ input	=> grid_vid2											}
 
-		fill	{ to		=> F000:DFD0,			with => 0xFF					}
-		link	{ input		=> sysident,			segment => CODE					}
-		#fill	{ to		=> F000:E000,			with => 0xFF					}
-		link	{ input		=> at_compat,			segment => CODE					}
-		link	{ input		=> grid_pw,				segment => CODE					}
-		link	{ input		=> at_compat,			segment => CODE2				}
-		link	{ input		=> grid_misc,			segment => CODE					}
-		fill	{ to		=> F000:F841			with => 0xFF					}
-		link	{ input		=> at_compat,			segment => CODE3				}
-		link	{ input		=> rom_trailer,			segment => CODE					}
+		fill	{ to	=> F000:DFD0		with => 0xFF						}
+		link	{ input	=> sysident												}
+		#fill	{ to	=> F000:E000		with => 0xFF						}
+		link	{ input	=> at_compat											}
+		link	{ input	=> grid_pw												}
+		link	{ input	=> at_compat		segment => CODE2					}
+		link	{ input	=> grid_driveid		if => "\$BIOS_VERSION > 19880912"	}
+		link	{ input	=> grid_misc											}
+		fill	{ to	=> F000:F841		with => 0xFF						}
+		link	{ input	=> at_compat		segment => CODE3					}
+		link	{ input	=> rom_trailer											}
 		end		{ }
 	]
 	assert => {

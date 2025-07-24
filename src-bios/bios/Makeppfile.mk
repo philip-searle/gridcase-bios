@@ -44,6 +44,7 @@ OBJECTS	:=	rom_header.obj \
 			int13_xt.obj \
 			grid_cpu.obj \
 			grid_autodetect.obj \
+			grid_driveid.obj \
 			grid_fd.obj \
 			grid_vid.obj \
 			int15_grid.obj \

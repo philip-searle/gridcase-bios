@@ -14,7 +14,7 @@ use OMF::Model;
 use OMF::Parser qw( parse_omf_file );
 
 my $log = Debug::Easy->new(
-	'LogLevel' => 'INFO',
+	'LogLevel' => 'NOTICE',
 	'Color' => 1,
 	'ANSILevel' => {
 		'ERR'      => colored(['white on_red'],			'[ ERROR ]'),
@@ -66,6 +66,12 @@ my @segments_to_write = ();
 
 # Current offset in the output's address space
 my $write_ptr = OMF::Address->parse('0000:0000');
+
+# ---------------------------------------------------------------------
+
+sub load_metadata {
+	$log->INFO(Data::Dumper::Dumper($config->{metadata}));
+}
 
 # ---------------------------------------------------------------------
 
@@ -206,13 +212,22 @@ sub resolve_segments {
 # ---------------------------------------------------------------------
 
 sub process_script_link {
-    my $params = shift;
+    my ($default_segment, $params) = @_;
     my $input = $params->{input};
-    my $segment_name = $params->{segment};
+    my $segment_name = $params->{segment} // $default_segment;
     my $virtual = $params->{virtual} // 0;
     LOGDIE('Missing "input" in link') unless defined $input;
     LOGDIE('Missing "segment" in link') unless defined $segment_name;
 
+	my $if = $params->{if};
+	if (defined $if) {
+		$if =~ s/\$(\w+)/\$config->{metadata}{$1}/;
+		$log->INFO("Evaluating condition: $if:" . Data::Dumper::Dumper(eval($if)));
+		if (!eval($if)) {
+			$log->INFO('Evaluated FALSE, skipping');
+			return;
+		}
+	}
     my $segments = collect_segments($segment_name, $input);
     resolve_segments($segments);
     push @segments_to_write, @{ $segments } unless $virtual;
@@ -297,6 +312,7 @@ sub resolve_xrefs {
 
 sub process_script {
     my $script = $config->{linker}{script};
+	my $default_segment = $config->{linker}{defaultSegment};
 	$log->INFO((@{$script} / 2) . ' script nodes to process');
     my $script_index = 0;
     while (1) {
@@ -309,7 +325,7 @@ sub process_script {
         if ($action eq 'advance') {
             process_script_advance($params);
         } elsif ($action eq 'link') {
-            process_script_link($params);
+            process_script_link($default_segment, $params);
         } elsif ($action eq 'fill') {
             process_script_fill($params);
         } else {
@@ -515,6 +531,8 @@ sub verify_asserts {
 # ---------------------------------------------------------------------
 
 sub main {
+	$log->NOTICE('Loading metadata');
+	load_metadata;
 	$log->NOTICE('Predefining symbols');
     predefine_symbols;
 	$log->NOTICE('Loading input files');

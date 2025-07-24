@@ -356,6 +356,12 @@ HdDetect	PROC
 .leaveFunction	retn
 		ENDPROC	HdDetect
 
+; Some versions of the GRiD BIOS have DriveIdentify code here.
+; In later versions this became too long to fit and it was relocated
+; into slack space in the at_compat module.  Split the code into two
+; segments so we can conditionally link it in the correct place.
+[CODE2]	SEGMENT WIDTH=16, ALIGN=1, CLASS=CODE, PURPOSE=DATA|CODE, COMBINE=PUBLIC
+
 ; ===========================================================================
 ; CmosResetCsum
 ; Checksums the contents of CMOS RAM from 10h to 2Dh and stores them in the

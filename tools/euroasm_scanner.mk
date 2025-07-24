@@ -9,7 +9,7 @@ perl_begin
 	our @ISA = qw/Mpp::Scanner::C/;
 	sub get_directive {
 		# Regex is case-insensitive, but Mpp::Scanner::C requires lowercase directives
-		s/^\s*(include)1?\s*//i ? $1 : undef;
+		s/^\s*%?(include)1?\s*//i ? $1 : undef;
 	}
 	sub factory {
 		Mpp::Scanner::Euroasm->new(@_);
@@ -54,3 +54,4 @@ perl_begin
 perl_end
 
 register-parser euroasm.x Mpp::CommandParser::Euroasm
+register-parser glink Mpp::CommandParser::Euroasm
