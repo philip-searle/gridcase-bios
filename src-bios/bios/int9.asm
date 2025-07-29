@@ -763,13 +763,15 @@ Int9_Actual	PROC
 		mov	[CtrlBrkFlag], 80h
 		pushf
 		cli
+		; Push CS:IP so MakeIsrStack/int/UnmakeIsrStack sees
+		; the expected stack layout of a hardware interrupt
 		push	cs
-		mov	ax, 0A54Eh		; ???
+		mov	ax, .retnIsr
 		push	ax
 		call	MakeIsrStack
 		int	1Bh			; Ctrl+break handler
 		jmp	UnmakeIsrStack
-		xor_	ax, ax
+.retnIsr		xor_	ax, ax
 		jmp	.processKeyCode
 
 ; ---------------------------------------------------------------------

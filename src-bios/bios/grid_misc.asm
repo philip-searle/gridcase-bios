@@ -5,8 +5,40 @@ GRID_MISC	PROGRAM	OutFile=grid_misc.obj
 		include	"segments.inc"
 		include	"hdc_at.inc"
 		include	"parallel.inc"
+		include	"pic.inc"
 
 		PUBLIC	DetectMemC, HdWaitSpinUp
+		PUBLIC	EoiPic1, EoiPic1and2
+
+; =====================================================================
+; EoiPic1
+; Interrupt handler.  Sends a non-specific end-of-interrupt to PIC1.
+; =====================================================================
+EoiPic1		PROC
+		push	ax
+		mov	al, NONSPECIFIC_EOI
+		out	PORT_PIC1_CTRL, al
+		pop	ax
+		iret
+		ENDPROC	EoiPic1
+
+; =====================================================================
+; EoiPic1and2
+; Interrupt handler.  Sends a non-specific end-of-interrupt to both PICs.
+; =====================================================================
+EoiPic1and2	PROC
+		push	ax
+		mov	al, NONSPECIFIC_EOI
+		out	PORT_PIC2_CTRL, al
+		out	PORT_PIC1_CTRL, al
+		pop	ax
+		iret
+		ENDPROC	EoiPic1and2
+
+
+; grid_driveid code is inserted between the EoiPic* procs and DetectMemC
+; so we start a new code segment to allow the linker to make it work
+[CODE2]	SEGMENT WIDTH=16, ALIGN=1, CLASS=CODE, PURPOSE=DATA|CODE, COMBINE=PUBLIC
 
 ; =====================================================================
 ; DetectMemC

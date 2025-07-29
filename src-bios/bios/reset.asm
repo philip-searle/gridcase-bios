@@ -34,8 +34,11 @@ RESET		PROGRAM	OutFile=reset.obj
 		EXTERN	SetCriticalErr, InitTimerTicks
 		EXTERN	GridAutodetect, FdCheckConfigValid, HdDetect70, HdXtEarlyReset, HdInit
 		EXTERN	A20Disable, PmClearTraces
-		EXTERN	PwEnabled, PwStartInput, PwPrompt, PwProcessInput, PwEndInput
-		EXTERN	PwCompareStored, PwBackdoor2, PwIncorrect, PwClearBuffer
+		%IF	BIOS_VERSION > 19880912
+			; 1988 BIOS doesn't support password feature
+			EXTERN	PwEnabled, PwStartInput, PwPrompt, PwProcessInput, PwEndInput
+			EXTERN	PwCompareStored, PwBackdoor2, PwIncorrect, PwClearBuffer
+		%ENDIF
 		EXTERN	ConString, ConString_Inline, ConCharHex2, ConCharHex4
 		EXTERN	ConBadCsumMsg, ConBiosBanner
 		EXTERN	PromptF1Cont
@@ -550,6 +553,16 @@ SDH_POST	PROC
 		mov	al, 0 | NMI_ENABLE
 		out	PORT_CMOS_ADDRESS, al
 
+		%IF	BIOS_VERSION = 19880912
+			; 1988 BIOS does a bunch of erxtra port writes here
+			; What are these port writes doing?
+			mov	dx, PORT_UNKNOWN_426
+			mov	al, 0
+			out	dx, al
+			mov	dx, PORT_424
+			mov	al, 1
+			out	dx, al
+		%ENDIF
 		; Fall-through into SDH_00
 		ENDPROC	SDH_POST
 
@@ -558,17 +571,9 @@ SDH_POST	PROC
 ; Also fallthrough from SDH_POST for cold boot.
 ; ===========================================================================
 SDH_00		PROC
-		%IF	BIOS_VERSION = 19880912
-			; 1988 BIOS doesn't support boot password
-			; What are these port writes doing?
-			mov	dx, PORT_UNKNOWN_426
-			mov	al, 0
-			out	dx, al
-			mov	dx, PORT_424
-			mov	al, 1
-			out	dx, al
-		%ELSE
+		%IF	BIOS_VERSION > 19880912
 			; GRiD extensions to password-lock BIOS bootloader
+			; only supported after 1988 BIOS
 			call	PwEnabled
 			jnb	.ipl
 			call	PwStartInput

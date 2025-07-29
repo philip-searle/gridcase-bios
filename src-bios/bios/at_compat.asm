@@ -3,6 +3,7 @@ AT_COMPAT	PROGRAM	OutFile=at_compat.obj
 
 		include	"macros.inc"
 		include	"segments.inc"
+		include	"bios-version.inc"
 		include	"int13.inc"
 		include	"pic.inc"
 
@@ -13,6 +14,10 @@ AT_COMPAT	PROGRAM	OutFile=at_compat.obj
 		EXTERN	Int15_Actual, Int1A_Actual, Int8_Actual
 		EXTERN	UnexpectedInt, Int18, Int70, Int71, Int75, Int10_Actual
 		EXTERN	PrntScrn_Actual
+		%IF	BIOS_VERSION > 19880912
+			; Non-1988 BIOSes have extra code to ack IRQs
+			EXTERN	EoiPic1, EoiPic1and2
+		%ENDIF
 
 		PUBLIC	Reset_Compat, IntNmi_Compat, Int13Hd_Compat
 		PUBLIC	Int8_Compat, DisketteParams, FixedDiskParams
@@ -68,7 +73,12 @@ Reset_Compat	jmpn	Reset_Actual
 
 ; Second part of Phoenix copyright notice is after the Reset_Compat jump.
 ; Maybe because this lines it up nicely with the first part in a hexdump?
-Copyr_Phoenix2	db	0Dh,0Ah,'All Rights Reserved',0Dh,0Ah,0Ah,0
+Copyr_Phoenix2	db	0Dh,0Ah,'All Rights Reserved',0Dh,0Ah,0Ah
+		%IF	BIOS_VERSION = 19880912
+			; 1988 BIOS has GRiD copyright following the Phoenix one
+			db	'GRiD Systems Corporation 9/12/88',0Dh,0Ah,0Ah
+		%ENDIF
+		; NUL-terminate Copyr_Phoenix2
 
 ; ---------------------------------------------------------------------------
 
@@ -254,39 +264,10 @@ VidColumns	dw	2828h,5050h,2828h,5050h			; Not sure about these...
 
 VidModeSets	db	2Ch,28h,2Dh,29h,2Ah,2Eh,1Eh,29h
 
-; GRiD password code is placed after the video constants.
-; We'll use a second code segment to hold the EOI functions
+; GRiD IDE Identify, memory controller, and HD spindown code is placed after the
+; video constants.   We'll use a second code segment to hold the EOI functions
 ; and let the linker worry about putting it all in the correct place.
 [CODE2]	SEGMENT WIDTH=16, ALIGN=1, CLASS=CODE, PURPOSE=DATA|CODE, COMBINE=PUBLIC
-
-; ---------------------------------------------------------------------------
-; EoiPic1
-; Interrupt handler.  Sends a non-specific end-of-interrupt to PIC1.
-EoiPic1		PROC
-		push	ax
-		mov	al, NONSPECIFIC_EOI
-		out	PORT_PIC1_CTRL, al
-		pop	ax
-		iret
-		ENDPROC	EoiPic1
-
-; ---------------------------------------------------------------------------
-; EoiPic1and2
-; Interrupt handler.  Sends a non-specific end-of-interrupt to both PICs.
-EoiPic1and2	PROC
-		push	ax
-		mov	al, NONSPECIFIC_EOI
-		out	PORT_PIC2_CTRL, al
-		out	PORT_PIC1_CTRL, al
-		pop	ax
-		iret
-		ENDPROC	EoiPic1and2
-
-; GRiD IDE Identify, memory controller, and HD spindown code is placed after the
-; EOI function.  We'll use a third code segment to hold the remainder of the
-; at_compat code and let the linker worry about putting it all in the correct place.
-[CODE3]	SEGMENT WIDTH=16, ALIGN=1, CLASS=CODE, PURPOSE=DATA|CODE, COMBINE=PUBLIC
-
 %XxxBase	%seta 0F841h
 
 ; ---------------------------------------------------------------------------
@@ -327,16 +308,29 @@ Int8_Compat	jmpn	Int8_Actual
 ;          because some programs will try to restore interrupts by copying
 ;          out of the BIOS, ignoring that other programs may have hooked the
 ;          interrupt in the meantime.
+		%IF	BIOS_VERSION = 19880912
+			; The 1988 BIOS just does a simple iret to ignore
+			; an interrupt.
+			_EoiPic1	equ	SoftwareIret
+			_EoiPic1and2	equ	SoftwareIret
+		%ELSE
+			; Later BIOS versions ignore the interrupt and also
+			; acknowledge IRQ line(s) that caused it -- presumably
+			; because if they keep refiring, the machine's
+			; performance tanks trying to handle them.
+			_EoiPic1	equ	EoiPic1
+			_EoiPic1and2	equ	EoiPic1and2
+		%ENDIF
 		FillRom	0FEF3h, 0FFh
 InitialIvt:	; PIC1 hardware interrupts
 		dw	Int8_Compat	; Int8: timer
 		dw	Int9_Compat	; Int9: keyboard
-		dw	EoiPic1		; IntA: cascade input
+		dw	_EoiPic1	; IntA: cascade input
 		dw	UnexpectedInt	; IntB: unused
 		dw	UnexpectedInt	; IntC: unused
 		dw	UnexpectedInt	; IntD: unused
 		dw	IntE_Compat	; IntE: diskette
-		dw	EoiPic1		; IntF: unused?
+		dw	_EoiPic1	; IntF: unused?
 		; Software interrupts
 		dw	Int10_Compat	; Int10: video
 		dw	Int11_Compat	; Int11: equipment
@@ -362,7 +356,7 @@ InitialIvt:	; PIC1 hardware interrupts
 		dw	UnexpectedInt	; Int74: unused
 		dw	Int75		; Int75: NPU/FPU
 		dw	UnexpectedInt	; Int76: unused
-		dw	EoiPic1and2	; Int77: ???
+		dw	_EoiPic1and2	; Int77: ???
 
 ; ---------------------------------------------------------------------------
 ; [Compat] Empty software interrupt routine may be reused by applications
@@ -386,9 +380,10 @@ BeepFactor	db	3Ch	; Timing for speaker beep pitch
 
 ; ---------------------------------------------------------------------------
 
-; GRiD BIOS date (and maybe checksums?).  Split so even/odd ROMs each get a copy.
+; Phoenix BIOS date, nul-terminated.  Split so even/odd ROMs each get a copy.
 		db	'0011//1199//8877'
 		db	0,0
-		db	0E0h,24h
+; Even/odd ROM checksums
+		db	BIOS_CHECKSUM_E, BIOS_CHECKSUM_O
 
 ENDPROGRAM	AT_COMPAT

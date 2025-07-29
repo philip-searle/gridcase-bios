@@ -302,9 +302,12 @@ sub resolve_xrefs {
         my $pubdef = $xref->pubdef;
         my $base_symbol_name = $pubdef->segment_def->unique_name;
         my $resolved_base_symbol = $resolved_symbols{$base_symbol_name};
-        LOGDIE("xref $symbol_name refers to unresolved symbol $base_symbol_name") unless defined $resolved_base_symbol;
-        my $resolved_xref_address = $resolved_base_symbol->address + $pubdef->offset;
-        resolve_symbol($symbol_name, $resolved_xref_address, $pubdef->segment_def);
+		if (defined $resolved_base_symbol) {
+        	my $resolved_xref_address = $resolved_base_symbol->address + $pubdef->offset;
+        	resolve_symbol($symbol_name, $resolved_xref_address, $pubdef->segment_def);
+		} else {
+        	#LOGDIE("xref $symbol_name refers to unresolved symbol $base_symbol_name") unless defined $resolved_base_symbol;
+		}
     }
 }
 

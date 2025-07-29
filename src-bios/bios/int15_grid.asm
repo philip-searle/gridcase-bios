@@ -4,6 +4,7 @@ INT15_GRID	PROGRAM	OutFile=int15_grid.obj
 		include	"macros.inc"
 		include	"segments.inc"
 		include	"segments/bda.inc"
+		include	"bios-version.inc"
 		include	"cmos.inc"
 		include	"grid.inc"
 		include	"keyboard.inc"
@@ -17,7 +18,10 @@ INT15_GRID	PROGRAM	OutFile=int15_grid.obj
 		EXTERN	VidLoadColMapExpRegs
 		EXTERN	MachineId, GridSysId
 		EXTERN	DriveIdentify, HdAtSpinDown
-		EXTERN	GridConfig4B
+		%IF	BIOS_VERSION > 19880912
+			; 1988 BIOS doesn't support password feature
+			EXTERN	GridConfig4B
+		%ENDIF
 
 		PUBLIC	Int15_Grid, GridBootRom, IsExtFdIndex
 
@@ -356,7 +360,10 @@ Grid15Config	PROC
 		d w	GridConfig48
 		d w	GridConfig49
 		d w	GridConfig4A
-		d w	GridConfig4B
+		%IF	BIOS_VERSION > 19880912
+			; 1988 BIOS doesn't support password feature
+			d w	GridConfig4B
+		%ENDIF
 .handlersEnd	ENDPROC	Grid15Config
 
 ; =====================================================================
@@ -409,13 +416,22 @@ GridConfig42	PROC
 		jz	.enquireRamType
 
 		; change extra RAM type
-		mov	al, CMOS_GRIDFLAGS
-		call	ReadCmos
-		mov_	ah, al
-		and	ah, GF_PASSWORD	; preserve password enabled flag
-		mov_	al, dl
-		and	al, GF_EMS	; set new extra RAM type
-		or_	al, ah		; merge in other flags
+		%IF	BIOS_VERSION = 19880912
+			; 1988 BIOS doesn't support boot password feature
+			; and so doesn't need to preserve the CMOS flag
+			mov_	al, dl
+			and	al, GF_EMS
+		%ELSE
+			; Later BIOS version must merge the EMS flag
+			; into the CMOS_GRIDFLAGS byte
+			mov	al, CMOS_GRIDFLAGS
+			call	ReadCmos
+			mov_	ah, al
+			and	ah, GF_PASSWORD	; preserve password enabled flag
+			mov_	al, dl
+			and	al, GF_EMS	; set new extra RAM type
+			or_	al, ah		; merge in other flags
+		%ENDIF
 		mov	ah, CMOS_GRIDFLAGS
 		call	WriteCmos
 		xor_	ax, ax
