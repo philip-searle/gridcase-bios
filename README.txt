@@ -8,6 +8,9 @@ original ROMs.
 As of commit 6275509ec2ae56762f64cc711beffe5b96b138b5 (2025-06-01) it builds a
 bit-perfect image of the 1989-03-11 BIOS ROM.
 
+As of commit 3fee0c9f57cc2062df9b08df6bdaba677943b058 (2025-07-29) it also
+builds a bit-perfect image of the 1988-09-12 BIOS ROM.
+
 Once documentation of this image is complete, I hope to go back to the two
 earlier BIOS images that have been dumped and figure out what the differences
 are.
