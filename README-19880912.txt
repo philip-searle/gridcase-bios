@@ -1,0 +1,40 @@
+GRiD BIOS 1988-09-12
+====================
+
+The 1988-09-12 version of the GRiD 1520 BIOS has these differences
+compared to the 1989-03-11 version:
+
+ * Default handlers for IRQs IntA (cascade)IntF (unused), and Int77 (?)
+   immediately return with an IRET and do not acknowledge the IRQ on
+   either PIC.
+
+ * Includes the GRiD BIOS copyright notice immediately after the
+   Phoenix BIOS copyright notice in ROM, instead of printing it out
+   on-screen.
+
+ * Does not support the GRiD-specific boot password feature.
+   This also means that:
+    * CMOS_GRIDFLAGS only supports setting the lowest bit and does not
+      preserve any higher ones.
+    * Int 15/E4 doesn't support undocumented subfunction 4A.
+
+ * No support for GRiD drive backplane type nine (GRID_HD_9).
+
+ * IDE auto-detect only supports Connor hard drive models CP3022,
+   CP344, and CP3104.  No support for models CP3024, CP3044, or
+   CP3042 as in later BIOSes.
+
+ * For some reason has the last entry in the BackplFdTypes array set
+   to be a 3.5" 1.44MB floppy drive instead of no floppy drives.
+   Odd because I don't think those array entries are ever referenced.
+
+ * Lacks the call to HdWaitSpinUp before initializing a built-in
+   plasma display.  Possibly this could lead to excessive draw on the
+   power supply as the drive and display both pull max inrush current.
+
+ * Has a simpler (shorter) attempt to reset built-in modem on reboot.
+
+ * Doesn't support auto-detecting 256KB/1MB memory controller chip.
+   I think this means it only supports the 256KB variant?
+
+ * Only supports auto-detecting two serial ports.

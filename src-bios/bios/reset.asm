@@ -554,7 +554,7 @@ SDH_POST	PROC
 		out	PORT_CMOS_ADDRESS, al
 
 		%IF	BIOS_VERSION = 19880912
-			; 1988 BIOS does a bunch of erxtra port writes here
+			; 1988 BIOS does a bunch of extra port writes here
 			; What are these port writes doing?
 			mov	dx, PORT_UNKNOWN_426
 			mov	al, 0
