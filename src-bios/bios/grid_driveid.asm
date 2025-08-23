@@ -3,6 +3,7 @@ GRID_DRIVEID	PROGRAM	OutFile=grid_driveid.obj
 
 		include	"macros.inc"
 		include	"segments.inc"
+		include	"segments/bda.inc"
 		include	"bios-version.inc"
 		include	"grid.inc"
 		include	"hdc_at.inc"
@@ -11,6 +12,10 @@ GRID_DRIVEID	PROGRAM	OutFile=grid_driveid.obj
 		EXTERN	HdAtIdentify
 
 		PUBLIC	DriveIdentify
+		%IF	BIOS_VERSION = 19891025
+			EXTERN	kBdaSegment
+			PUBLIC	DriveSpindown
+		%ENDIF
 
 ; Supported model numbers for IDE IDENTIFY response
 IdCp3022	db	'CP3022'
@@ -165,5 +170,21 @@ DriveIdentify	PROC
 		pop	bx
 		jmp	.driveTypeKnown
 		ENDPROC	DriveIdentify
+
+		%IF	BIOS_VERSION = 19891025
+; =====================================================================
+; DriveSpindown
+; On return:
+;   DL == HD spindown timer
+; =====================================================================
+DriveSpindown	PROC
+		push	ds
+		mov	ds, [cs:kBdaSegment]
+		mov	dl, [HdSpindownUnknown1]
+		xor_	ah, ah
+		pop	ds
+		retn
+		ENDPROC	DriveSpindown
+		%ENDIF
 
 ENDPROGRAM	GRID_DRIVEID

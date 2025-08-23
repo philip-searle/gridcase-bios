@@ -22,8 +22,18 @@ INT15_GRID	PROGRAM	OutFile=int15_grid.obj
 			; 1988 BIOS doesn't support password feature
 			EXTERN	GridConfig4B
 		%ENDIF
+		%IF	BIOS_VERSION = 19891025
+			; VGA support
+			EXTERN	kBdaSegment
+			EXTERN	VgaIdentify, VgaUnknown5, VgaUnknown6
+			; Spindown BDA support
+			EXTERN	DriveSpindown
+		%ELSE
+			; Some GRiD code is part of this module in older versions
+			PUBLIC	GridBootRom, IsExtFdIndex
+		%ENDIF
 
-		PUBLIC	Int15_Grid, GridBootRom, IsExtFdIndex
+		PUBLIC	Int15_Grid
 
 ; =====================================================================
 ; Int15_Grid
@@ -59,6 +69,10 @@ Int15_Grid	PROC
 		xor_	bh, bh
 		mov	cl, 4		; isolate top nibble of subfunction so
 		shr	bx, cl		; we can lookup the correct handler table
+		%IF	BIOS_VERSION = 19891025
+			; Latest BIOS prevents crashes from odd function numbers
+			and	bl, 0FEh
+		%ENDIF
 		add	bx, .handlers
 		mov	bx, [cs:bx]
 		mov	[bp+2], bx	; move handler into r_handler
@@ -169,6 +183,12 @@ GridDisplay20	PROC
 		jz	.returnDisplay
 		and	al, VID_TYPE_INTERNAL_MASK
 		mov_	dl, al
+		%IF	BIOS_VERSION = 19891025
+			; Later BIOS reused 640x200 LCD code for VGA panel
+			cmp	al, VID_TYPE_LCD_200
+			jnz	.returnDisplay
+			mov	dl, VID_TYPE_VGA
+		%ENDIF
 .returnDisplay	xor_	ax, ax
 		retn
 
@@ -287,12 +307,28 @@ GridDisplay23	PROC
 ; Select current display font.
 ; =====================================================================
 GridDisplay22	PROC
+		%IF	BIOS_VERSION = 19891025
+			call	VgaUnknown5
+			cmp	dl, 0FFh	; ??? VGA
+			jz	.getVgaFont
+		%ENDIF
 		cmp	dl, 3		; only four valid fonts
 		jbe	.setFont
 		mov	ah, GRID_INT15_OUTOFRANGE
 		retn
 
+		%IF	BIOS_VERSION = 19891025
+.getVgaFont		call	VgaUnknown6
+			retn
+		%ENDIF
+
 .setFont	push	dx
+		%IF	BIOS_VERSION = 19891025
+			; VGA support
+			push	ds
+			mov	ds, [cs:kBdaSegment]
+			mov	[VgaByteUnknown4], dl
+		%ENDIF
 		mov_	al, dl
 		push	ax
 		and	al, 1		; write lo bit
@@ -301,9 +337,13 @@ GridDisplay22	PROC
 		pop	ax
 		shr	al, 1
 		and	al, 1		; write hi bit
-		inc	dx
+		inc	dx		; advance to PORT_VID_FONT_HI
 		out	dx, al
 		pop	dx
+		%IF	BIOS_VERSION = 19891025
+			; VGA support
+			pop	ds
+		%ENDIF
 		xor_	ax, ax
 		retn
 		ENDPROC	GridDisplay22
@@ -337,6 +377,57 @@ GridDisplay24	PROC
 		retn
 		ENDPROC	GridDisplay24
 
+		%IF	BIOS_VERSION = 19891025
+; =====================================================================
+; ???
+; =====================================================================
+VgaUnknown3_Helper	PROC
+		cmp	dl, 0FFh
+		jnz	.setValue
+
+		; Query current value
+		call	VgaIdentify
+		clc
+		retn
+
+.setValue	call	VgaIdentify
+		jnc	.vgaPresent
+		mov	ah, GRID_INT15_VGA_NOVGA
+		retn
+
+.vgaPresent	cmp	dl, 1
+		jbe	.validDl
+		mov	ah, GRID_INT15_ERROR
+		stc
+		retn
+
+.validDl	push	bx
+		push	dx
+		push	ds
+
+		mov_	al, dl
+		push	ax
+		xor	al, 1
+		cli
+		mov	bx, BDA_SEGMENT
+		mov	ds, bx
+		or	[VgaByteUnknown1], 1
+		sti
+		mov	bl, 32h		; INT 10 - VIDEO - ALTERNATE FUNCTION SELECT (VGA, MCGA) - VIDEO ADDRESSING
+		mov	ah, 12h
+		int	10h
+		cli
+		pop	ax
+		and	[VgaByteUnknown1], 0FEh
+		or	[VgaByteUnknown1], al
+		pop	ds
+		pop	dx
+		pop	bx
+		xor_	ax, ax
+		retn
+		ENDPROC	VgaUnknown3_Helper
+		%ENDIF
+
 ; =====================================================================
 ; Grid15Config
 ; Handler for int15/E4, subfunctions 40h-5Fh
@@ -363,6 +454,11 @@ Grid15Config	PROC
 		%IF	BIOS_VERSION > 19880912
 			; 1988 BIOS doesn't support password feature
 			d w	GridConfig4B
+		%ENDIF
+		%IF	BIOS_VERSION = 19891025
+			; One more function added
+			d 12 * w	Grid15Unsup
+			d w		GridConfig58
 		%ENDIF
 .handlersEnd	ENDPROC	Grid15Config
 
@@ -619,147 +715,21 @@ GridConfig4A	PROC
 		retn
 		ENDPROC	GridConfig4A
 
+		%IF	BIOS_VERSION = 19891025
 ; =====================================================================
-; GridBootRom
-; Checks all available application ROMs and returns if none of them
-; are bootable.  Loads ROM boot sector and jumps to it otherwise.
+; GridConfig58 [UNDOC]
+; Undocumented BIOS function that queries the AT hard drive spindown
+; timer value (as stored in the BDA)
+; Actually implemented in the GRiD hard drive code; aliased here to keep
+; the GridConfigXX naming pattern consistent.
 ; =====================================================================
-GridBootRom	PROC
-		cli
-		mov	ax, 2000h	; use segment 2000h as ROM subsystem scratch space
-		mov	ds, ax
-		mov	ax, 0E401h	; initialise ROM subsystem
-		int	15h
-		jnc	.romInitOk
+GridConfig58	equ	DriveSpindown
+		%ENDIF
 
-.romInitDone	jmp	.leaveFunction
-
-.romInitOk	cmp	al, 0		; ROM images stil to process?
-		jz	.romInitDone
-
-		mov_	cl, al		; CX is our loop counter
-		xor_	ch, ch
-.checkRomImage	; Get info for current ROM image (ES=ROM image base, DH=ROM system type)
-		push	cx
-		mov	ax, 0E402h	; get ROM image info
-		mov_	dl, cl
-		dec	dl		; convert loop index into ROM image ordinal
-		int	15h
-		pop	cx
-		jc	.romInitDone	; bail our on error
-
-		; Validate ROM image is bootable
-		push	cx
-		cmp	dh, 1		; skip ROM if it's not MS-DOS format
-		jnz	.romCheckDone
-		mov	ax, es
-		add	ax, 1FF0h	; repoint ES to ROM image header
-		mov	es, ax
-		mov	ax, 0E403h	; enable ROM image
-		int	15h
-		mov	di, 0
-		cmp	[es:di], 0BB66h,DATA=WORD	; check for ROM header signature
-		jnz	.romCheckDone
-		cmp	[es:di+3], 80h,DATA=BYTE	; bootable flag set?
-		jnz	.romCheckDone
-
-		; ROM image passed checks, copy the entire 128K ROM mapping section
-		; into 8000:0000 - 9000:FFFF then unmap the ROM image.
-		; ??? This is where the ROMs are mapped anyway -- is it just reads that
-		; are mapped to the ROM sockets so we can shadow-copy them into RAM?
-		push	ds
-		push	es
-		push	di
-		mov	ax, es
-		sub	ax, 1FF0h	; point DS to ROM mapping base (source)
-		mov	ds, ax
-		mov	ax, 8000h	; point ES to high RAM (under ROM mapping?)
-		mov	es, ax
-		mov	si, 0
-		mov	di, 0
-		mov	cx, 8000h
-		rep movsw		; copy first 64K
-		mov	ax, ds
-		add	ax, 1000h
-		mov	ds, ax
-		mov	ax, es
-		add	ax, 1000h
-		mov	es, ax
-		mov	si, 0
-		mov	di, 0
-		mov	cx, 8000h
-		rep movsw		; copy second 64K
-		pop	di
-		pop	es
-		pop	ds
-
-		; Setup a far return to the boot sector code on the stack,
-		; them retf to hand control to the ROM's code (implies the
-		; code must be position-independent?)
-		mov	ax, [es:di+4]	; load boot sector offset
-		cmp	ax, 8000h	; ignore values that would wrap past 1MB
-		jnb	.jmpBootsector
-		add	ax, 8000h
-.jmpBootsector	push	ax		; push boot sector segment
-		mov	ax, 0
-		push	ax		; push boot sector offset
-		mov	ax, 0E404h	; unmap ROM image
-		int	15h
-		mov	dl, 'r'		; set drive index for boot sector code
-		sti
-		retf
-
-.romCheckDone	; advance to next ROM image
-		pop	cx
-		loop	.nextRomImage
-		push	cx
-		pop	cx
-.leaveFunction	sti
-		retn
-.nextRomImage	jmp	.checkRomImage
-		ENDPROC	GridBootRom
-
-; =====================================================================
-; IsExtFdIndex
-; On entry:
-;   AL == drive index
-; On return:
-;   ZF set if drive index represents the external floppy drive
-; =====================================================================
-IsExtFdIndex	PROC
-		push	ax
-		push	dx
-		mov_	ah, al
-		mov	dx, PORT_PRINTER_STATUSC
-		in	al, dx
-		and	al, PRINTER_STATC_EFLOPPY | PRINTER_STATC_TAPE
-		cmp	al, PRINTER_STATC_EFLOPPY	; Ext floppy present?
-		jnz	.leaveFunction
-
-		mov	dx, PORT_PRINTER_STATUSB
-		in	al, dx
-		and	al, PRINTER_STATB_BORA		; 0=A, 1=B
-		mov_	dl, al				; Ext drive index in DL
-		jz	.knowExtIndex
-		mov	dx, PORT_ROM_SUBSYSTEM1
-		in	al, dx
-		and	al, GRID_BKPL_MASK
-		jz	.knowExtIndex		; no internal drives
-		cmp	al, GRID_BKPL_20
-		mov	dl, 2
-		jz	.knowExtIndex		; Backplane 2 has two floppies
-		dec	dl
-		cmp	al, GRID_BKPL_40	; One floppy for backplanes 1, 3, 9
-		jb	.knowExtIndex
-		cmp	al, GRID_BKPL_90
-		jz	.knowExtIndex
-		dec	dl			; No floppies for backplanes 4-8
-
-.knowExtIndex	cmp_	ah, dl
-.leaveFunction	pop	dx
-		pop	ax
-		retn
-		ENDPROC	IsExtFdIndex
+		%IF	BIOS_VERSION < 19891025
+		include	"movable/bootrom.asm"
+		include	"movable/isextfdindex.asm"
+		%ENDIF
 
 ; =====================================================================
 ; Grid15Rom

@@ -84,6 +84,9 @@ GRID_INT15_ROM_BADDS	equ	02h	; Invalid data segment provided
 GRID_INT15_ROM_NOROM	equ	03h	; No such ROM image exists
 GRID_INT15_ROM_RANGE	equ	04h	; Supplied ROM index out of range
 
+; Error codes for int 15 VGA subsystem
+GRID_INT15_VGA_NOVGA	equ	01h	; VGA not present
+
 ; ---------------------------------------------------------------------------
 ; (-W) Application ROM enable [TechRef 2-13] [TechRef 3-32]
 ; Controls whether address space A0000h-BF000h is mapped to display RAM or to

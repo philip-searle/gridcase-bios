@@ -14,11 +14,34 @@ POST14_VidInit	PROC
 		test	[InterruptFlag], 40h	; ???
 		jnz	.l1
 		mov	[EquipmentWord], 20h,DATA=BYTE	; 80x25 colour
+.l1		; EquipmentWord now set
+
+		%IF	BIOS_VERSION = 19891025
+			; VGA module support
+			push	ax
+			call	VgaIdentify
+			cmp	al, VGA_TYPE_2
+			jz	.removeInt10Isr
+			cmp	al, VGA_TYPE_4
+			jz	.removeInt10Isr
+			cmp	al, VGA_TYPE_0
+			jz	.vgaHandled
+			pop	ax
+			jmp	.l2
+			jmp	.findVidRom	; Unnecessary jmp???
+
+.removeInt10Isr		push	ds
+			xor_	ax, ax
+			mov	ds, ax
+			mov	[IvtInt10], SoftwareIret,DATA=WORD
+			pop	ds
+.vgaHandled		pop	ax
+		%ENDIF
 
 		; Check for an option ROM present anywhere between C000:0000
 		; and C8000:0000, at 2KB boundaries.  If found, then assume it's
 		; an EGA+ video adapter and update the default video mode.
-.l1		mov	si, 0C000h
+		mov	si, 0C000h
 		mov	cx, 10h
 .findVidRom	mov	ds, si
 		add	si, 80h
@@ -81,6 +104,16 @@ POST14_VidInit	PROC
 		mov	[EquipmentWord], ax
 		test	al, 30h			; check int10/00 return
 		jz	.vidInitFail
+		%IF	BIOS_VERSION = 19891025
+			; VGA module support
+			push	ax
+			push	dx
+			call	VgaGetFlags
+			test	dl, VGA_FLAGS_10	; ??? VGA
+			pop	dx
+			pop	ax
+			jnz	.vidInitDone
+		%ENDIF
 
 		call	VidTestMem
 		jnb	.vidInitDone
@@ -98,7 +131,10 @@ POST14_VidInit	PROC
 .vidInitFail	xor_	ax, ax
 		mov	ds, ax
 		mov	[IvtInt10], SoftwareIret,DATA=WORD
-
+		%IF	BIOS_VERSION = 19891025
+			; Disable VGA???
+			call	VgaUnknown2
+		%ENDIF
 .vidInitDone	; Exit via fall-through to next POST procedure
 		ENDPROC POST14_VidInit
 

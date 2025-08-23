@@ -7,6 +7,7 @@ GRID_VID2	PROGRAM	OutFile=grid_vid2.obj
 		include	"macros.inc"
 		include	"segments.inc"
 		include	"segments/bda.inc"
+		include	"bios-version.inc"
 		include	"grid.inc"
 		include	"v6366.inc"
 
@@ -14,6 +15,9 @@ GRID_VID2	PROGRAM	OutFile=grid_vid2.obj
 		PUBLIC	VidLoadColMapExpRegs
 		PUBLIC	VidInitColMap
 
+		%IF	BIOS_VERSION = 19891025
+			EXTERN	VgaRetnGuard
+		%ENDIF
 ; ---------------------------------------------------------------------
 ; Video expansion register bytes for video modes 0-5 (0 is used for
 ; modes > 5).  First 32 bytes are colour palette register values.
@@ -90,6 +94,9 @@ VidLoadExpRegs	PROC
 ; colour map index (5).
 ; =====================================================================
 VidDecColMap	PROC
+		%IF	BIOS_VERSION = 19891025
+			call	VgaRetnGuard
+		%ENDIF
 		push	ds
 		push	ax
 		mov	ax, BDA_SEGMENT
@@ -112,6 +119,9 @@ VidDecColMap	PROC
 ; loading and return code for VidDecColMap.
 ; =====================================================================
 VidIncColMap	PROC
+		%IF	BIOS_VERSION = 19891025
+			call	VgaRetnGuard
+		%ENDIF
 		push	ds
 		push	ax
 		mov	ax, BDA_SEGMENT

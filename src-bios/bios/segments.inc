@@ -36,7 +36,7 @@ PWDA_SEGMENT	equ	0070h
 
 IVT_SEGMENT	equ	0000h
 
-; Upper and lower limits for hard disk option ROM search
+; Upper and lower limits for early-init (hard disk/VGA) option ROM search
 HD_ROM_SEG_LO	equ	0C000h
 HD_ROM_SEG_HI	equ	0C800h
 
@@ -46,6 +46,10 @@ OPT_ROM_SEG_HI	equ	0E000h
 
 ; Location for system option ROM search
 SYS_ROM_SEG	equ	0E000h
+
+; Location for VGA module option ROM
+VGA_ROM_SEG	equ	0C000h
+VGA_ROM_LEN	equ	08000h
 
 ;  Default to CODE segment
 [CODE]

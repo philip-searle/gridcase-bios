@@ -1,6 +1,6 @@
 
 POST01_Cpu	PROC
-		; Enter via fall-through from reset handler
+		; Enter via fall-through from previous POST code
 
 ; ---------------------------------------------------------------------------
 ; CPU register test
@@ -33,4 +33,3 @@ POST01_Cpu	PROC
 
 		; Exit via fall-through to next POST procedure
 		ENDPROC	POST01_Cpu
-

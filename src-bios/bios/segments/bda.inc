@@ -323,6 +323,21 @@ Fd2DriveInfo		d b		; as FdDriveInfo, but for the external drive
 
 VidColorMap		d b		; currently active video color map
 
+$		equ	0ACh
+VgaByteUnknown1		d b		; Unknown byte used by VGA module BIOS
+
+$		equ	0B1h
+VgaFlags		d b		; VGA module type flags
+VGA_FLAGS_VALID	equ	80h		; Flags byte has valid value
+VGA_FLAGS_02	equ	02h		; VGA ???
+VGA_FLAGS_08	equ	08h		; VGA ???
+VGA_FLAGS_10	equ	10h		; VGA ???
+VGA_FLAGS_20	equ	20h		; VGA ???
+
+HdSpindownUnknown1	d b		; Unknown byte: HD spindown time?
+VgaByteUnknown3		d b		; Unknown byte used by VGA external monitor routine
+VgaByteUnknown4		d b		; Unknown byte used by VGA font routine
+
 ; 0040:0100 is equivalent to 0050:0000
 ; Technically outside the BDA, but segment 50 seems to have always been
 ; intended as an extended BDA/BASIC/DOS data segment.

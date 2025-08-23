@@ -17,6 +17,10 @@ POST15_HdOptRom	PROC
 		mov	cx, HD_ROM_SEG_HI
 		mov	dl, 1			; ???
 		call	InitOptionRoms
+		%IF	BIOS_VERSION = 19891025
+			; VGA option ROM hooking?
+			call	VgaUnknown3
+		%ENDIF
 
 .romInitDone	; Exit via fall-through to next POST procedure
 		ENDPROC POST15_HdOptRom

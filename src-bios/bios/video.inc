@@ -39,6 +39,7 @@ VID_TYPE_PLASMA_200	equ	01h	; Plasma/EL 640x200
 VID_TYPE_PLASMA_400	equ	05h	; Plasma/EL 640x400
 VID_TYPE_LCD_200	equ	06h	; LCD 640x200
 VID_TYPE_LCD_400	equ	07h	; LCD 640x400
+VID_TYPE_VGA		equ	09h	; 19891025 BIOS converts VID_TYPE_LCD_200 to this
 
 ; ---------------------------------------------------------------------------
 ; (-W) GRiD video board font

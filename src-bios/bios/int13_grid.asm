@@ -50,6 +50,10 @@ HdAtSpinDown	PROC
 		push	ds
 		push	di
 		push	es
+		%IF	BIOS_VERSION = 19891025
+			; Need DS set for BDA access later
+			mov	ds, [cs:kBdaSegment]
+		%ENDIF
 
 		or_	al, al		; force motor off?
 		jz	.turnOffMotor
@@ -61,16 +65,28 @@ HdAtSpinDown	PROC
 		mov	ah, 0E2h	; [TechRef 10-34] Standby mode with auto power-off
 		cmp	dh, 1
 		ja	.leaveFunction	; only 0/1 are valid values
+		%IF	BIOS_VERSION = 19891025
+			; Store spindown value in BDA
+			mov	[HdSpindownUnknown1], al
+		%ENDIF
 		add_	ah, dh		; potential adjust by one to get:
 					; [TechRef 10-34] Idle mode with auto power-off
 		jmp	.sendHdCmd
 
 .turnOnMotor	; AL is zero so enter idle mode with auto power-off disabled
+		%IF	BIOS_VERSION = 19891025
+			; Store spindown value in BDA
+			mov	[HdSpindownUnknown1], 0FFh
+		%ENDIF
 		mov	ah, 0E3h	; [TechRef 10-34] Idle mode with auto power-off
 		mov	al, 0		; auto power-off disabled
 		jmp	.sendHdCmd2
 
 .turnOffMotor	; AL is FFh so enter standby mode immediately
+		%IF	BIOS_VERSION = 19891025
+			; Store spindown value in BDA
+			mov	[HdSpindownUnknown1], 0
+		%ENDIF
 		mov	ah, 0E0h	; [TechRef 10-34] Standby mode
 		mov	al, 1		; why set sector count here?
 					; command E0h doesn't need it...

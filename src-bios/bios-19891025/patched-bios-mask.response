@@ -1,0 +1,7 @@
+(
+	# 14 even bytes in ROM_HEADER corrupt
+	-generate 0x0000 0x001B -repeat-data 0xFF 0x00
+
+	# Three even bytes corrupt in Reset_Actual
+	-generate 0x00B0 0x00B6 -repeat-data 0xFF 0x00
+ ) -unfill 0x00

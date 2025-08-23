@@ -5,6 +5,7 @@ INT19		PROGRAM	OutFile=int19.obj
 		include	"segments.inc"
 		include	"segments/bda.inc"
 		include	"segments/ivt.inc"
+		include	"bios-version.inc"
 		include	"grid.inc"
 		include	"parallel.inc"
 
@@ -337,6 +338,15 @@ GridBootFdIds	PROC
 
 ; Fetch drive backplane type from ROM subsystem
 		mov	dx, PORT_ROM_SUBSYSTEM1
+		%IF	BIOS_VERSION = 19891025
+			; ??? what's going on with the delay and redundant read?
+			;     maybe change to slower hardware in newer revisions, or
+			;     perhaps some ULAs only place data on the bus for a
+			;     marginal length of time?
+			Delay	6
+			in	al, dx
+			Delay	2
+		%ENDIF
 		in	al, dx
 		and	al, GRID_BKPL_MASK
 

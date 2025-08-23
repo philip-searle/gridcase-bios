@@ -5,6 +5,7 @@ INT10		PROGRAM	OutFile=int10.obj
 		include	"segments.inc"
 		include	"segments/bda.inc"
 		include	"segments/ivt.inc"
+		include	"bios-version.inc"
 		include	"isr.inc"
 		include	"video.inc"
 
@@ -48,6 +49,30 @@ Int10.handlersLast	dw	VidWriteString
 ; Provides BIOS video services.
 ; ---------------------------------------------------------------------
 Int10_Actual	PROC
+		%IF	BIOS_VERSION = 19891025
+			; VGA module support
+			push	ax
+			push	ds
+			mov	ax, BDA_SEGMENT
+			mov	ds, ax
+
+			mov	al, [VgaByteUnknown1]
+			and	al, 81h		; ??? VGA
+			pop	ds
+			cmp	al, 81h		; ??? VGA
+			jz	.vgaHandled
+			cmp	al, 0		; ??? VGA
+			jz	.vgaHandled
+			pop	ax
+
+			; Forward to relocated VGA BIOS?
+			sti
+			nop			; ??? nop
+			int	42h
+			retf	2
+
+.vgaHandled		pop	ax
+		%ENDIF
 		call	MakeIsrStack
 		mov	di, Int10.handlersLast - Int10.handlers
 		call	FuncToOffset

@@ -3,6 +3,7 @@ GRID_AUTODETECT	PROGRAM	OutFile=grid_autodetect.obj
 
 		include	"macros.inc"
 		include	"segments.inc"
+		include	"segments/bda.inc"
 		include	"segments/ivt.inc"
 		include	"bios-version.inc"
 		include	"cmos.inc"
@@ -12,6 +13,9 @@ GRID_AUTODETECT	PROGRAM	OutFile=grid_autodetect.obj
 		EXTERN	ReadCmos, WriteCmos
 		EXTERN	HdAtOpComplete
 		EXTERN	DriveIdentify
+		%IF	BIOS_VERSION = 19891025
+			EXTERN	kBdaSegment, VgaUnknown4
+		%ENDIF
 
 		PUBLIC	GridAutodetect, HdDetect70, HdDetectNot70
 		PUBLIC	MemSetXmsEms
@@ -31,6 +35,9 @@ GridAutodetect	PROC
 		call	FdAutodetect
 		call	HdDetectNot70
 		call	MemAutodetect
+		%IF	BIOS_VERSION = 19891025
+			call	VgaUnknown4
+		%ENDIF
 		call	CmosResetCsum
 		pop	dx
 		pop	cx
@@ -281,6 +288,12 @@ HdDetect70	PROC
 ; Does nothing otherwise.
 ; ===========================================================================
 HdDetectNot70	PROC
+		%IF	BIOS_VERSION = 19891025
+			push	ds
+			mov	ds, [cs:kBdaSegment]
+			mov	[HdSpindownUnknown1], 0FFh
+			pop	ds
+		%ENDIF
 		mov	bx, IVT_SEGMENT
 		mov	dx, PORT_ROM_SUBSYSTEM1
 		in	al, dx

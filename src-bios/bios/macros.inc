@@ -15,16 +15,23 @@ EUROASM AUTOALIGN=OFF, AUTOSEGMENT=OFF
 ; Advances the current location to the specified address, filling any space
 ; with the byte provided.
 FillRom		%macro
-		%if (%1 - offset#$ - %XxxBase) <= 0
-		%error	XXXX: %1 - offset#$ - %XxxBase <= 0
-		%endif
+		%if (%1 - offset#$ - %XxxBase) > 0 && (%1 - offset#$ - %XxxBase) <= 2147483647
 		d	(%1 - offset#$ - %XxxBase) * byte %2
+		%else
+		; Don't raise an error if out of range, some modules
+		; are temporarily out of range until the final assembler
+		; pass where they settle down to a reasonable value.
+		; Not sure how to detect the final pass to suppress the
+		; error message, so for now I'm relying on the linker's
+		; assertions to detect public symbols shifting around.
+		;%error	XXXX: %1 - offset#$ - %XxxBase > MAX
+		%endif
 		%endmacro
 
 ; ---------------------------------------------------------------------
 ; PUBLIC_COMPAT symbol [, symbol...]
 ;
-; Makes the supplies symbols available as PUBLIC exports, but with the
+; Makes the supplied symbols available as PUBLIC exports, but with the
 ; name prefixed with a tilde (~).  Intended for symbols which aren't
 ; intended to be referenced from other BIOS modules, but which need to
 ; be made available so the linker can assert that their addresses

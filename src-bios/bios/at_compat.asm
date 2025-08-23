@@ -3,7 +3,14 @@ AT_COMPAT	PROGRAM	OutFile=at_compat.obj
 
 		include	"macros.inc"
 		include	"segments.inc"
+		include	"segments/bda.inc"
 		include	"bios-version.inc"
+		%IF	BIOS_VERSION = 19891025
+			include	"grid.inc"
+			include	"parallel.inc"
+			include	"vga.inc"
+			include	"video.inc"
+		%ENDIF
 		include	"int13.inc"
 		include	"pic.inc"
 
@@ -18,6 +25,10 @@ AT_COMPAT	PROGRAM	OutFile=at_compat.obj
 			; Non-1988 BIOSes have extra code to ack IRQs
 			EXTERN	EoiPic1, EoiPic1and2
 		%ENDIF
+		%IF	BIOS_VERSION = 19891025
+			EXTERN	kBdaSegment
+			EXTERN	VgaGetFlags
+		%ENDIF
 
 		PUBLIC	Reset_Compat, IntNmi_Compat, Int13Hd_Compat
 		PUBLIC	Int8_Compat, DisketteParams, FixedDiskParams
@@ -27,6 +38,10 @@ AT_COMPAT	PROGRAM	OutFile=at_compat.obj
 		PUBLIC	GraphicsChars
 		PUBLIC	Copyr_Phoenix, Copyr_Phoenix2
 		PUBLIC	kConfigTable
+		%IF	BIOS_VERSION = 19891025
+			PUBLIC	GridBootRom, IsExtFdIndex
+			PUBLIC	VgaRetnGuard
+		%ENDIF
 
 		PUBLIC_COMPAT	Copyr_Compat
 		PUBLIC_COMPAT	Int9_Compat, IntE_Compat, Int10_Compat
@@ -86,6 +101,10 @@ Copyr_Phoenix2	db	0Dh,0Ah,'All Rights Reserved',0Dh,0Ah,0Ah
 		FillRom	0E2C3h,00h
 IntNmi_Compat	jmpn	IntNmi_Actual
 
+; ---------------------------------------------------------------------------
+		%IF	BIOS_VERSION = 19891025
+			include	"movable/vga1.asm"
+		%ENDIF
 ; ---------------------------------------------------------------------------
 
 ; [Compat] Int13 fixed disk entrypoint must be the same as the XT BIOS.
@@ -173,6 +192,10 @@ kConfigTable	dw	8	; number of bytes following
 		db	0, 0	; Phoenix BIOS extra bytes
 
 ; ---------------------------------------------------------------------------
+		%IF	BIOS_VERSION = 19891025
+			include	"movable/vga_external.asm"
+		%ENDIF
+; ---------------------------------------------------------------------------
 
 ; [Compat] Baud rate init table must be in the same place as the XT BIOS
 		FillRom	0E729h, 0FFh
@@ -191,10 +214,20 @@ BaudRateInit	dw	1047	; 100 Baud
 Int14_Compat	jmpn	Int14_Actual
 
 ; ---------------------------------------------------------------------------
+		%IF	BIOS_VERSION = 19891025
+			include	"movable/vga2.asm"
+		%ENDIF
+; ---------------------------------------------------------------------------
 
 ; [Compat] Int16 (keyboard) entrypoint must be the same place as the XT BIOS
 		FillRom	0E82Eh, 0FFh
 Int16_Compat	jmpn	Int16_Actual
+		%IF	BIOS_VERSION = 19891025
+			; Later BIOS relocated some GRiD code here to
+			; accomodate larger hard drive identification code
+			; in the INT15_GRID module.
+			include	"movable/bootrom.asm"
+		%ENDIF
 
 ; ---------------------------------------------------------------------------
 
@@ -287,6 +320,14 @@ Int11_Compat	jmpn	Int11_Actual
 ;          also extended it with their own APIs.
 		FillRom	0F859h, 0FFh
 Int15_Compat	jmpn	Int15_Actual
+
+		%IF	BIOS_VERSION = 19891025
+			; Later BIOS relocated some GRiD code here to
+			; accomodate larger hard drive identification code
+			; in the INT15_GRID module.
+			include	"movable/vga.asm"
+			include	"movable/isextfdindex.asm"
+		%ENDIF
 
 ; ---------------------------------------------------------------------------
 ; [Compat] CGA graphics character set must be in same location as the XT BIOS

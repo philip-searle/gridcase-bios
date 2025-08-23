@@ -70,6 +70,15 @@ output {
 linker {
 	define => {
 	#	Symbol				=>	Segm:Offs
+		VgaIdentify	=>	F000:E2C6
+		VgaGetFlags	=>	F000:E9A1
+		VgaUnknown2	=>	F000:F577
+		VgaUnknown3	=>	F000:F5A0
+		VgaUnknown4	=>	F000:E98A
+		VgaUnknown5	=>	F000:F8C7
+		VgaUnknown6	=>	F000:F8D0
+		VgaCheckPh	=>	F000:E747
+		VgaRomLocation	=>	F000:E73C
 	}
 	defaultSegment => CODE
 	script => [

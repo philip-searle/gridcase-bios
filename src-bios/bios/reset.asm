@@ -17,6 +17,7 @@ RESET		PROGRAM	OutFile=reset.obj
 		include	"pic.inc"
 		include	"pit.inc"
 		include	"serial.inc"
+		include	"vga.inc"
 		include	"video.inc"
 
 		EXTERN	Beep, BeepFactor
@@ -38,6 +39,9 @@ RESET		PROGRAM	OutFile=reset.obj
 			; 1988 BIOS doesn't support password feature
 			EXTERN	PwEnabled, PwStartInput, PwPrompt, PwProcessInput, PwEndInput
 			EXTERN	PwCompareStored, PwBackdoor2, PwIncorrect, PwClearBuffer
+		%ENDIF
+		%IF	BIOS_VERSION = 19891025
+			EXTERN	VgaIdentify, VgaGetFlags, VgaUnknown2, VgaUnknown3
 		%ENDIF
 		EXTERN	ConString, ConString_Inline, ConCharHex2, ConCharHex4
 		EXTERN	ConBadCsumMsg, ConBiosBanner
@@ -322,6 +326,7 @@ SDH_POST	PROC
 ; by 'falling through' from the previous file.  It is expected to continue to
 ; the next part of the POST code in the same way: by 'falling off' the end of
 ; the PROC.
+		include	"post/00_vga.asm"
 		include	"post/01_cpu.asm"
 		include "post/02_vidoff.asm"
 		include "post/03_cmosreg.asm"
